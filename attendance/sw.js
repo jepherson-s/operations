@@ -1,6 +1,9 @@
-const cacheName = "attendance-shell-v3";
+const cacheName = "attendance-shell-v4";
 
-const scope = new URL("./", self.location.href);
+const scope = new URL(
+  "./",
+  self.location.href
+);
 
 const files = [
   new URL("index.html", scope).href,
@@ -11,21 +14,29 @@ const files = [
   new URL("../shared/core.js", scope).href
 ];
 
+/* installazione */
+
 self.addEventListener("install", event => {
   event.waitUntil(
     (async () => {
-      const cache = await caches.open(cacheName);
-
-      await cache.addAll(
-        files.map(url => new Request(url, {
-          cache: "reload"
-        }))
+      const cache = await caches.open(
+        cacheName
       );
+
+      const requests = files.map(
+        url => new Request(url, {
+          cache: "reload"
+        })
+      );
+
+      await cache.addAll(requests);
 
       await self.skipWaiting();
     })()
   );
 });
+
+/* attivazione */
 
 self.addEventListener("activate", event => {
   event.waitUntil(
@@ -35,7 +46,9 @@ self.addEventListener("activate", event => {
       await Promise.all(
         names
           .filter(name =>
-            name.startsWith("attendance-shell-") &&
+            name.startsWith(
+              "attendance-shell-"
+            ) &&
             name !== cacheName
           )
           .map(name => caches.delete(name))
@@ -46,48 +59,69 @@ self.addEventListener("activate", event => {
   );
 });
 
+/* gestione richieste */
+
 self.addEventListener("fetch", event => {
   const request = event.request;
 
-  if (request.method !== "GET") return;
+  if (request.method !== "GET") {
+    return;
+  }
 
   const url = new URL(request.url);
 
-  if (url.origin !== scope.origin) return;
+  if (url.origin !== scope.origin) {
+    return;
+  }
 
   const insideApp =
-    url.pathname.startsWith(scope.pathname);
+    url.pathname.startsWith(
+      scope.pathname
+    );
 
   const sharedFile =
     url.pathname ===
-    new URL("../shared/core.js", scope).pathname;
+    new URL(
+      "../shared/core.js",
+      scope
+    ).pathname;
 
-  if (!insideApp && !sharedFile) return;
-
-  if (request.mode === "navigate") {
-    event.respondWith(
-      (async () => {
-        const cache = await caches.open(cacheName);
-
-        const cached = await cache.match(files[0]);
-
-        return cached || fetch(request);
-      })()
-    );
-
+  if (!insideApp && !sharedFile) {
     return;
   }
 
   event.respondWith(
     (async () => {
-      const cache = await caches.open(cacheName);
+      const cache = await caches.open(
+        cacheName
+      );
 
-      const cached = await cache.match(request);
+      if (request.mode === "navigate") {
+        const page = await cache.match(
+          files[0]
+        );
 
-      return cached || fetch(request);
+        if (page) {
+          return page;
+        }
+
+        return fetch(request);
+      }
+
+      const cached = await cache.match(
+        request
+      );
+
+      if (cached) {
+        return cached;
+      }
+
+      return fetch(request);
     })()
   );
 });
+
+/* verifica cache */
 
 self.addEventListener("message", event => {
   if (
@@ -102,18 +136,23 @@ self.addEventListener("message", event => {
   event.waitUntil(
     (async () => {
       try {
-        const cache = await caches.open(cacheName);
+        const cache = await caches.open(
+          cacheName
+        );
 
         const matches = await Promise.all(
           files.map(file => cache.match(file))
         );
 
         port.postMessage({
-          ready: matches.every(Boolean)
+          ready: matches.every(Boolean),
+          cacheName
         });
+
       } catch (error) {
         port.postMessage({
-          ready: false
+          ready: false,
+          cacheName
         });
       }
     })()
