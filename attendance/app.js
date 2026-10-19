@@ -4,12 +4,21 @@ import {
   verifyEmployeePin
 } from "../shared/core.js";
 
-import {
-  createAttendanceStore
-} from "./store.js";
+import { createAttendanceStore } from "./store.js";
 
 const get = id => document.getElementById(id);
 const store = createAttendanceStore();
+
+const cacheName = "attendance-shell-v5";
+
+const shellFiles = [
+  "index.html",
+  "app.js",
+  "store.js",
+  "manifest.json",
+  "icon.svg",
+  "../shared/core.js"
+].map(path => new URL(path, import.meta.url).href);
 
 const dateFormat = new Intl.DateTimeFormat("it-IT", {
   day: "2-digit",
@@ -19,14 +28,13 @@ const dateFormat = new Intl.DateTimeFormat("it-IT", {
   minute: "2-digit"
 });
 
-const expectedCache = "attendance-shell-v4";
-
 let state = null;
 let pendingSetup = null;
 let adminPinSession = null;
 let adminTimer = null;
-let busy = false;
 let clockPin = "";
+let clockTimer = null;
+let busy = false;
 let offlineCheckId = 0;
 
 /* interfaccia */
@@ -35,17 +43,15 @@ function message(id, value = "", kind = "") {
   const element = get(id);
 
   element.textContent = value;
-  element.className =
-    `message${kind ? ` ${kind}` : ""}`;
+  element.className = kind
+    ? `message ${kind}`
+    : "message";
 }
 
 function screen(id) {
-  for (
-    const element of
-    document.querySelectorAll(".screen")
-  ) {
+  document.querySelectorAll(".screen").forEach(element => {
     element.hidden = element.id !== id;
-  }
+  });
 
   get("adminOpen").hidden = id !== "clockScreen";
   get("adminBack").hidden = id !== "adminScreen";
@@ -53,7 +59,15 @@ function screen(id) {
   window.scrollTo(0, 0);
 }
 
-/* pin timbratura */
+function setBusy(value) {
+  busy = value;
+
+  document.querySelectorAll(".key").forEach(button => {
+    button.disabled = value;
+  });
+}
+
+/* pin automatico */
 
 function renderClockPin() {
   const display = get("pinDisplay");
@@ -63,17 +77,25 @@ function renderClockPin() {
     `PIN: ${clockPin.length} cifre su 4`
   );
 
-  const dots = display.querySelectorAll(".pin-dot");
+  display.querySelectorAll(".pin-dot").forEach(
+    (dot, index) => {
+      dot.classList.toggle(
+        "filled",
+        index < clockPin.length
+      );
+    }
+  );
+}
 
-  dots.forEach((dot, index) => {
-    dot.classList.toggle(
-      "filled",
-      index < clockPin.length
-    );
-  });
+function cancelClockTimer() {
+  if (clockTimer !== null) {
+    clearTimeout(clockTimer);
+    clockTimer = null;
+  }
 }
 
 function resetClockPin() {
+  cancelClockTimer();
   clockPin = "";
   renderClockPin();
 }
@@ -88,22 +110,42 @@ function addClockDigit(digit) {
     return;
   }
 
+  if (!clockPin.length) {
+    message("clockMessage");
+  }
+
   clockPin += digit;
   renderClockPin();
+
+  if (clockPin.length === 4) {
+    const enteredPin = clockPin;
+
+    cancelClockTimer();
+
+    clockTimer = setTimeout(() => {
+      clockTimer = null;
+
+      if (
+        !busy &&
+        !get("clockScreen").hidden &&
+        clockPin === enteredPin
+      ) {
+        void registerPunch(enteredPin);
+      }
+    }, 120);
+  }
 }
 
 function eraseClockDigit() {
-  if (busy) {
-    return;
-  }
+  if (busy) return;
 
+  cancelClockTimer();
   clockPin = clockPin.slice(0, -1);
   renderClockPin();
 }
 
 function refreshClock() {
-  get("deviceName").textContent =
-    state.device.name;
+  get("deviceName").textContent = state.device.name;
 
   resetClockPin();
   message("clockMessage");
@@ -125,21 +167,11 @@ function validState(data) {
   );
 }
 
-/* sicurezza */
-
 function security(kind) {
-  if (!state.security) {
-    state.security = {};
-  }
-
-  if (!state.security[kind]) {
-    state.security[kind] = {
-      failures: 0,
-      lockedUntil: 0
-    };
-  }
-
-  return state.security[kind];
+  return state.security?.[kind] || {
+    failures: 0,
+    lockedUntil: 0
+  };
 }
 
 function checkLock(kind) {
@@ -156,39 +188,49 @@ function checkLock(kind) {
   }
 }
 
-async function failPin(kind) {
-  const guard = security(kind);
+async function updateSecurity(kind, success) {
+  const next = structuredClone(state);
 
-  guard.failures += 1;
+  if (!next.security) {
+    next.security = {};
+  }
 
-  if (guard.failures >= 5) {
+  const guard = next.security[kind] || {
+    failures: 0,
+    lockedUntil: 0
+  };
+
+  if (success) {
+    if (!guard.failures && !guard.lockedUntil) {
+      return;
+    }
+
     guard.failures = 0;
-    guard.lockedUntil = Date.now() + 60000;
+    guard.lockedUntil = 0;
+  } else {
+    guard.failures += 1;
+
+    if (guard.failures >= 5) {
+      guard.failures = 0;
+      guard.lockedUntil = Date.now() + 60000;
+    }
   }
 
-  await store.save(state);
+  next.security[kind] = guard;
 
-  throw new Error(
-    guard.lockedUntil > Date.now()
-      ? "Troppi tentativi. Attendi 60 secondi."
-      : "PIN non riconosciuto"
-  );
-}
+  await store.save(next);
+  state = next;
 
-async function clearPinFailures(kind) {
-  const guard = security(kind);
-
-  if (!guard.failures && !guard.lockedUntil) {
-    return;
+  if (!success) {
+    throw new Error(
+      guard.lockedUntil > Date.now()
+        ? "Troppi tentativi. Attendi 60 secondi."
+        : "PIN non riconosciuto"
+    );
   }
-
-  guard.failures = 0;
-  guard.lockedUntil = 0;
-
-  await store.save(state);
 }
 
-/* lettura json */
+/* file json */
 
 async function readJsonFile(file) {
   if (
@@ -207,205 +249,174 @@ async function readJsonFile(file) {
   }
 }
 
-/* prima configurazione */
+/* configurazione iniziale */
 
-get("setupForm").addEventListener(
-  "submit",
-  async event => {
-    event.preventDefault();
+get("setupForm").addEventListener("submit", async event => {
+  event.preventDefault();
 
-    if (busy) {
-      return;
+  if (busy) return;
+
+  setBusy(true);
+  get("setupContinue").disabled = true;
+  message("setupMessage");
+
+  try {
+    const pin = get("setupPin").value;
+
+    const json = await readJsonFile(
+      get("setupJson").files[0]
+    );
+
+    const config = await openProvisioningPackage(
+      json,
+      pin
+    );
+
+    if (!config.employees.length) {
+      throw new Error(
+        "Il JSON non contiene dipendenti attivi"
+      );
     }
 
-    busy = true;
+    pendingSetup = { config, pin };
 
-    const button = get("setupContinue");
-    button.disabled = true;
+    get("setupImport").hidden = true;
+    get("setupDevice").hidden = false;
 
-    message("setupMessage");
+    get("setupCount").textContent =
+      "Configurazione pronta";
 
-    try {
-      const pin = get("setupPin").value;
-
-      const json = await readJsonFile(
-        get("setupJson").files[0]
-      );
-
-      const config =
-        await openProvisioningPackage(
-          json,
-          pin
-        );
-
-      if (!config.employees.length) {
-        throw new Error(
-          "Il JSON non contiene dipendenti attivi"
-        );
-      }
-
-      pendingSetup = {
-        config,
-        pin
-      };
-
-      get("setupImport").hidden = true;
-      get("setupDevice").hidden = false;
-
-      get("setupCount").textContent =
-        "Configurazione pronta";
-
-      get("setupPin").value = "";
-      get("deviceInput").focus();
-
-    } catch (error) {
-      message(
-        "setupMessage",
-        error.message,
-        "error"
-      );
-    } finally {
-      busy = false;
-      button.disabled = false;
-    }
+    get("setupPin").value = "";
+    get("deviceInput").focus();
+  } catch (error) {
+    message(
+      "setupMessage",
+      error.message,
+      "error"
+    );
+  } finally {
+    setBusy(false);
+    get("setupContinue").disabled = false;
   }
-);
+});
 
-get("deviceForm").addEventListener(
-  "submit",
-  async event => {
-    event.preventDefault();
+get("deviceForm").addEventListener("submit", async event => {
+  event.preventDefault();
 
-    if (busy || !pendingSetup) {
-      return;
+  if (busy || !pendingSetup) return;
+
+  setBusy(true);
+  get("activateButton").disabled = true;
+  message("setupMessage");
+
+  try {
+    const name = get("deviceInput").value.trim();
+
+    if (!name || name.length > 80) {
+      throw new Error(
+        "Inserisci il nome dispositivo"
+      );
     }
 
-    busy = true;
+    const { config, pin } = pendingSetup;
+    const now = new Date().toISOString();
 
-    const button = get("activateButton");
-    button.disabled = true;
-
-    message("setupMessage");
-
-    try {
-      const name =
-        get("deviceInput").value.trim();
-
-      if (!name || name.length > 80) {
-        throw new Error(
-          "Inserisci il nome dispositivo"
-        );
-      }
-
-      const { config, pin } = pendingSetup;
-      const now = new Date().toISOString();
-
-      const challenge =
-        await createProvisioningPackage(
-          {
-            schemaVersion: 1,
-            kind: "center-provisioning",
-            sourceCenter: "core",
-            targetCenter: "attendance",
-            originId: config.originId,
-            exportId: crypto.randomUUID(),
-            issuedAt: now,
-            employees: []
-          },
-          pin
-        );
-
-      const newState = {
+    const challenge = await createProvisioningPackage(
+      {
         schemaVersion: 1,
-        center: "attendance",
+        kind: "center-provisioning",
+        sourceCenter: "core",
+        targetCenter: "attendance",
         originId: config.originId,
+        exportId: crypto.randomUUID(),
+        issuedAt: now,
+        employees: []
+      },
+      pin
+    );
 
-        device: {
-          id: crypto.randomUUID(),
-          name,
-          createdAt: now
-        },
+    const newState = {
+      schemaVersion: 1,
+      center: "attendance",
+      originId: config.originId,
 
-        adminChallenge: challenge,
+      device: {
+        id: crypto.randomUUID(),
+        name,
+        createdAt: now
+      },
 
-        employees: structuredClone(
-          config.employees
-        ),
+      adminChallenge: challenge,
 
-        punches: [],
+      employees: structuredClone(config.employees),
 
-        imports: [
-          {
-            exportId: config.exportId,
-            at: now,
-            added: config.employees.length,
-            skipped: 0,
-            conflicts: 0
-          }
-        ],
+      punches: [],
 
-        security: {
-          employee: {
-            failures: 0,
-            lockedUntil: 0
-          },
-          admin: {
-            failures: 0,
-            lockedUntil: 0
-          }
+      imports: [
+        {
+          exportId: config.exportId,
+          at: now,
+          added: config.employees.length,
+          skipped: 0,
+          conflicts: 0
         }
-      };
+      ],
 
-      await store.initialize(newState);
-
-      state = newState;
-      pendingSetup = null;
-
-      get("deviceForm").reset();
-
-      if (navigator.storage?.persist) {
-        navigator.storage.persist().catch(
-          () => {}
-        );
+      security: {
+        employee: {
+          failures: 0,
+          lockedUntil: 0
+        },
+        admin: {
+          failures: 0,
+          lockedUntil: 0
+        }
       }
+    };
 
-      screen("clockScreen");
-      refreshClock();
+    await store.initialize(newState);
 
-    } catch (error) {
-      message(
-        "setupMessage",
-        error.message,
-        "error"
-      );
-    } finally {
-      busy = false;
-      button.disabled = false;
-    }
-  }
-);
-
-get("setupBack").addEventListener(
-  "click",
-  () => {
+    state = newState;
     pendingSetup = null;
 
-    get("setupImport").hidden = false;
-    get("setupDevice").hidden = true;
+    get("deviceForm").reset();
 
-    message("setupMessage");
+    if (navigator.storage?.persist) {
+      navigator.storage.persist().catch(() => {});
+    }
+
+    screen("clockScreen");
+    refreshClock();
+  } catch (error) {
+    message(
+      "setupMessage",
+      error.message,
+      "error"
+    );
+  } finally {
+    setBusy(false);
+    get("activateButton").disabled = false;
   }
-);
+});
+
+get("setupBack").addEventListener("click", () => {
+  pendingSetup = null;
+
+  get("setupImport").hidden = false;
+  get("setupDevice").hidden = true;
+
+  message("setupMessage");
+});
 
 /* tastierino */
 
-document
-  .querySelectorAll("[data-digit]")
-  .forEach(button => {
+document.querySelectorAll("[data-digit]").forEach(
+  button => {
     button.addEventListener("click", () => {
       addClockDigit(button.dataset.digit);
     });
-  });
+  }
+);
 
 get("erasePin").addEventListener(
   "click",
@@ -435,9 +446,7 @@ document.addEventListener("keydown", event => {
   if (
     target instanceof HTMLElement &&
     (
-      target.matches(
-        "input, textarea, select"
-      ) ||
+      target.matches("input, textarea, select") ||
       target.isContentEditable
     )
   ) {
@@ -447,136 +456,96 @@ document.addEventListener("keydown", event => {
   if (/^[0-9]$/.test(event.key)) {
     event.preventDefault();
     addClockDigit(event.key);
-    return;
-  }
-
-  if (event.key === "Backspace") {
+  } else if (event.key === "Backspace") {
     event.preventDefault();
     eraseClockDigit();
-    return;
-  }
-
-  if (event.key === "Escape") {
+  } else if (event.key === "Escape") {
     event.preventDefault();
     resetClockPin();
-    return;
-  }
-
-  if (
-    event.key === "Enter" &&
-    target?.tagName !== "BUTTON"
-  ) {
-    event.preventDefault();
-    get("clockForm").requestSubmit();
   }
 });
 
-/* timbrature */
+/* timbratura automatica */
 
-function currentTime() {
-  return dateFormat.format(new Date());
-}
+async function registerPunch(pin) {
+  if (busy || !state) return;
 
-get("clockForm").addEventListener(
-  "submit",
-  async event => {
-    event.preventDefault();
+  setBusy(true);
+  cancelClockTimer();
 
-    if (busy || !state) {
+  try {
+    checkLock("employee");
+
+    if (!/^[0-9]{4}$/.test(pin)) {
+      throw new Error("Inserisci un PIN di 4 cifre");
+    }
+
+    let found = null;
+
+    for (const employee of state.employees) {
+      if (
+        employee.active &&
+        await verifyEmployeePin(
+          pin,
+          employee.pinVerifier
+        )
+      ) {
+        found = employee;
+        break;
+      }
+    }
+
+    if (!found) {
+      await updateSecurity("employee", false);
       return;
     }
 
-    busy = true;
+    await updateSecurity("employee", true);
 
-    const button = get("clockButton");
-    button.disabled = true;
+    const previous = [...state.punches]
+      .reverse()
+      .find(punch => punch.employeeId === found.id);
 
-    message("clockMessage");
+    const type = previous?.type === "in"
+      ? "out"
+      : "in";
 
-    try {
-      checkLock("employee");
+    const at = new Date().toISOString();
 
-      const pin = clockPin;
+    const next = structuredClone(state);
 
-      if (!/^[0-9]{4}$/.test(pin)) {
-        throw new Error(
-          "Inserisci un PIN di 4 cifre"
-        );
-      }
+    next.punches.push({
+      id: crypto.randomUUID(),
+      employeeId: found.id,
+      deviceId: state.device.id,
+      type,
+      at
+    });
 
-      let found = null;
+    await store.save(next);
+    state = next;
 
-      for (const employee of state.employees) {
-        if (
-          employee.active &&
-          await verifyEmployeePin(
-            pin,
-            employee.pinVerifier
-          )
-        ) {
-          found = employee;
-          break;
-        }
-      }
+    const time = dateFormat.format(new Date(at));
 
-      if (!found) {
-        await failPin("employee");
-      }
-
-      await clearPinFailures("employee");
-
-      const previous = [
-        ...state.punches
-      ].reverse().find(
-        punch => punch.employeeId === found.id
-      );
-
-      const type =
-        previous?.type === "in"
-          ? "out"
-          : "in";
-
-      const at = new Date().toISOString();
-
-      const next = structuredClone(state);
-
-      next.punches.push({
-        id: crypto.randomUUID(),
-        employeeId: found.id,
-        deviceId: state.device.id,
-        type,
-        at
-      });
-
-      await store.save(next);
-      state = next;
-
-      resetClockPin();
-
-      message(
-        "clockMessage",
-        `${found.firstName} · ` +
-        `${type === "in" ? "Entrata" : "Uscita"} · ` +
-        `${currentTime()} · ` +
-        `${type === "in" ? "Buon lavoro!" : "Buon riposo!"}`,
-        "success"
-      );
-
-    } catch (error) {
-      resetClockPin();
-
-      message(
-        "clockMessage",
-        error.message,
-        "error"
-      );
-
-    } finally {
-      busy = false;
-      button.disabled = false;
-    }
+    message(
+      "clockMessage",
+      `${found.firstName} · ` +
+      `${type === "in" ? "Entrata" : "Uscita"} · ` +
+      `${time} · ` +
+      `${type === "in" ? "Buon lavoro!" : "Buon riposo!"}`,
+      "success"
+    );
+  } catch (error) {
+    message(
+      "clockMessage",
+      error.message,
+      "error"
+    );
+  } finally {
+    resetClockPin();
+    setBusy(false);
   }
-);
+}
 
 /* amministrazione */
 
@@ -630,24 +599,17 @@ function renderAdmin() {
   const list = get("punchList");
   list.replaceChildren();
 
-  for (
-    const punch of
-    state.punches.slice(-20).reverse()
-  ) {
-    const row =
-      document.createElement("div");
-
+  for (const punch of state.punches.slice(-20).reverse()) {
+    const row = document.createElement("div");
     row.className = "log-row";
 
-    const person =
-      document.createElement("strong");
+    const person = document.createElement("strong");
 
     person.textContent =
       names.get(punch.employeeId) ||
       "Dipendente non trovato";
 
-    const details =
-      document.createElement("span");
+    const details = document.createElement("span");
 
     details.textContent =
       `${punch.type === "in" ? "Entrata" : "Uscita"} · ` +
@@ -658,31 +620,28 @@ function renderAdmin() {
   }
 
   if (!state.punches.length) {
-    const empty =
-      document.createElement("p");
+    const empty = document.createElement("p");
 
     empty.className = "hint";
-    empty.textContent =
-      "Nessuna timbratura";
+    empty.textContent = "Nessuna timbratura";
 
     list.append(empty);
   }
 }
 
-get("adminOpen").addEventListener(
-  "click",
-  () => {
-    screen("adminScreen");
+get("adminOpen").addEventListener("click", () => {
+  if (busy) return;
 
-    get("adminGate").hidden = false;
-    get("adminPanel").hidden = true;
+  screen("adminScreen");
 
-    get("adminLogin").reset();
+  get("adminGate").hidden = false;
+  get("adminPanel").hidden = true;
 
-    message("adminMessage");
-    get("adminPin").focus();
-  }
-);
+  get("adminLogin").reset();
+  message("adminMessage");
+
+  get("adminPin").focus();
+});
 
 get("adminBack").addEventListener(
   "click",
@@ -694,235 +653,199 @@ get("adminExit").addEventListener(
   closeAdmin
 );
 
-get("adminLogin").addEventListener(
-  "submit",
-  async event => {
-    event.preventDefault();
+get("adminLogin").addEventListener("submit", async event => {
+  event.preventDefault();
 
-    if (busy) {
-      return;
-    }
+  if (busy) return;
 
-    busy = true;
+  setBusy(true);
+  get("adminLoginButton").disabled = true;
 
-    const button =
-      get("adminLoginButton");
+  message("adminMessage");
 
-    button.disabled = true;
-    message("adminMessage");
+  try {
+    checkLock("admin");
+
+    const pin = get("adminPin").value;
+    let valid = false;
 
     try {
-      checkLock("admin");
+      const proof = await openProvisioningPackage(
+        state.adminChallenge,
+        pin
+      );
 
-      const pin = get("adminPin").value;
-      let valid = false;
-
-      try {
-        const proof =
-          await openProvisioningPackage(
-            state.adminChallenge,
-            pin
-          );
-
-        valid =
-          proof.originId === state.originId;
-
-      } catch (error) {
-        valid = false;
-      }
-
-      if (!valid) {
-        await failPin("admin");
-      }
-
-      await clearPinFailures("admin");
-
-      adminPinSession = pin;
-      get("adminLogin").reset();
-
-      get("adminGate").hidden = true;
-      get("adminPanel").hidden = false;
-
-      renderAdmin();
-      refreshAdminTimeout();
-
+      valid = proof.originId === state.originId;
     } catch (error) {
-      message(
-        "adminMessage",
-        error.message,
-        "error"
-      );
-
-    } finally {
-      busy = false;
-      button.disabled = false;
+      valid = false;
     }
-  }
-);
 
-/* aggiornamento dipendenti */
-
-get("importForm").addEventListener(
-  "submit",
-  async event => {
-    event.preventDefault();
-
-    if (busy || !adminPinSession) {
+    if (!valid) {
+      await updateSecurity("admin", false);
       return;
     }
 
-    busy = true;
+    await updateSecurity("admin", true);
 
-    const button = get("importButton");
-    button.disabled = true;
+    adminPinSession = pin;
 
-    message("importMessage");
+    get("adminLogin").reset();
+    get("adminGate").hidden = true;
+    get("adminPanel").hidden = false;
 
-    try {
-      const json = await readJsonFile(
-        get("importJson").files[0]
+    renderAdmin();
+    refreshAdminTimeout();
+  } catch (error) {
+    message(
+      "adminMessage",
+      error.message,
+      "error"
+    );
+  } finally {
+    setBusy(false);
+    get("adminLoginButton").disabled = false;
+  }
+});
+
+/* importazione additiva */
+
+get("importForm").addEventListener("submit", async event => {
+  event.preventDefault();
+
+  if (busy || !adminPinSession) return;
+
+  setBusy(true);
+  get("importButton").disabled = true;
+
+  message("importMessage");
+
+  try {
+    const json = await readJsonFile(
+      get("importJson").files[0]
+    );
+
+    const incoming = await openProvisioningPackage(
+      json,
+      adminPinSession
+    );
+
+    if (incoming.originId !== state.originId) {
+      throw new Error(
+        "Configurazione di un altro Core Center"
+      );
+    }
+
+    if (
+      state.imports.some(
+        item => item.exportId === incoming.exportId
+      )
+    ) {
+      message(
+        "importMessage",
+        "JSON già importato",
+        "success"
       );
 
-      const incoming =
-        await openProvisioningPackage(
-          json,
-          adminPinSession
-        );
+      return;
+    }
 
-      if (
-        incoming.originId !== state.originId
-      ) {
-        throw new Error(
-          "Configurazione di un altro Core Center"
-        );
-      }
+    const currentById = new Map(
+      state.employees.map(employee => [
+        employee.id,
+        employee
+      ])
+    );
 
-      if (
-        state.imports.some(
-          item =>
-            item.exportId === incoming.exportId
-        )
-      ) {
-        message(
-          "importMessage",
-          "JSON già importato",
-          "success"
-        );
+    const names = new Set(
+      state.employees.map(employee =>
+        `${employee.firstName} ${employee.lastName}`
+          .trim()
+          .toLocaleLowerCase("it")
+      )
+    );
 
-        return;
-      }
+    const added = [];
+    const conflicts = [];
+    let skipped = 0;
 
-      const currentById = new Map(
-        state.employees.map(
-          employee => [
-            employee.id,
-            employee
-          ]
-        )
-      );
+    for (const employee of incoming.employees) {
+      const existing = currentById.get(employee.id);
 
-      const names = new Set(
-        state.employees.map(
-          employee =>
-            `${employee.firstName} ${employee.lastName}`
-              .trim()
-              .toLocaleLowerCase("it")
-        )
-      );
-
-      const added = [];
-      const conflicts = [];
-
-      let skipped = 0;
-
-      for (
-        const employee of incoming.employees
-      ) {
-        const existing =
-          currentById.get(employee.id);
-
-        if (existing) {
-          if (
-            JSON.stringify(existing) ===
-            JSON.stringify(employee)
-          ) {
-            skipped += 1;
-          } else {
-            conflicts.push(
-              `${employee.firstName} ${employee.lastName}`
-            );
-          }
-
-          continue;
-        }
-
-        const name =
-          `${employee.firstName} ${employee.lastName}`
-            .trim()
-            .toLocaleLowerCase("it");
-
-        if (names.has(name)) {
+      if (existing) {
+        if (
+          JSON.stringify(existing) ===
+          JSON.stringify(employee)
+        ) {
+          skipped += 1;
+        } else {
           conflicts.push(
             `${employee.firstName} ${employee.lastName}`
           );
-
-          continue;
         }
 
-        names.add(name);
-
-        added.push(
-          structuredClone(employee)
-        );
+        continue;
       }
 
-      const next = structuredClone(state);
+      const name =
+        `${employee.firstName} ${employee.lastName}`
+          .trim()
+          .toLocaleLowerCase("it");
 
-      next.employees.push(...added);
+      if (names.has(name)) {
+        conflicts.push(
+          `${employee.firstName} ${employee.lastName}`
+        );
 
-      next.imports.push({
-        exportId: incoming.exportId,
-        at: new Date().toISOString(),
-        added: added.length,
-        skipped,
-        conflicts: conflicts.length
-      });
+        continue;
+      }
 
-      await store.save(next);
-
-      state = next;
-
-      get("importForm").reset();
-
-      renderAdmin();
-      refreshAdminTimeout();
-
-      const summary =
-        `${added.length} aggiunti · ` +
-        `${skipped} già presenti · ` +
-        `${conflicts.length} conflitti`;
-
-      message(
-        "importMessage",
-        conflicts.length
-          ? `${summary}. Non modificati: ${conflicts.join(", ")}`
-          : summary,
-        conflicts.length ? "error" : "success"
-      );
-
-    } catch (error) {
-      message(
-        "importMessage",
-        error.message,
-        "error"
-      );
-
-    } finally {
-      busy = false;
-      button.disabled = false;
+      names.add(name);
+      added.push(structuredClone(employee));
     }
+
+    const next = structuredClone(state);
+
+    next.employees.push(...added);
+
+    next.imports.push({
+      exportId: incoming.exportId,
+      at: new Date().toISOString(),
+      added: added.length,
+      skipped,
+      conflicts: conflicts.length
+    });
+
+    await store.save(next);
+    state = next;
+
+    get("importForm").reset();
+
+    renderAdmin();
+    refreshAdminTimeout();
+
+    const summary =
+      `${added.length} aggiunti · ` +
+      `${skipped} già presenti · ` +
+      `${conflicts.length} conflitti`;
+
+    message(
+      "importMessage",
+      conflicts.length
+        ? `${summary}. Non modificati: ${conflicts.join(", ")}`
+        : summary,
+      conflicts.length ? "error" : "success"
+    );
+  } catch (error) {
+    message(
+      "importMessage",
+      error.message,
+      "error"
+    );
+  } finally {
+    setBusy(false);
+    get("importButton").disabled = false;
   }
-);
+});
 
 /* temi */
 
@@ -942,20 +865,16 @@ function applyTheme(theme) {
   document.documentElement.dataset.theme =
     selected === "auto" ? "" : selected;
 
-  for (const button of themeButtons) {
-    const active =
-      button.dataset.theme === selected;
+  themeButtons.forEach(button => {
+    const active = button.dataset.theme === selected;
 
-    button.classList.toggle(
-      "active",
-      active
-    );
+    button.classList.toggle("active", active);
 
     button.setAttribute(
       "aria-pressed",
       String(active)
     );
-  }
+  });
 
   const dark =
     selected === "dark" ||
@@ -965,9 +884,7 @@ function applyTheme(theme) {
     );
 
   document
-    .querySelector(
-      'meta[name="theme-color"]'
-    )
+    .querySelector('meta[name="theme-color"]')
     .setAttribute(
       "content",
       dark ? "#111113" : "#f5f5f7"
@@ -979,7 +896,7 @@ function applyTheme(theme) {
       selected
     );
   } catch (error) {
-    // tema disponibile nella sessione
+    // tema locale facoltativo
   }
 }
 
@@ -987,34 +904,24 @@ let storedTheme = "auto";
 
 try {
   storedTheme =
-    localStorage.getItem(
-      "attendance-theme"
-    ) || "auto";
+    localStorage.getItem("attendance-theme") || "auto";
 } catch (error) {
   storedTheme = "auto";
 }
 
 applyTheme(storedTheme);
 
-for (const button of themeButtons) {
-  button.addEventListener(
-    "click",
-    () => applyTheme(
-      button.dataset.theme
-    )
-  );
-}
+themeButtons.forEach(button => {
+  button.addEventListener("click", () => {
+    applyTheme(button.dataset.theme);
+  });
+});
 
-colorPreference.addEventListener?.(
-  "change",
-  () => {
-    if (
-      !document.documentElement.dataset.theme
-    ) {
-      applyTheme("auto");
-    }
+colorPreference.addEventListener?.("change", () => {
+  if (!document.documentElement.dataset.theme) {
+    applyTheme("auto");
   }
-);
+});
 
 /* verifica offline */
 
@@ -1027,72 +934,40 @@ function setOfflineStatus(ready, value) {
   get("offlineText").textContent = value;
 }
 
-async function withTimeout(promise, milliseconds) {
+function withTimeout(promise, milliseconds) {
   let timer;
 
-  try {
-    return await Promise.race([
-      promise,
+  const timeout = new Promise((resolve, reject) => {
+    timer = setTimeout(() => {
+      reject(new Error("Tempo di attesa superato"));
+    }, milliseconds);
+  });
 
-      new Promise((resolve, reject) => {
-        timer = setTimeout(() => {
-          reject(
-            new Error("tempo di attesa superato")
-          );
-        }, milliseconds);
-      })
-    ]);
-  } finally {
-    clearTimeout(timer);
-  }
+  return Promise.race([
+    promise,
+    timeout
+  ]).finally(() => clearTimeout(timer));
 }
 
-function checkOfflineCache(worker) {
-  return new Promise(resolve => {
-    const channel = new MessageChannel();
+async function checkOfflineCache() {
+  const cache = await caches.open(cacheName);
 
-    let finished = false;
+  const matches = await Promise.all(
+    shellFiles.map(file => cache.match(file))
+  );
 
-    const finish = result => {
-      if (finished) {
-        return;
-      }
-
-      finished = true;
-      clearTimeout(timer);
-      channel.port1.close();
-
-      resolve(result);
-    };
-
-    const timer = setTimeout(() => {
-      finish(null);
-    }, 4000);
-
-    channel.port1.onmessage = event => {
-      finish(event.data);
-    };
-
-    try {
-      worker.postMessage(
-        { type: "cache-check" },
-        [channel.port2]
-      );
-    } catch (error) {
-      finish(null);
-    }
-  });
+  return matches.every(Boolean);
 }
 
 async function registerOffline() {
-  const checkId = ++offlineCheckId;
+  const currentCheck = ++offlineCheckId;
 
-  setOfflineStatus(
-    false,
-    "Verifica offline..."
-  );
+  setOfflineStatus(false, "Verifica offline...");
 
-  if (!("serviceWorker" in navigator)) {
+  if (
+    !("serviceWorker" in navigator) ||
+    !("caches" in window)
+  ) {
     setOfflineStatus(
       false,
       "Offline non supportato"
@@ -1102,42 +977,50 @@ async function registerOffline() {
   }
 
   try {
-    const registration = await withTimeout(
-      navigator.serviceWorker.register(
-        "./sw.js",
-        {
-          scope: "./",
-          updateViaCache: "none"
-        }
-      ),
-      12000
-    );
+    let registration;
 
-    const worker = registration.active ||
-      await withTimeout(
-        navigator.serviceWorker.ready.then(
-          result => result.active
+    if (navigator.onLine) {
+      registration = await withTimeout(
+        navigator.serviceWorker.register(
+          "./sw.js",
+          {
+            scope: "./",
+            updateViaCache: "none"
+          }
         ),
-        10000
+        7000
       );
-
-    if (!worker) {
-      throw new Error(
-        "service worker non attivo"
+    } else {
+      registration = await withTimeout(
+        navigator.serviceWorker.getRegistration("./"),
+        3000
       );
     }
 
-    const result = await checkOfflineCache(
-      worker
+    if (
+      registration &&
+      !registration.active &&
+      navigator.onLine
+    ) {
+      registration = await withTimeout(
+        navigator.serviceWorker.ready,
+        6000
+      );
+    }
+
+    const cacheReady = await withTimeout(
+      checkOfflineCache(),
+      5000
     );
 
-    if (checkId !== offlineCheckId) {
+    if (currentCheck !== offlineCheckId) {
       return;
     }
 
-    const ready =
-      result?.ready === true &&
-      result?.cacheName === expectedCache;
+    const ready = Boolean(
+      registration?.active &&
+      cacheReady
+    );
 
     setOfflineStatus(
       ready,
@@ -1145,9 +1028,8 @@ async function registerOffline() {
         ? "Disponibile offline"
         : "Offline non pronto"
     );
-
   } catch (error) {
-    if (checkId !== offlineCheckId) {
+    if (currentCheck !== offlineCheckId) {
       return;
     }
 
@@ -1199,7 +1081,6 @@ async function start() {
       get("setupImport").hidden = false;
       get("setupDevice").hidden = true;
     }
-
   } catch (error) {
     get("bootMessage").textContent =
       error.message;
@@ -1209,5 +1090,5 @@ async function start() {
 }
 
 renderClockPin();
-start();
-registerOffline();
+void start();
+void registerOffline();
