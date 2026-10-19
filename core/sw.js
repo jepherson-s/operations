@@ -1,15 +1,21 @@
-const cacheName = "core-shell-v1";
+const cacheName = "core-shell-v3";
 
-const appFiles = [
-  "./index.html",
-  "./manifest.json",
-  "./icon.svg"
+const scope = new URL(
+  "./",
+  self.location.href
+);
+
+const shellFiles = [
+  new URL("index.html", scope).href,
+  new URL("manifest.json", scope).href,
+  new URL("icon.svg", scope).href,
+  new URL("../shared/core.js", scope).href
 ];
 
 self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(cacheName)
-      .then(cache => cache.addAll(appFiles))
+      .then(cache => cache.addAll(shellFiles))
       .then(() => self.skipWaiting())
   );
 });
@@ -41,23 +47,31 @@ self.addEventListener("fetch", event => {
   }
 
   const url = new URL(request.url);
-  const scope = new URL("./", self.location.href);
 
-  if (
-    url.origin !== scope.origin ||
-    !url.pathname.startsWith(scope.pathname)
-  ) {
+  if (url.origin !== scope.origin) {
+    return;
+  }
+
+  const insideCore =
+    url.pathname.startsWith(scope.pathname);
+
+  const sharedFile =
+    url.pathname ===
+    new URL("../shared/core.js", scope).pathname;
+
+  if (!insideCore && !sharedFile) {
     return;
   }
 
   if (request.mode === "navigate") {
     event.respondWith(
       (async () => {
-        const cache = await caches.open(cacheName);
-        const saved = await cache.match("./index.html");
+        const cached = await caches.match(
+          shellFiles[0]
+        );
 
-        if (saved) {
-          return saved;
+        if (cached) {
+          return cached;
         }
 
         return fetch(request);
@@ -69,13 +83,48 @@ self.addEventListener("fetch", event => {
 
   event.respondWith(
     (async () => {
-      const saved = await caches.match(request);
+      const cached = await caches.match(
+        request
+      );
 
-      if (saved) {
-        return saved;
+      if (cached) {
+        return cached;
       }
 
       return fetch(request);
+    })()
+  );
+});
+
+self.addEventListener("message", event => {
+  if (
+    event.data?.type !== "cache-check" ||
+    !event.ports[0]
+  ) {
+    return;
+  }
+
+  const port = event.ports[0];
+
+  event.waitUntil(
+    (async () => {
+      try {
+        const cache = await caches.open(
+          cacheName
+        );
+
+        const files = await Promise.all(
+          shellFiles.map(file => cache.match(file))
+        );
+
+        port.postMessage({
+          ready: files.every(Boolean)
+        });
+      } catch (error) {
+        port.postMessage({
+          ready: false
+        });
+      }
     })()
   );
 });
