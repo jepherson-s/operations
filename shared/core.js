@@ -128,7 +128,6 @@ export async function verifyEmployeePin(pin, verifier) {
   }
 
   const actual = await derivePinHash(pin, salt);
-
   let difference = 0;
 
   for (let i = 0; i < actual.length; i++) {
@@ -174,6 +173,176 @@ async function decryptData(record, key) {
     decoder.decode(decrypted)
   );
 }
+
+/* provisioning */
+
+function validateProvisioningData(data) {
+  if (
+    !data ||
+    data.schemaVersion !== 1 ||
+    data.kind !== "center-provisioning" ||
+    data.sourceCenter !== "core" ||
+    data.targetCenter !== "attendance" ||
+    typeof data.originId !== "string" ||
+    !data.originId ||
+    typeof data.exportId !== "string" ||
+    !data.exportId ||
+    typeof data.issuedAt !== "string" ||
+    !Array.isArray(data.employees)
+  ) {
+    throw new Error(
+      "dati di configurazione non validi"
+    );
+  }
+
+  const ids = new Set();
+
+  for (const employee of data.employees) {
+    const verifier = employee?.pinVerifier;
+
+    if (
+      typeof employee?.id !== "string" ||
+      !employee.id ||
+      ids.has(employee.id) ||
+      typeof employee.firstName !== "string" ||
+      !employee.firstName.trim() ||
+      typeof employee.lastName !== "string" ||
+      !employee.lastName.trim() ||
+      employee.active !== true ||
+      typeof employee.weeklyHours !== "number" ||
+      !Number.isFinite(employee.weeklyHours) ||
+      employee.weeklyHours < 0 ||
+      employee.weeklyHours > 80 ||
+      !verifier ||
+      verifier.version !== 1 ||
+      verifier.algorithm !== "pbkdf2-sha256" ||
+      verifier.rounds !== employeeIterations ||
+      typeof verifier.salt !== "string" ||
+      typeof verifier.hash !== "string"
+    ) {
+      throw new Error(
+        "dati dipendente non validi"
+      );
+    }
+
+    let salt;
+    let hash;
+
+    try {
+      salt = fromBase64(verifier.salt);
+      hash = fromBase64(verifier.hash);
+    } catch (error) {
+      throw new Error(
+        "verificatore pin non valido"
+      );
+    }
+
+    if (salt.length !== 16 || hash.length !== 32) {
+      throw new Error(
+        "verificatore pin non valido"
+      );
+    }
+
+    ids.add(employee.id);
+  }
+}
+
+export async function createProvisioningPackage(
+  data,
+  adminPin
+) {
+  if (!/^[0-9]{6}$/.test(adminPin)) {
+    throw new Error(
+      "il pin admin deve avere 6 cifre"
+    );
+  }
+
+  validateProvisioningData(data);
+
+  const salt = crypto.getRandomValues(
+    new Uint8Array(16)
+  );
+
+  const key = await deriveKey(adminPin, salt);
+  const protectedData = await encryptData(data, key);
+
+  return {
+    format: "operations.provisioning",
+    version: 1,
+    sourceCenter: "core",
+    targetCenter: "attendance",
+    protection: {
+      algorithm: "aes-256-gcm",
+      derivation: "pbkdf2-sha256",
+      rounds: iterations,
+      salt: toBase64(salt),
+      iv: protectedData.iv
+    },
+    encrypted: protectedData.encrypted
+  };
+}
+
+export async function openProvisioningPackage(
+  input,
+  adminPin
+) {
+  if (!/^[0-9]{6}$/.test(adminPin)) {
+    throw new Error(
+      "il pin admin deve avere 6 cifre"
+    );
+  }
+
+  const protection = input?.protection;
+
+  if (
+    input?.format !== "operations.provisioning" ||
+    input.version !== 1 ||
+    input.sourceCenter !== "core" ||
+    input.targetCenter !== "attendance" ||
+    protection?.algorithm !== "aes-256-gcm" ||
+    protection.derivation !== "pbkdf2-sha256" ||
+    protection.rounds !== iterations ||
+    typeof protection.salt !== "string" ||
+    typeof protection.iv !== "string" ||
+    typeof input.encrypted !== "string" ||
+    input.encrypted.length > 7000000
+  ) {
+    throw new Error(
+      "file di configurazione non compatibile"
+    );
+  }
+
+  let data;
+
+  try {
+    const salt = fromBase64(protection.salt);
+    const iv = fromBase64(protection.iv);
+
+    if (salt.length !== 16 || iv.length !== 12) {
+      throw new Error("formato non valido");
+    }
+
+    const key = await deriveKey(adminPin, salt);
+
+    data = await decryptData(
+      {
+        iv: protection.iv,
+        encrypted: input.encrypted
+      },
+      key
+    );
+  } catch (error) {
+    throw new Error(
+      "pin non corretto o file non valido"
+    );
+  }
+
+  validateProvisioningData(data);
+
+  return structuredClone(data);
+}
+
+/* archivio locale */
 
 export function createLocalVault(
   databaseName,
@@ -315,7 +484,6 @@ export function createLocalVault(
       );
 
       let conflict = false;
-
       const request = store.get(recordKey);
 
       request.onsuccess = () => {
