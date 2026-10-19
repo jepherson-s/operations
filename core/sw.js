@@ -1,4 +1,4 @@
-const cacheName = "core-shell-v5";
+const cacheName = "core-shell-v6";
 
 const scope = new URL(
   "./",
@@ -88,6 +88,7 @@ self.addEventListener("fetch", event => {
   event.respondWith(
     (async () => {
       const cached = await caches.match(request);
+
       return cached || fetch(request);
     })()
   );
