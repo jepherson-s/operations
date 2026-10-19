@@ -1,4 +1,4 @@
-const cacheName = "core-shell-v4";
+const cacheName = "core-shell-v5";
 
 const scope = new URL(
   "./",
@@ -15,7 +15,15 @@ const shellFiles = [
 self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(cacheName)
-      .then(cache => cache.addAll(shellFiles))
+      .then(cache => {
+        const requests = shellFiles.map(
+          url => new Request(url, {
+            cache: "reload"
+          })
+        );
+
+        return cache.addAll(requests);
+      })
       .then(() => self.skipWaiting())
   );
 });
@@ -70,11 +78,7 @@ self.addEventListener("fetch", event => {
           shellFiles[0]
         );
 
-        if (cached) {
-          return cached;
-        }
-
-        return fetch(request);
+        return cached || fetch(request);
       })()
     );
 
@@ -83,15 +87,8 @@ self.addEventListener("fetch", event => {
 
   event.respondWith(
     (async () => {
-      const cached = await caches.match(
-        request
-      );
-
-      if (cached) {
-        return cached;
-      }
-
-      return fetch(request);
+      const cached = await caches.match(request);
+      return cached || fetch(request);
     })()
   );
 });
@@ -109,9 +106,7 @@ self.addEventListener("message", event => {
   event.waitUntil(
     (async () => {
       try {
-        const cache = await caches.open(
-          cacheName
-        );
+        const cache = await caches.open(cacheName);
 
         const files = await Promise.all(
           shellFiles.map(file => cache.match(file))
