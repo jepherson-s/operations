@@ -22,6 +22,7 @@
   --muted: #777780;
   --border: #e7e7eb;
   --soft: #ebebef;
+  --error: #bc3434;
 }
 
 :root[data-theme="dark"] {
@@ -32,6 +33,7 @@
   --muted: #a1a1aa;
   --border: #343439;
   --soft: #2d2d31;
+  --error: #ff8585;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -43,11 +45,16 @@
     --muted: #a1a1aa;
     --border: #343439;
     --soft: #2d2d31;
+    --error: #ff8585;
   }
 }
 
 * {
   box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
 }
 
 body {
@@ -59,9 +66,24 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-button {
+button,
+input {
   font: inherit;
+}
+
+button {
   cursor: pointer;
+}
+
+button:disabled {
+  opacity: .5;
+  cursor: wait;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid var(--muted);
+  outline-offset: 3px;
 }
 
 .shell {
@@ -74,7 +96,9 @@ button {
 
 .topbar {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+  gap: 12px;
   margin-bottom: 38px;
 }
 
@@ -102,37 +126,27 @@ button {
   color: var(--text);
 }
 
-/* navigazione */
-
-.page {
-  display: none;
+.lock-button {
+  min-height: 44px;
+  padding: 0 17px;
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  color: var(--text);
+  background: var(--card);
+  font-size: 13px;
+  font-weight: 700;
 }
 
-.page.active {
-  display: block;
-  animation: appear .28s ease;
-}
+/* accesso */
 
-/* intestazione */
-
-.hero {
-  position: relative;
-  min-height: 215px;
-  display: flex;
-  align-items: center;
-  overflow: hidden;
-  margin-bottom: 35px;
-}
-
-.hero-copy {
-  position: relative;
-  z-index: 2;
-  max-width: 650px;
+.gate {
+  max-width: 430px;
+  margin: 60px auto 80px;
 }
 
 .eyebrow {
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   color: var(--muted);
   font-size: 12px;
   font-weight: 700;
@@ -152,10 +166,97 @@ h1 span {
 }
 
 .subtitle {
-  margin: 15px 0 0;
+  margin: 16px 0 0;
   font-size: 16px;
   line-height: 1.6;
   color: var(--muted);
+}
+
+.gate h1 {
+  font-size: clamp(34px, 6vw, 48px);
+  letter-spacing: -2px;
+}
+
+.auth-form {
+  display: grid;
+  gap: 17px;
+  margin-top: 32px;
+}
+
+.field {
+  display: grid;
+  gap: 9px;
+}
+
+.field label {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.field input {
+  width: 100%;
+  min-height: 55px;
+  padding: 0 17px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  color: var(--text);
+  font-size: 18px;
+}
+
+.primary-button {
+  min-height: 55px;
+  border: none;
+  border-radius: 18px;
+  background: var(--text);
+  color: var(--bg);
+  font-weight: 750;
+}
+
+.hint {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--muted);
+}
+
+.error {
+  margin-top: 18px;
+  color: var(--error);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.error:empty {
+  display: none;
+}
+
+/* pagine */
+
+.page {
+  display: none;
+}
+
+.page.active {
+  display: block;
+  animation: appear .28s ease;
+}
+
+/* intestazione */
+
+.hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 215px;
+  margin-bottom: 35px;
+  overflow: hidden;
+}
+
+.hero-copy {
+  position: relative;
+  z-index: 2;
+  max-width: 650px;
 }
 
 /* doodle */
@@ -278,12 +379,12 @@ h1 span {
   }
 }
 
-/* pagine interne */
+/* navigazione */
 
 .back {
   min-height: 44px;
-  margin-bottom: 25px;
   padding: 0 5px;
+  margin-bottom: 25px;
   border: 0;
   background: transparent;
   color: var(--text);
@@ -315,7 +416,7 @@ h1 span {
   line-height: 1.7;
 }
 
-/* stato applicazione */
+/* footer */
 
 .footer {
   padding: 35px 0 0;
@@ -342,11 +443,28 @@ h1 span {
   background: #35a76b;
 }
 
-/* accessibilità */
+/* animazioni */
 
-button:focus-visible {
-  outline: 3px solid var(--muted);
-  outline-offset: 3px;
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) rotate(-8deg);
+  }
+
+  50% {
+    transform: translateY(-13px) rotate(8deg);
+  }
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* mobile */
@@ -358,6 +476,10 @@ button:focus-visible {
 
   .topbar {
     margin-bottom: 28px;
+  }
+
+  .gate {
+    margin-top: 45px;
   }
 
   .hero {
@@ -392,28 +514,6 @@ button:focus-visible {
   }
 }
 
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0) rotate(-8deg);
-  }
-
-  50% {
-    transform: translateY(-13px) rotate(8deg);
-  }
-}
-
-@keyframes appear {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -431,17 +531,28 @@ button:focus-visible {
 
   <header class="topbar">
 
+    <button
+      id="lockButton"
+      class="lock-button"
+      type="button"
+      hidden>
+      blocca
+    </button>
+
     <div class="themes" role="group" aria-label="tema">
 
-      <button type="button"
+      <button
+        type="button"
         data-theme="light"
         aria-label="tema chiaro">☀</button>
 
-      <button type="button"
+      <button
+        type="button"
         data-theme="auto"
         aria-label="tema automatico">◐</button>
 
-      <button type="button"
+      <button
+        type="button"
         data-theme="dark"
         aria-label="tema scuro">☾</button>
 
@@ -451,218 +562,410 @@ button:focus-visible {
 
   <main>
 
-    <!-- home -->
+    <!-- accesso locale -->
 
-    <section id="home" class="page active">
+    <section id="gate" class="gate">
 
-      <div class="hero">
+      <span class="eyebrow">accesso locale</span>
 
-        <div class="hero-copy">
+      <h1 id="gateTitle">
+        verifica archivio...
+      </h1>
 
-          <span class="eyebrow">operations</span>
+      <p id="gateDescription" class="subtitle">
+        inizializzazione in corso.
+      </p>
 
-          <h1>core center<span>.</span></h1>
+      <!-- prima configurazione -->
 
-          <p class="subtitle">
-            il tuo centro di controllo.
-            semplice, organizzato e sempre disponibile.
+      <form id="setupForm" class="auth-form" hidden>
+
+        <div class="field">
+          <label for="newPin">
+            crea pin admin
+          </label>
+
+          <input
+            id="newPin"
+            type="password"
+            inputmode="numeric"
+            autocomplete="new-password"
+            minlength="10"
+            maxlength="12"
+            pattern="[0-9]{10,12}"
+            required>
+        </div>
+
+        <div class="field">
+          <label for="confirmPin">
+            conferma pin admin
+          </label>
+
+          <input
+            id="confirmPin"
+            type="password"
+            inputmode="numeric"
+            autocomplete="new-password"
+            minlength="10"
+            maxlength="12"
+            pattern="[0-9]{10,12}"
+            required>
+        </div>
+
+        <p class="hint">
+          utilizza da 10 a 12 cifre.
+          conserva il pin in un luogo sicuro.
+          senza il pin e senza un backup,
+          i dati cifrati non saranno recuperabili.
+        </p>
+
+        <button
+          class="primary-button"
+          type="submit">
+          configura core center
+        </button>
+
+      </form>
+
+      <!-- accesso successivo -->
+
+      <form id="unlockForm" class="auth-form" hidden>
+
+        <div class="field">
+
+          <label for="adminPin">
+            pin admin
+          </label>
+
+          <input
+            id="adminPin"
+            type="password"
+            inputmode="numeric"
+            autocomplete="current-password"
+            minlength="10"
+            maxlength="12"
+            pattern="[0-9]{10,12}"
+            required>
+
+        </div>
+
+        <button
+          class="primary-button"
+          type="submit">
+          sblocca
+        </button>
+
+      </form>
+
+      <p id="gateError" class="error" role="alert"></p>
+
+    </section>
+
+    <!-- applicazione -->
+
+    <div id="workspace" hidden>
+
+      <!-- home -->
+
+      <section id="home" class="page active">
+
+        <div class="hero">
+
+          <div class="hero-copy">
+
+            <span class="eyebrow">
+              operations
+            </span>
+
+            <h1>
+              core center<span>.</span>
+            </h1>
+
+            <p class="subtitle">
+              il tuo centro di controllo.
+              semplice, organizzato e sempre disponibile.
+            </p>
+
+          </div>
+
+          <div class="doodles" aria-hidden="true">
+
+            <div class="doodle one">
+              <svg viewBox="0 0 80 80">
+                <rect
+                  x="15" y="18"
+                  width="50" height="45"
+                  rx="11"/>
+                <path d="M27 18v-8M53 18v-8M15 32h50"/>
+                <path d="M27 44h8M45 44h8M27 54h8"/>
+              </svg>
+            </div>
+
+            <div class="doodle two">
+              <svg viewBox="0 0 80 80">
+                <circle cx="40" cy="40" r="28"/>
+                <path d="M40 23v18l12 9"/>
+                <path d="M40 5v5M40 70v5"/>
+              </svg>
+            </div>
+
+            <div class="doodle three">
+              <svg viewBox="0 0 80 80">
+                <circle cx="40" cy="26" r="13"/>
+                <path d="M16 68c0-14 11-24 24-24s24 10 24 24"/>
+                <path d="M57 17l5-5M63 25h7"/>
+              </svg>
+            </div>
+
+          </div>
+
+        </div>
+
+        <h2 class="section-title">
+          gestione
+        </h2>
+
+        <div class="grid">
+
+          <!-- dipendenti -->
+
+          <button
+            type="button"
+            class="tile"
+            data-open="employees">
+
+            <span class="tile-icon">
+              <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="7" r="4"/>
+                <path d="M4 21v-2a8 8 0 0 1 16 0v2"/>
+              </svg>
+            </span>
+
+            <span class="tile-bottom">
+              <span class="tile-name">
+                dipendenti
+              </span>
+              <span class="tile-arrow">›</span>
+            </span>
+
+          </button>
+
+          <!-- dispositivi -->
+
+          <button
+            type="button"
+            class="tile"
+            data-open="devices">
+
+            <span class="tile-icon">
+              <svg viewBox="0 0 24 24">
+                <rect
+                  x="3" y="4"
+                  width="18" height="13"
+                  rx="2"/>
+                <path d="M8 21h8M12 17v4"/>
+              </svg>
+            </span>
+
+            <span class="tile-bottom">
+              <span class="tile-name">
+                dispositivi
+              </span>
+              <span class="tile-arrow">›</span>
+            </span>
+
+          </button>
+
+          <!-- configurazioni -->
+
+          <button
+            type="button"
+            class="tile"
+            data-open="settings">
+
+            <span class="tile-icon">
+              <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="3"/>
+                <path
+                  d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+                <path
+                  d="M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>
+              </svg>
+            </span>
+
+            <span class="tile-bottom">
+              <span class="tile-name">
+                configurazioni
+              </span>
+              <span class="tile-arrow">›</span>
+            </span>
+
+          </button>
+
+          <!-- sincronizzazione -->
+
+          <button
+            type="button"
+            class="tile"
+            data-open="sync">
+
+            <span class="tile-icon">
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M20 7a9 9 0 0 0-15-2L3 7"/>
+                <path d="M3 3v4h4"/>
+                <path
+                  d="M4 17a9 9 0 0 0 15 2l2-2"/>
+                <path d="M17 17h4v4"/>
+              </svg>
+            </span>
+
+            <span class="tile-bottom">
+              <span class="tile-name">
+                sincronizzazione
+              </span>
+              <span class="tile-arrow">›</span>
+            </span>
+
+          </button>
+
+        </div>
+
+      </section>
+
+      <!-- dipendenti -->
+
+      <section id="employees" class="page">
+
+        <button
+          type="button"
+          class="back"
+          data-back>
+          ‹ indietro
+        </button>
+
+        <h1 class="detail-title">
+          dipendenti
+        </h1>
+
+        <div class="empty">
+
+          <strong>
+            gestione del personale
+          </strong>
+
+          <p>
+            il database locale cifrato è attivo.
+            la gestione di anagrafica, pin,
+            contratti, ore distribuite,
+            stipendio e iban sarà disponibile
+            nella prossima versione.
           </p>
 
         </div>
 
-        <div class="doodles" aria-hidden="true">
+      </section>
 
-          <div class="doodle one">
-            <svg viewBox="0 0 80 80">
-              <rect x="15" y="18"
-                width="50" height="45" rx="11"/>
-              <path d="M27 18v-8M53 18v-8M15 32h50"/>
-              <path d="M27 44h8M45 44h8M27 54h8"/>
-            </svg>
-          </div>
+      <!-- dispositivi -->
 
-          <div class="doodle two">
-            <svg viewBox="0 0 80 80">
-              <circle cx="40" cy="40" r="28"/>
-              <path d="M40 23v18l12 9"/>
-              <path d="M40 5v5M40 70v5"/>
-            </svg>
-          </div>
+      <section id="devices" class="page">
 
-          <div class="doodle three">
-            <svg viewBox="0 0 80 80">
-              <circle cx="40" cy="26" r="13"/>
-              <path d="M16 68c0-14 11-24 24-24s24 10 24 24"/>
-              <path d="M57 17l5-5M63 25h7"/>
-            </svg>
-          </div>
+        <button
+          type="button"
+          class="back"
+          data-back>
+          ‹ indietro
+        </button>
+
+        <h1 class="detail-title">
+          dispositivi
+        </h1>
+
+        <div class="empty">
+
+          <strong>
+            dispositivi registrati
+          </strong>
+
+          <p>
+            questa sezione conterrà
+            i dispositivi configurati
+            attraverso i json generati
+            dal core center.
+          </p>
 
         </div>
 
-      </div>
+      </section>
 
-      <h2 class="section-title">gestione</h2>
+      <!-- configurazioni -->
 
-      <div class="grid">
+      <section id="settings" class="page">
 
-        <button type="button"
-          class="tile" data-open="employees">
-
-          <span class="tile-icon">
-            <svg viewBox="0 0 24 24">
-              <circle cx="12" cy="7" r="4"/>
-              <path d="M4 21v-2a8 8 0 0 1 16 0v2"/>
-            </svg>
-          </span>
-
-          <span class="tile-bottom">
-            <span class="tile-name">dipendenti</span>
-            <span class="tile-arrow">›</span>
-          </span>
-
+        <button
+          type="button"
+          class="back"
+          data-back>
+          ‹ indietro
         </button>
 
-        <button type="button"
-          class="tile" data-open="devices">
+        <h1 class="detail-title">
+          configurazioni
+        </h1>
 
-          <span class="tile-icon">
-            <svg viewBox="0 0 24 24">
-              <rect x="3" y="4"
-                width="18" height="13" rx="2"/>
-              <path d="M8 21h8M12 17v4"/>
-            </svg>
-          </span>
+        <div class="empty">
 
-          <span class="tile-bottom">
-            <span class="tile-name">dispositivi</span>
-            <span class="tile-arrow">›</span>
-          </span>
+          <strong>
+            archivio locale protetto
+          </strong>
 
+          <p>
+            il database è cifrato con aes-gcm
+            e viene sbloccato tramite pin admin.
+            il pin non viene memorizzato in chiaro.
+            la generazione dei json per gli altri
+            center sarà integrata successivamente.
+          </p>
+
+        </div>
+
+      </section>
+
+      <!-- sincronizzazione -->
+
+      <section id="sync" class="page">
+
+        <button
+          type="button"
+          class="back"
+          data-back>
+          ‹ indietro
         </button>
 
-        <button type="button"
-          class="tile" data-open="settings">
+        <h1 class="detail-title">
+          sincronizzazione
+        </h1>
 
-          <span class="tile-icon">
-            <svg viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="3"/>
-              <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
-              <path d="M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>
-            </svg>
-          </span>
+        <div class="empty">
 
-          <span class="tile-bottom">
-            <span class="tile-name">configurazioni</span>
-            <span class="tile-arrow">›</span>
-          </span>
+          <strong>
+            sincronizzazione non ancora attiva
+          </strong>
 
-        </button>
+          <p>
+            i dati rimangono conservati localmente.
+            la sincronizzazione bidirezionale
+            verrà integrata successivamente
+            attraverso google apps script.
+            non viene eseguita alcuna
+            sincronizzazione automatica.
+          </p>
 
-        <button type="button"
-          class="tile" data-open="sync">
+        </div>
 
-          <span class="tile-icon">
-            <svg viewBox="0 0 24 24">
-              <path d="M20 7a9 9 0 0 0-15-2L3 7"/>
-              <path d="M3 3v4h4"/>
-              <path d="M4 17a9 9 0 0 0 15 2l2-2"/>
-              <path d="M17 17h4v4"/>
-            </svg>
-          </span>
+      </section>
 
-          <span class="tile-bottom">
-            <span class="tile-name">sincronizzazione</span>
-            <span class="tile-arrow">›</span>
-          </span>
-
-        </button>
-
-      </div>
-
-    </section>
-
-    <!-- dipendenti -->
-
-    <section id="employees" class="page">
-
-      <button type="button"
-        class="back" data-back>‹ indietro</button>
-
-      <h1 class="detail-title">dipendenti</h1>
-
-      <div class="empty">
-        <strong>gestione del personale</strong>
-        <p>
-          qui gestiremo anagrafica, pin,
-          contratti, ore distribuite,
-          stipendio e stato dei dipendenti.
-          il database locale sarà integrato
-          nella prossima fase.
-        </p>
-      </div>
-
-    </section>
-
-    <!-- dispositivi -->
-
-    <section id="devices" class="page">
-
-      <button type="button"
-        class="back" data-back>‹ indietro</button>
-
-      <h1 class="detail-title">dispositivi</h1>
-
-      <div class="empty">
-        <strong>dispositivi registrati</strong>
-        <p>
-          qui saranno visualizzati i dispositivi
-          dei center, con nome, identificativo
-          e ultima sincronizzazione.
-        </p>
-      </div>
-
-    </section>
-
-    <!-- configurazioni -->
-
-    <section id="settings" class="page">
-
-      <button type="button"
-        class="back" data-back>‹ indietro</button>
-
-      <h1 class="detail-title">configurazioni</h1>
-
-      <div class="empty">
-        <strong>configurazione dei center</strong>
-        <p>
-          gestione pin admin e generazione
-          del json universale per configurare
-          le applicazioni.
-        </p>
-      </div>
-
-    </section>
-
-    <!-- sincronizzazione -->
-
-    <section id="sync" class="page">
-
-      <button type="button"
-        class="back" data-back>‹ indietro</button>
-
-      <h1 class="detail-title">sincronizzazione</h1>
-
-      <div class="empty">
-        <strong>sincronizzazione non ancora attiva</strong>
-        <p>
-          il comando unico di sincronizzazione
-          verrà integrato successivamente.
-          nessuna sincronizzazione viene
-          avviata automaticamente.
-        </p>
-      </div>
-
-    </section>
+    </div>
 
   </main>
 
@@ -675,17 +978,50 @@ button:focus-visible {
       </span>
     </div>
 
-    <div>core center · versione 1.2</div>
+    <div>
+      core center · versione 1.3
+    </div>
 
   </footer>
 
 </div>
 
-<script>
+<script type="module">
 
-/* navigazione */
+import {
+  createLocalVault
+} from "../shared/core.js";
+
+/* database */
+
+const vault = createLocalVault(
+  "operations-core",
+  "core"
+);
+
+/* elementi */
+
+const gate = document.getElementById("gate");
+const workspace = document.getElementById("workspace");
+
+const setupForm = document.getElementById("setupForm");
+const unlockForm = document.getElementById("unlockForm");
+
+const gateTitle = document.getElementById("gateTitle");
+const gateDescription =
+  document.getElementById("gateDescription");
+
+const gateError = document.getElementById("gateError");
+
+const lockButton =
+  document.getElementById("lockButton");
 
 const pages = document.querySelectorAll(".page");
+
+const themeButtons =
+  document.querySelectorAll("[data-theme]");
+
+/* navigazione */
 
 function openPage(pageId) {
   pages.forEach(page => {
@@ -710,10 +1046,129 @@ document.querySelectorAll("[data-back]").forEach(button => {
   });
 });
 
-/* temi */
+/* visualizzazione accesso */
 
-const themeButtons =
-  document.querySelectorAll("[data-theme]");
+async function showGate() {
+  gate.hidden = false;
+  workspace.hidden = true;
+  lockButton.hidden = true;
+
+  setupForm.hidden = true;
+  unlockForm.hidden = true;
+
+  gateError.textContent = "";
+
+  try {
+    const configured = await vault.hasData();
+
+    if (configured) {
+      gateTitle.textContent = "bentornato.";
+
+      gateDescription.textContent =
+        "inserisci il pin admin per sbloccare il tuo archivio locale.";
+
+      unlockForm.hidden = false;
+    } else {
+      gateTitle.textContent = "prima configurazione.";
+
+      gateDescription.textContent =
+        "crea il pin admin per inizializzare il database locale cifrato.";
+
+      setupForm.hidden = false;
+    }
+  } catch (error) {
+    gateTitle.textContent = "archivio non disponibile.";
+
+    gateDescription.textContent =
+      "impossibile leggere il database locale.";
+
+    gateError.textContent = error.message;
+  }
+}
+
+/* apertura dashboard */
+
+function showWorkspace() {
+  gate.hidden = true;
+  workspace.hidden = false;
+  lockButton.hidden = false;
+
+  openPage("home");
+}
+
+/* configurazione iniziale */
+
+setupForm.addEventListener("submit", async event => {
+  event.preventDefault();
+
+  const pin = document.getElementById("newPin").value;
+  const confirmPin =
+    document.getElementById("confirmPin").value;
+
+  gateError.textContent = "";
+
+  if (pin !== confirmPin) {
+    gateError.textContent =
+      "i pin inseriti non corrispondono";
+
+    return;
+  }
+
+  const button = setupForm.querySelector(
+    'button[type="submit"]'
+  );
+
+  button.disabled = true;
+
+  try {
+    await vault.create(pin);
+
+    showWorkspace();
+  } catch (error) {
+    gateError.textContent = error.message;
+  } finally {
+    setupForm.reset();
+    button.disabled = false;
+  }
+});
+
+/* accesso admin */
+
+unlockForm.addEventListener("submit", async event => {
+  event.preventDefault();
+
+  const pin = document.getElementById("adminPin").value;
+
+  const button = unlockForm.querySelector(
+    'button[type="submit"]'
+  );
+
+  gateError.textContent = "";
+  button.disabled = true;
+
+  try {
+    await vault.unlock(pin);
+
+    showWorkspace();
+  } catch (error) {
+    gateError.textContent = error.message;
+  } finally {
+    unlockForm.reset();
+    button.disabled = false;
+  }
+});
+
+/* blocco manuale */
+
+lockButton.addEventListener("click", async () => {
+  vault.lock();
+
+  openPage("home");
+
+  await showGate();
+});
+
+/* temi */
 
 function setTheme(theme) {
   const selected =
@@ -728,13 +1183,19 @@ function setTheme(theme) {
     const active = button.dataset.theme === selected;
 
     button.classList.toggle("active", active);
-    button.setAttribute("aria-pressed", String(active));
+    button.setAttribute(
+      "aria-pressed",
+      String(active)
+    );
   });
+
+  const prefersDark = window.matchMedia(
+    "(prefers-color-scheme: dark)"
+  ).matches;
 
   const dark =
     selected === "dark" ||
-    (selected === "auto" &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches);
+    (selected === "auto" && prefersDark);
 
   document
     .querySelector('meta[name="theme-color"]')
@@ -746,7 +1207,7 @@ function setTheme(theme) {
   try {
     localStorage.setItem("theme", selected);
   } catch (error) {
-    // tema mantenuto nella sessione corrente
+    // il tema rimane attivo nella sessione
   }
 }
 
@@ -766,15 +1227,22 @@ try {
 
 setTheme(savedTheme);
 
-window
-  .matchMedia("(prefers-color-scheme: dark)")
-  .addEventListener("change", () => {
-    if (!document.documentElement.dataset.theme) {
-      setTheme("auto");
-    }
-  });
+const colorPreference = window.matchMedia(
+  "(prefers-color-scheme: dark)"
+);
 
-/* pwa offline */
+if (colorPreference.addEventListener) {
+  colorPreference.addEventListener(
+    "change",
+    () => {
+      if (!document.documentElement.dataset.theme) {
+        setTheme("auto");
+      }
+    }
+  );
+}
+
+/* verifica pwa */
 
 const offlineStatus =
   document.getElementById("offlineStatus");
@@ -783,40 +1251,82 @@ const offlineText =
   document.getElementById("offlineText");
 
 function setOfflineStatus(ready, message) {
-  offlineStatus.classList.toggle("ready", ready);
+  offlineStatus.classList.toggle(
+    "ready",
+    ready
+  );
+
   offlineText.textContent = message;
 }
 
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", async () => {
-    try {
-      await navigator.serviceWorker.register(
-        "./sw.js",
-        { scope: "./" }
-      );
+async function checkOfflineCache(worker) {
+  return new Promise(resolve => {
+    const channel = new MessageChannel();
 
+    const timer = setTimeout(() => {
+      channel.port1.close();
+      resolve(false);
+    }, 3000);
+
+    channel.port1.onmessage = event => {
+      clearTimeout(timer);
+      channel.port1.close();
+
+      resolve(
+        event.data?.ready === true
+      );
+    };
+
+    worker.postMessage(
+      { type: "cache-check" },
+      [channel.port2]
+    );
+  });
+}
+
+async function registerOffline() {
+  if (!("serviceWorker" in navigator)) {
+    setOfflineStatus(
+      false,
+      "offline non supportato"
+    );
+
+    return;
+  }
+
+  try {
+    await navigator.serviceWorker.register(
+      "./sw.js",
+      { scope: "./" }
+    );
+
+    const registration =
       await navigator.serviceWorker.ready;
 
-      setOfflineStatus(
-        true,
-        "interfaccia disponibile offline"
-      );
+    const ready = await checkOfflineCache(
+      registration.active
+    );
 
-    } catch (error) {
-      setOfflineStatus(
-        false,
-        "offline non disponibile"
-      );
+    setOfflineStatus(
+      ready,
+      ready
+        ? "interfaccia disponibile offline"
+        : "cache offline da verificare"
+    );
+  } catch (error) {
+    setOfflineStatus(
+      false,
+      "offline non disponibile"
+    );
 
-      console.error("service worker:", error);
-    }
-  });
-} else {
-  setOfflineStatus(
-    false,
-    "offline non supportato"
-  );
+    console.error(error);
+  }
 }
+
+/* avvio */
+
+showGate();
+registerOffline();
 
 </script>
 
