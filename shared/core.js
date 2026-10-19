@@ -1,6 +1,7 @@
 const storeName = "vault";
 const recordKey = "main";
 const iterations = 350000;
+const employeeIterations = 180000;
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
@@ -28,32 +29,18 @@ function fromBase64(value) {
   return bytes;
 }
 
-function validateNewPin(pin) {
-  if (!/^[0-9]{6}$/.test(pin)) {
-    throw new Error(
-      "il nuovo pin deve contenere esattamente 6 cifre"
-    );
-  }
-}
-
-function validateAccessPin(pin) {
-  if (
-    !/^(?:[0-9]{6}|[0-9]{10,12})$/.test(pin)
-  ) {
-    throw new Error(
-      "inserisci un pin di 6 cifre o il vecchio pin"
-    );
-  }
-}
-
-async function deriveKey(pin, salt) {
-  const material = await crypto.subtle.importKey(
+async function importPinMaterial(pin) {
+  return crypto.subtle.importKey(
     "raw",
     encoder.encode(pin),
     "PBKDF2",
     false,
-    ["deriveKey"]
+    ["deriveKey", "deriveBits"]
   );
+}
+
+async function deriveKey(pin, salt) {
+  const material = await importPinMaterial(pin);
 
   return crypto.subtle.deriveKey(
     {
@@ -70,6 +57,85 @@ async function deriveKey(pin, salt) {
     false,
     ["encrypt", "decrypt"]
   );
+}
+
+async function derivePinHash(pin, salt) {
+  const material = await importPinMaterial(pin);
+
+  const bits = await crypto.subtle.deriveBits(
+    {
+      name: "PBKDF2",
+      salt,
+      iterations: employeeIterations,
+      hash: "SHA-256"
+    },
+    material,
+    256
+  );
+
+  return new Uint8Array(bits);
+}
+
+function validateEmployeePin(pin) {
+  if (!/^[0-9]{4}$/.test(pin)) {
+    throw new Error(
+      "il pin dipendente deve avere 4 cifre"
+    );
+  }
+}
+
+export async function createEmployeePinVerifier(pin) {
+  validateEmployeePin(pin);
+
+  const salt = crypto.getRandomValues(
+    new Uint8Array(16)
+  );
+
+  const hash = await derivePinHash(pin, salt);
+
+  return {
+    version: 1,
+    algorithm: "pbkdf2-sha256",
+    rounds: employeeIterations,
+    salt: toBase64(salt),
+    hash: toBase64(hash)
+  };
+}
+
+export async function verifyEmployeePin(pin, verifier) {
+  if (!/^[0-9]{4}$/.test(pin)) {
+    return false;
+  }
+
+  if (
+    !verifier ||
+    verifier.version !== 1 ||
+    verifier.algorithm !== "pbkdf2-sha256" ||
+    verifier.rounds !== employeeIterations
+  ) {
+    throw new Error(
+      "verificatore pin non compatibile"
+    );
+  }
+
+  const salt = fromBase64(verifier.salt);
+  const expected = fromBase64(verifier.hash);
+
+  if (salt.length !== 16 || expected.length !== 32) {
+    throw new Error(
+      "verificatore pin non valido"
+    );
+  }
+
+  const actual = await derivePinHash(pin, salt);
+
+  let difference = 0;
+
+  for (let i = 0; i < actual.length; i++) {
+    difference |= actual[i] ^ expected[i];
+  }
+
+  return difference === 0;
 }
 
 async function encryptData(data, key) {
@@ -278,7 +344,7 @@ export function createLocalVault(
         reject(
           new Error(
             conflict
-              ? "archivio modificato altrove: blocca e riapri"
+              ? "archivio modificato: blocca e riapri"
               : "salvataggio annullato"
           )
         );
@@ -366,7 +432,11 @@ export function createLocalVault(
   }
 
   async function create(pin) {
-    validateNewPin(pin);
+    if (!/^[0-9]{6}$/.test(pin)) {
+      throw new Error(
+        "il pin admin deve contenere 6 cifre"
+      );
+    }
 
     if (await hasData()) {
       throw new Error(
@@ -397,7 +467,13 @@ export function createLocalVault(
   }
 
   async function unlock(pin) {
-    validateAccessPin(pin);
+    if (
+      !/^(?:[0-9]{6}|[0-9]{10,12})$/.test(pin)
+    ) {
+      throw new Error(
+        "formato pin non valido"
+      );
+    }
 
     const record = await readRecord();
 
@@ -469,12 +545,18 @@ export function createLocalVault(
       );
     }
 
-    validateAccessPin(oldPin);
-    validateNewPin(newPin);
+    if (
+      !/^(?:[0-9]{6}|[0-9]{10,12})$/.test(oldPin) ||
+      !/^[0-9]{6}$/.test(newPin)
+    ) {
+      throw new Error(
+        "formato pin non valido"
+      );
+    }
 
     if (oldPin === newPin) {
       throw new Error(
-        "scegli un pin diverso da quello attuale"
+        "scegli un pin diverso"
       );
     }
 
