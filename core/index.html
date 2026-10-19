@@ -66,18 +66,13 @@ button {
   padding: 24px 20px 50px;
 }
 
+/* barra superiore */
+
 .topbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  justify-content: flex-end;
   margin-bottom: 38px;
-}
-
-.brand {
-  font-size: 17px;
-  font-weight: 750;
-  letter-spacing: -0.5px;
 }
 
 .themes {
@@ -104,6 +99,8 @@ button {
   color: var(--text);
 }
 
+/* pagine */
+
 .page {
   display: none;
 }
@@ -113,13 +110,15 @@ button {
   animation: appear .28s ease;
 }
 
+/* intestazione */
+
 .hero {
   position: relative;
   min-height: 215px;
   display: flex;
   align-items: center;
   overflow: hidden;
-  margin-bottom: 24px;
+  margin-bottom: 35px;
 }
 
 .hero-copy {
@@ -156,6 +155,8 @@ h1 span {
   line-height: 1.6;
   color: var(--muted);
 }
+
+/* doodle */
 
 .doodles {
   position: absolute;
@@ -201,10 +202,13 @@ h1 span {
   animation-delay: -4s;
 }
 
+/* animazioni */
+
 @keyframes float {
   0%, 100% {
     transform: translateY(0) rotate(-8deg);
   }
+
   50% {
     transform: translateY(-13px) rotate(8deg);
   }
@@ -215,50 +219,20 @@ h1 span {
     opacity: 0;
     transform: translateY(8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-.summary {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 28px;
-  padding: 25px;
-  margin-bottom: 30px;
-}
+/* gestione */
 
 .section-title {
   margin: 0 0 20px;
   font-size: 19px;
   font-weight: 750;
   letter-spacing: -.5px;
-}
-
-.stats {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 15px;
-}
-
-.stat {
-  min-width: 0;
-  padding: 18px;
-  background: var(--bg);
-  border-radius: 20px;
-}
-
-.stat-value {
-  font-size: 32px;
-  font-weight: 780;
-  letter-spacing: -1px;
-}
-
-.stat-label {
-  margin-top: 5px;
-  color: var(--muted);
-  font-size: 13px;
 }
 
 .grid {
@@ -324,6 +298,8 @@ h1 span {
   color: var(--muted);
 }
 
+/* navigazione interna */
+
 .back {
   display: inline-flex;
   align-items: center;
@@ -362,6 +338,8 @@ h1 span {
   margin: 0;
 }
 
+/* footer */
+
 .footer {
   padding: 35px 0 0;
   text-align: center;
@@ -369,10 +347,14 @@ h1 span {
   font-size: 12px;
 }
 
+/* accessibilità */
+
 button:focus-visible {
   outline: 3px solid var(--muted);
   outline-offset: 3px;
 }
+
+/* mobile */
 
 @media (max-width: 600px) {
   .shell {
@@ -385,6 +367,7 @@ button:focus-visible {
 
   .hero {
     min-height: 185px;
+    margin-bottom: 28px;
   }
 
   h1 {
@@ -412,18 +395,14 @@ button:focus-visible {
     min-height: 105px;
     padding: 18px 20px;
   }
-
-  .summary {
-    padding: 19px;
-  }
-
-  .stat {
-    padding: 14px;
-  }
 }
 
+/* movimento ridotto */
+
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation: none !important;
     transition: none !important;
   }
@@ -435,59 +414,111 @@ button:focus-visible {
 
 <div class="shell">
 
+  <!-- barra superiore -->
+
   <header class="topbar">
 
-    <div class="brand">core center</div>
-
     <div class="themes" role="group" aria-label="tema">
-      <button type="button" data-theme="light"
-        aria-label="tema chiaro">☀</button>
-      <button type="button" data-theme="auto"
-        aria-label="tema automatico">◐</button>
-      <button type="button" data-theme="dark"
-        aria-label="tema scuro">☾</button>
+
+      <button
+        type="button"
+        data-theme="light"
+        aria-label="tema chiaro">
+        ☀
+      </button>
+
+      <button
+        type="button"
+        data-theme="auto"
+        aria-label="tema automatico">
+        ◐
+      </button>
+
+      <button
+        type="button"
+        data-theme="dark"
+        aria-label="tema scuro">
+        ☾
+      </button>
+
     </div>
 
   </header>
 
   <main>
 
+    <!-- home -->
+
     <section id="home" class="page active">
 
       <div class="hero">
 
         <div class="hero-copy">
+
           <span class="eyebrow">operations</span>
-          <h1>core center<span>.</span></h1>
+
+          <h1>
+            core center<span>.</span>
+          </h1>
+
           <p class="subtitle">
             il tuo centro di controllo.
             semplice, organizzato e sempre disponibile.
           </p>
+
         </div>
+
+        <!-- doodle animati -->
 
         <div class="doodles" aria-hidden="true">
 
           <div class="doodle one">
             <svg viewBox="0 0 80 80">
-              <rect x="15" y="18" width="50" height="45" rx="11"/>
-              <path d="M27 18v-8M53 18v-8M15 32h50"/>
-              <path d="M27 44h8M45 44h8M27 54h8"/>
+              <rect
+                x="15"
+                y="18"
+                width="50"
+                height="45"
+                rx="11"
+              />
+              <path
+                d="M27 18v-8M53 18v-8M15 32h50"
+              />
+              <path
+                d="M27 44h8M45 44h8M27 54h8"
+              />
             </svg>
           </div>
 
           <div class="doodle two">
             <svg viewBox="0 0 80 80">
-              <circle cx="40" cy="40" r="28"/>
-              <path d="M40 23v18l12 9"/>
-              <path d="M40 5v5M40 70v5"/>
+              <circle
+                cx="40"
+                cy="40"
+                r="28"
+              />
+              <path
+                d="M40 23v18l12 9"
+              />
+              <path
+                d="M40 5v5M40 70v5"
+              />
             </svg>
           </div>
 
           <div class="doodle three">
             <svg viewBox="0 0 80 80">
-              <circle cx="40" cy="26" r="13"/>
-              <path d="M16 68c0-14 11-24 24-24s24 10 24 24"/>
-              <path d="M57 17l5-5M63 25h7"/>
+              <circle
+                cx="40"
+                cy="26"
+                r="13"
+              />
+              <path
+                d="M16 68c0-14 11-24 24-24s24 10 24 24"
+              />
+              <path
+                d="M57 17l5-5M63 25h7"
+              />
             </svg>
           </div>
 
@@ -495,211 +526,402 @@ button:focus-visible {
 
       </div>
 
-      <div class="summary">
+      <!-- gestione -->
 
-        <h2 class="section-title">riepilogo</h2>
-
-        <div class="stats">
-
-          <div class="stat">
-            <div class="stat-value">—</div>
-            <div class="stat-label">dipendenti</div>
-          </div>
-
-          <div class="stat">
-            <div class="stat-value">—</div>
-            <div class="stat-label">dispositivi</div>
-          </div>
-
-        </div>
-
-      </div>
-
-      <h2 class="section-title">gestione</h2>
+      <h2 class="section-title">
+        gestione
+      </h2>
 
       <div class="grid">
 
-        <button class="tile" data-open="employees">
+        <!-- dipendenti -->
+
+        <button
+          type="button"
+          class="tile"
+          data-open="employees">
+
           <span class="tile-icon">
             <svg viewBox="0 0 24 24">
               <circle cx="12" cy="7" r="4"/>
-              <path d="M4 21v-2a8 8 0 0 1 16 0v2"/>
+              <path
+                d="M4 21v-2a8 8 0 0 1 16 0v2"
+              />
             </svg>
           </span>
+
           <span class="tile-bottom">
-            <span class="tile-name">dipendenti</span>
+            <span class="tile-name">
+              dipendenti
+            </span>
             <span class="tile-arrow">›</span>
           </span>
+
         </button>
 
-        <button class="tile" data-open="devices">
+        <!-- dispositivi -->
+
+        <button
+          type="button"
+          class="tile"
+          data-open="devices">
+
           <span class="tile-icon">
             <svg viewBox="0 0 24 24">
-              <rect x="3" y="4" width="18" height="13" rx="2"/>
-              <path d="M8 21h8M12 17v4"/>
+              <rect
+                x="3"
+                y="4"
+                width="18"
+                height="13"
+                rx="2"
+              />
+              <path
+                d="M8 21h8M12 17v4"
+              />
             </svg>
           </span>
+
           <span class="tile-bottom">
-            <span class="tile-name">dispositivi</span>
+            <span class="tile-name">
+              dispositivi
+            </span>
             <span class="tile-arrow">›</span>
           </span>
+
         </button>
 
-        <button class="tile" data-open="settings">
+        <!-- configurazioni -->
+
+        <button
+          type="button"
+          class="tile"
+          data-open="settings">
+
           <span class="tile-icon">
             <svg viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="3"/>
-              <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
-              <path d="M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>
+              <circle
+                cx="12"
+                cy="12"
+                r="3"
+              />
+              <path
+                d="M12 2v3M12 19v3M2 12h3M19 12h3"
+              />
+              <path
+                d="M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"
+              />
             </svg>
           </span>
+
           <span class="tile-bottom">
-            <span class="tile-name">configurazioni</span>
+            <span class="tile-name">
+              configurazioni
+            </span>
             <span class="tile-arrow">›</span>
           </span>
+
         </button>
 
-        <button class="tile" data-open="sync">
+        <!-- sincronizzazione -->
+
+        <button
+          type="button"
+          class="tile"
+          data-open="sync">
+
           <span class="tile-icon">
             <svg viewBox="0 0 24 24">
-              <path d="M20 7a9 9 0 0 0-15-2L3 7"/>
-              <path d="M3 3v4h4"/>
-              <path d="M4 17a9 9 0 0 0 15 2l2-2"/>
-              <path d="M17 17h4v4"/>
+              <path
+                d="M20 7a9 9 0 0 0-15-2L3 7"
+              />
+              <path
+                d="M3 3v4h4"
+              />
+              <path
+                d="M4 17a9 9 0 0 0 15 2l2-2"
+              />
+              <path
+                d="M17 17h4v4"
+              />
             </svg>
           </span>
+
           <span class="tile-bottom">
-            <span class="tile-name">sincronizzazione</span>
+            <span class="tile-name">
+              sincronizzazione
+            </span>
             <span class="tile-arrow">›</span>
           </span>
+
         </button>
 
       </div>
 
     </section>
 
+    <!-- dipendenti -->
+
     <section id="employees" class="page">
-      <button class="back" data-back>‹ indietro</button>
-      <h1 class="detail-title">dipendenti</h1>
+
+      <button
+        type="button"
+        class="back"
+        data-back>
+        ‹ indietro
+      </button>
+
+      <h1 class="detail-title">
+        dipendenti
+      </h1>
+
       <div class="empty">
-        <strong>gestione del personale</strong>
+
+        <strong>
+          gestione del personale
+        </strong>
+
         <p>
           questa sezione ospiterà anagrafica,
           pin, contratti, ore distribuite,
           retribuzioni e stato dei dipendenti.
           il database cifrato non è ancora collegato.
         </p>
+
       </div>
+
     </section>
 
+    <!-- dispositivi -->
+
     <section id="devices" class="page">
-      <button class="back" data-back>‹ indietro</button>
-      <h1 class="detail-title">dispositivi</h1>
+
+      <button
+        type="button"
+        class="back"
+        data-back>
+        ‹ indietro
+      </button>
+
+      <h1 class="detail-title">
+        dispositivi
+      </h1>
+
       <div class="empty">
-        <strong>gestione dispositivi</strong>
+
+        <strong>
+          gestione dispositivi
+        </strong>
+
         <p>
           qui saranno visualizzate le installazioni
           dei center, con nome, identificativo
           e ultima sincronizzazione.
         </p>
+
       </div>
+
     </section>
 
+    <!-- configurazioni -->
+
     <section id="settings" class="page">
-      <button class="back" data-back>‹ indietro</button>
-      <h1 class="detail-title">configurazioni</h1>
+
+      <button
+        type="button"
+        class="back"
+        data-back>
+        ‹ indietro
+      </button>
+
+      <h1 class="detail-title">
+        configurazioni
+      </h1>
+
       <div class="empty">
-        <strong>configurazione dei center</strong>
+
+        <strong>
+          configurazione dei center
+        </strong>
+
         <p>
           qui inseriremo la gestione del pin admin
           e la generazione del json universale
           per la configurazione iniziale.
         </p>
+
       </div>
+
     </section>
 
+    <!-- sincronizzazione -->
+
     <section id="sync" class="page">
-      <button class="back" data-back>‹ indietro</button>
-      <h1 class="detail-title">sincronizzazione</h1>
+
+      <button
+        type="button"
+        class="back"
+        data-back>
+        ‹ indietro
+      </button>
+
+      <h1 class="detail-title">
+        sincronizzazione
+      </h1>
+
       <div class="empty">
-        <strong>sincronizzazione non ancora attiva</strong>
+
+        <strong>
+          sincronizzazione non ancora attiva
+        </strong>
+
         <p>
           il comando unico di sincronizzazione
           sarà disponibile dopo l'integrazione
           con il backend.
           non verranno eseguite chiamate automatiche.
         </p>
+
       </div>
+
     </section>
 
   </main>
 
+  <!-- footer -->
+
   <footer class="footer">
-    core center · versione interfaccia 1.0
+    core center · versione interfaccia 1.1
   </footer>
 
 </div>
 
 <script>
+
+/* elementi */
+
 const pages = document.querySelectorAll(".page");
-const themeButtons = document.querySelectorAll("[data-theme]");
+
+const themeButtons =
+  document.querySelectorAll("[data-theme]");
+
+/* navigazione */
 
 function openPage(pageId) {
+
   pages.forEach(page => {
-    page.classList.toggle("active", page.id === pageId);
+
+    page.classList.toggle(
+      "active",
+      page.id === pageId
+    );
+
   });
 
   window.scrollTo(0, 0);
+
 }
 
-document.querySelectorAll("[data-open]").forEach(button => {
-  button.addEventListener("click", () => {
-    openPage(button.dataset.open);
-  });
-});
+/* apertura sezioni */
 
-document.querySelectorAll("[data-back]").forEach(button => {
-  button.addEventListener("click", () => {
-    openPage("home");
+document
+  .querySelectorAll("[data-open]")
+  .forEach(button => {
+
+    button.addEventListener("click", () => {
+
+      openPage(button.dataset.open);
+
+    });
+
   });
-});
+
+/* ritorno alla home */
+
+document
+  .querySelectorAll("[data-back]")
+  .forEach(button => {
+
+    button.addEventListener("click", () => {
+
+      openPage("home");
+
+    });
+
+  });
+
+/* gestione temi */
 
 function setTheme(theme) {
-  const selected = ["light", "dark", "auto"].includes(theme)
-    ? theme
-    : "auto";
+
+  const selected =
+    ["light", "dark", "auto"].includes(theme)
+      ? theme
+      : "auto";
 
   document.documentElement.dataset.theme =
     selected === "auto" ? "" : selected;
 
   themeButtons.forEach(button => {
-    const active = button.dataset.theme === selected;
-    button.classList.toggle("active", active);
-    button.setAttribute("aria-pressed", String(active));
+
+    const active =
+      button.dataset.theme === selected;
+
+    button.classList.toggle(
+      "active",
+      active
+    );
+
+    button.setAttribute(
+      "aria-pressed",
+      String(active)
+    );
+
   });
 
   try {
-    localStorage.setItem("theme", selected);
+
+    localStorage.setItem(
+      "theme",
+      selected
+    );
+
   } catch (error) {
-    // il tema rimane attivo nella sessione corrente
+
+    // tema mantenuto nella sessione corrente
+
   }
+
 }
 
+/* eventi temi */
+
 themeButtons.forEach(button => {
+
   button.addEventListener("click", () => {
+
     setTheme(button.dataset.theme);
+
   });
+
 });
+
+/* recupero tema salvato */
 
 let savedTheme = "auto";
 
 try {
-  savedTheme = localStorage.getItem("theme") || "auto";
+
+  savedTheme =
+    localStorage.getItem("theme") || "auto";
+
 } catch (error) {
+
   savedTheme = "auto";
+
 }
 
 setTheme(savedTheme);
+
 </script>
 
 </body>
