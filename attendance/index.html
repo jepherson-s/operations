@@ -3,38 +3,22 @@
 
 <head>
 <meta charset="utf-8">
-
 <meta
   name="viewport"
   content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-<meta
-  name="theme-color"
-  content="#f5f5f7">
+<meta name="theme-color" content="#f5f5f7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Attendance">
 
-<meta
-  name="apple-mobile-web-app-capable"
-  content="yes">
-
-<meta
-  name="apple-mobile-web-app-title"
-  content="Attendance">
-
-<link
-  rel="manifest"
-  href="./manifest.json">
-
-<link
-  rel="icon"
-  href="./icon.svg"
-  type="image/svg+xml">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
 
 <title>Attendance Center</title>
 
 <style>
 :root {
   color-scheme: light;
-
   --bg: #f5f5f7;
   --card: #ffffff;
   --text: #18181b;
@@ -47,7 +31,6 @@
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-
   --bg: #111113;
   --card: #202023;
   --text: #f5f5f7;
@@ -61,7 +44,6 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]):not([data-theme="dark"]) {
     color-scheme: dark;
-
     --bg: #111113;
     --card: #202023;
     --text: #f5f5f7;
@@ -84,16 +66,10 @@
 body {
   margin: 0;
   min-height: 100vh;
-
   background: var(--bg);
   color: var(--text);
-
-  font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
-
+  font-family: -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -124,14 +100,13 @@ input:focus-visible {
   padding: 20px 20px 50px;
 }
 
-/* barra superiore */
+/* barra */
 
 .bar {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
-
   min-height: 48px;
 }
 
@@ -143,13 +118,10 @@ input:focus-visible {
 .small-button {
   min-height: 43px;
   padding: 0 15px;
-
   border: 1px solid var(--border);
   border-radius: 16px;
-
   background: var(--card);
   color: var(--text);
-
   font-size: 13px;
   font-weight: 700;
 }
@@ -160,23 +132,18 @@ input:focus-visible {
   display: flex;
   gap: 3px;
   padding: 3px;
-
   border: 1px solid var(--border);
   border-radius: 25px;
-
   background: var(--card);
 }
 
 .themes button {
   width: 38px;
   height: 38px;
-
   border: 0;
   border-radius: 50%;
-
   background: transparent;
   color: var(--muted);
-
   font-size: 18px;
 }
 
@@ -194,13 +161,10 @@ input:focus-visible {
 
 .hero {
   position: relative;
-
   display: flex;
   align-items: center;
-
   min-height: 135px;
   margin-bottom: 28px;
-
   overflow: hidden;
 }
 
@@ -212,9 +176,7 @@ input:focus-visible {
 .kicker {
   display: block;
   margin-bottom: 12px;
-
   color: var(--muted);
-
   font-size: 12px;
   font-weight: 750;
   letter-spacing: 2px;
@@ -222,7 +184,6 @@ input:focus-visible {
 
 h1 {
   margin: 0;
-
   font-size: clamp(40px, 7vw, 65px);
   line-height: 1.05;
   letter-spacing: -2.5px;
@@ -235,7 +196,6 @@ h1 span {
 
 h2 {
   margin: 0 0 20px;
-
   font-size: 20px;
   letter-spacing: -.4px;
 }
@@ -255,34 +215,27 @@ h3 {
 
 .doodle {
   position: absolute;
-
   width: 72px;
   height: 72px;
-
   top: 2%;
   right: 10%;
-
   color: var(--muted);
   opacity: .23;
-
   animation: float 7s ease-in-out infinite;
 }
 
 .doodle.two {
   width: 48px;
   height: 48px;
-
   top: auto;
   bottom: 0;
   right: 0;
-
   animation-delay: -2s;
 }
 
 .doodle svg {
   width: 100%;
   height: 100%;
-
   fill: none;
   stroke: currentColor;
   stroke-width: 1.5;
@@ -294,10 +247,8 @@ h3 {
 
 .card {
   padding: 26px;
-
   border: 1px solid var(--border);
   border-radius: 26px;
-
   background: var(--card);
 }
 
@@ -333,15 +284,11 @@ input {
   width: 100%;
   min-width: 0;
   min-height: 54px;
-
   padding: 0 16px;
-
   border: 1px solid var(--border);
   border-radius: 16px;
-
   background: var(--bg);
   color: var(--text);
-
   font-size: 16px;
 }
 
@@ -353,26 +300,20 @@ input[type="file"] {
 input[type="file"]::file-selector-button {
   margin-right: 10px;
   padding: 8px 10px;
-
   border: 0;
   border-radius: 10px;
-
   background: var(--soft);
   color: var(--text);
-
   font-size: 13px;
 }
 
 .primary {
   min-height: 54px;
   padding: 13px 18px;
-
   border: 0;
   border-radius: 17px;
-
   background: var(--text);
   color: var(--bg);
-
   font-size: 15px;
   font-weight: 750;
 }
@@ -380,31 +321,24 @@ input[type="file"]::file-selector-button {
 .secondary {
   min-height: 48px;
   padding: 12px 17px;
-
   border: 1px solid var(--border);
   border-radius: 16px;
-
   background: var(--card);
   color: var(--text);
-
   font-weight: 700;
 }
 
 .hint {
   margin: 0;
-
   color: var(--muted);
-
   font-size: 13px;
   line-height: 1.6;
 }
 
 .message {
   margin: 15px 0 0;
-
   font-size: 14px;
   line-height: 1.5;
-
   overflow-wrap: anywhere;
 }
 
@@ -439,12 +373,9 @@ input[type="file"]::file-selector-button {
 
 .device-label {
   margin: 0 0 16px;
-
   color: var(--muted);
-
   font-size: 13px;
   text-align: center;
-
   overflow-wrap: anywhere;
 }
 
@@ -462,14 +393,10 @@ input[type="file"]::file-selector-button {
   align-items: center;
   justify-content: center;
   gap: 22px;
-
   min-height: 72px;
-
   border: 1px solid var(--border);
   border-radius: 18px;
-
   background: var(--bg);
-
   user-select: none;
   -webkit-user-select: none;
 }
@@ -477,22 +404,15 @@ input[type="file"]::file-selector-button {
 .pin-dot {
   width: 15px;
   height: 15px;
-
   border: 2px solid var(--muted);
   border-radius: 50%;
-
   background: transparent;
-
-  transition:
-    background .15s ease,
-    transform .15s ease,
-    border-color .15s ease;
+  transition: background .15s, transform .15s;
 }
 
 .pin-dot.filled {
   border-color: var(--text);
   background: var(--text);
-
   transform: scale(1.12);
 }
 
@@ -502,26 +422,19 @@ input[type="file"]::file-selector-button {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-
   width: min(100%, 325px);
-  margin: 18px auto;
+  margin: 18px auto 0;
 }
 
 .key {
   min-height: 65px;
-
   border: 1px solid var(--border);
   border-radius: 19px;
-
   background: var(--bg);
   color: var(--text);
-
   font-size: 24px;
   font-weight: 650;
-
-  transition:
-    transform .1s ease,
-    background .1s ease;
+  transition: transform .1s, background .1s;
 }
 
 .key:active {
@@ -537,7 +450,6 @@ input[type="file"]::file-selector-button {
 .clock-result {
   max-width: 480px;
   margin: 20px auto;
-
   text-align: center;
 }
 
@@ -545,7 +457,6 @@ input[type="file"]::file-selector-button {
 
 .stat {
   padding: 16px;
-
   border-radius: 18px;
   background: var(--bg);
 }
@@ -572,9 +483,7 @@ input[type="file"]::file-selector-button {
 .log-row {
   display: grid;
   gap: 4px;
-
   padding-bottom: 12px;
-
   border-bottom: 1px solid var(--border);
 }
 
@@ -598,11 +507,8 @@ input[type="file"]::file-selector-button {
   display: grid;
   justify-content: center;
   gap: 7px;
-
   padding: 42px 0 0;
-
   color: var(--muted);
-
   text-align: center;
   font-size: 12px;
 }
@@ -617,9 +523,7 @@ input[type="file"]::file-selector-button {
 .dot {
   width: 7px;
   height: 7px;
-
   border-radius: 50%;
-
   background: var(--muted);
 }
 
@@ -650,8 +554,6 @@ input[type="file"]::file-selector-button {
     transform: translateY(0);
   }
 }
-
-/* mobile */
 
 @media (max-width: 520px) {
   .shell {
@@ -725,23 +627,17 @@ input[type="file"]::file-selector-button {
       <button
         type="button"
         data-theme="light"
-        aria-label="Tema chiaro">
-        ☀
-      </button>
+        aria-label="Tema chiaro">☀</button>
 
       <button
         type="button"
         data-theme="auto"
-        aria-label="Tema automatico">
-        ◐
-      </button>
+        aria-label="Tema automatico">◐</button>
 
       <button
         type="button"
         data-theme="dark"
-        aria-label="Tema scuro">
-        ☾
-      </button>
+        aria-label="Tema scuro">☾</button>
 
     </div>
 
@@ -751,27 +647,16 @@ input[type="file"]::file-selector-button {
 
     <!-- apertura -->
 
-    <section
-      id="bootScreen"
-      class="screen">
+    <section id="bootScreen" class="screen">
 
       <div class="hero">
         <div class="hero-copy">
-
-          <span class="kicker">
-            Operations
-          </span>
-
-          <h1>
-            Attendance Center<span>.</span>
-          </h1>
-
+          <span class="kicker">Operations</span>
+          <h1>Attendance Center<span>.</span></h1>
         </div>
       </div>
 
-      <p class="hint">
-        Apertura archivio...
-      </p>
+      <p class="hint">Apertura archivio...</p>
 
     </section>
 
@@ -782,9 +667,7 @@ input[type="file"]::file-selector-button {
       class="screen"
       hidden>
 
-      <h1>
-        Archivio non disponibile.
-      </h1>
+      <h1>Archivio non disponibile.</h1>
 
       <p
         id="bootMessage"
@@ -803,53 +686,32 @@ input[type="file"]::file-selector-button {
       <div class="hero">
 
         <div class="hero-copy">
-
           <span class="kicker">
             Prima configurazione
           </span>
 
-          <h1>
-            Attendance Center<span>.</span>
-          </h1>
-
+          <h1>Attendance Center<span>.</span></h1>
         </div>
 
-        <div
-          class="doodles"
-          aria-hidden="true">
-
+        <div class="doodles" aria-hidden="true">
           <div class="doodle">
             <svg viewBox="0 0 80 80">
-              <circle
-                cx="40"
-                cy="40"
-                r="27"/>
-
+              <circle cx="40" cy="40" r="27"/>
               <path d="M40 23v18l12 9"/>
             </svg>
           </div>
-
         </div>
 
       </div>
 
-      <div
-        id="setupImport"
-        class="card">
+      <div id="setupImport" class="card">
 
-        <h2>
-          Importa configurazione
-        </h2>
+        <h2>Importa configurazione</h2>
 
-        <form
-          id="setupForm"
-          class="form">
+        <form id="setupForm" class="form">
 
           <div class="field">
-
-            <label for="setupPin">
-              PIN Admin
-            </label>
+            <label for="setupPin">PIN Admin</label>
 
             <input
               id="setupPin"
@@ -860,11 +722,9 @@ input[type="file"]::file-selector-button {
               maxlength="6"
               pattern="[0-9]{6}"
               required>
-
           </div>
 
           <div class="field">
-
             <label for="setupJson">
               JSON Attendance
             </label>
@@ -874,7 +734,6 @@ input[type="file"]::file-selector-button {
               type="file"
               accept=".json,application/json"
               required>
-
           </div>
 
           <button
@@ -893,16 +752,11 @@ input[type="file"]::file-selector-button {
         class="card"
         hidden>
 
-        <h2>
-          Nome dispositivo
-        </h2>
+        <h2>Nome dispositivo</h2>
 
-        <form
-          id="deviceForm"
-          class="form">
+        <form id="deviceForm" class="form">
 
           <div class="field">
-
             <label for="deviceInput">
               Dispositivo
             </label>
@@ -913,12 +767,9 @@ input[type="file"]::file-selector-button {
               maxlength="80"
               placeholder="Es. Tablet ingresso"
               required>
-
           </div>
 
-          <p
-            id="setupCount"
-            class="hint"></p>
+          <p id="setupCount" class="hint"></p>
 
           <button
             id="activateButton"
@@ -955,52 +806,30 @@ input[type="file"]::file-selector-button {
       <div class="hero">
 
         <div class="hero-copy">
-
-          <span class="kicker">
-            Operations
-          </span>
-
-          <h1>
-            Attendance Center<span>.</span>
-          </h1>
-
+          <span class="kicker">Operations</span>
+          <h1>Attendance Center<span>.</span></h1>
         </div>
 
-        <div
-          class="doodles"
-          aria-hidden="true">
+        <div class="doodles" aria-hidden="true">
 
           <div class="doodle">
-
             <svg viewBox="0 0 80 80">
-
-              <circle
-                cx="40"
-                cy="40"
-                r="27"/>
-
+              <circle cx="40" cy="40" r="27"/>
               <path d="M40 23v18l12 9"/>
               <path d="M40 5v5M40 70v5"/>
-
             </svg>
-
           </div>
 
           <div class="doodle two">
-
             <svg viewBox="0 0 80 80">
-
               <rect
                 x="15"
                 y="18"
                 width="50"
                 height="45"
                 rx="11"/>
-
               <path d="M27 18v-8M53 18v-8M15 32h50"/>
-
             </svg>
-
           </div>
 
         </div>
@@ -1017,123 +846,110 @@ input[type="file"]::file-selector-button {
           <h2>Timbratura</h2>
         </div>
 
-        <form
-          id="clockForm"
-          class="form">
+        <div class="pin-area">
 
-          <div class="pin-area">
-
-            <span class="pin-label">
-              PIN dipendente
-            </span>
-
-            <div
-              id="pinDisplay"
-              class="pin-dots"
-              role="status"
-              aria-live="polite"
-              aria-label="PIN: 0 cifre su 4">
-
-              <span
-                class="pin-dot"
-                aria-hidden="true"></span>
-
-              <span
-                class="pin-dot"
-                aria-hidden="true"></span>
-
-              <span
-                class="pin-dot"
-                aria-hidden="true"></span>
-
-              <span
-                class="pin-dot"
-                aria-hidden="true"></span>
-
-            </div>
-
-          </div>
+          <span class="pin-label">
+            PIN dipendente
+          </span>
 
           <div
-            class="keypad"
-            aria-label="Tastierino numerico">
+            id="pinDisplay"
+            class="pin-dots"
+            role="status"
+            aria-live="polite"
+            aria-label="PIN: 0 cifre su 4">
 
-            <button
-              class="key"
-              type="button"
-              data-digit="1">1</button>
+            <span
+              class="pin-dot"
+              aria-hidden="true"></span>
 
-            <button
-              class="key"
-              type="button"
-              data-digit="2">2</button>
+            <span
+              class="pin-dot"
+              aria-hidden="true"></span>
 
-            <button
-              class="key"
-              type="button"
-              data-digit="3">3</button>
+            <span
+              class="pin-dot"
+              aria-hidden="true"></span>
 
-            <button
-              class="key"
-              type="button"
-              data-digit="4">4</button>
-
-            <button
-              class="key"
-              type="button"
-              data-digit="5">5</button>
-
-            <button
-              class="key"
-              type="button"
-              data-digit="6">6</button>
-
-            <button
-              class="key"
-              type="button"
-              data-digit="7">7</button>
-
-            <button
-              class="key"
-              type="button"
-              data-digit="8">8</button>
-
-            <button
-              class="key"
-              type="button"
-              data-digit="9">9</button>
-
-            <button
-              id="clearPin"
-              class="key minor"
-              type="button"
-              aria-label="Cancella tutto">
-              C
-            </button>
-
-            <button
-              class="key"
-              type="button"
-              data-digit="0">0</button>
-
-            <button
-              id="erasePin"
-              class="key minor"
-              type="button"
-              aria-label="Cancella ultima cifra">
-              ⌫
-            </button>
+            <span
+              class="pin-dot"
+              aria-hidden="true"></span>
 
           </div>
 
+        </div>
+
+        <div
+          class="keypad"
+          aria-label="Tastierino numerico">
+
           <button
-            id="clockButton"
-            class="primary"
-            type="submit">
-            Timbra
+            class="key"
+            type="button"
+            data-digit="1">1</button>
+
+          <button
+            class="key"
+            type="button"
+            data-digit="2">2</button>
+
+          <button
+            class="key"
+            type="button"
+            data-digit="3">3</button>
+
+          <button
+            class="key"
+            type="button"
+            data-digit="4">4</button>
+
+          <button
+            class="key"
+            type="button"
+            data-digit="5">5</button>
+
+          <button
+            class="key"
+            type="button"
+            data-digit="6">6</button>
+
+          <button
+            class="key"
+            type="button"
+            data-digit="7">7</button>
+
+          <button
+            class="key"
+            type="button"
+            data-digit="8">8</button>
+
+          <button
+            class="key"
+            type="button"
+            data-digit="9">9</button>
+
+          <button
+            id="clearPin"
+            class="key minor"
+            type="button"
+            aria-label="Cancella tutto">
+            C
           </button>
 
-        </form>
+          <button
+            class="key"
+            type="button"
+            data-digit="0">0</button>
+
+          <button
+            id="erasePin"
+            class="key minor"
+            type="button"
+            aria-label="Cancella ultima cifra">
+            ⌫
+          </button>
+
+        </div>
 
       </div>
 
@@ -1153,38 +969,23 @@ input[type="file"]::file-selector-button {
       hidden>
 
       <div class="hero">
-
         <div class="hero-copy">
-
           <span class="kicker">
             Attendance Center
           </span>
 
-          <h1>
-            Amministrazione<span>.</span>
-          </h1>
-
+          <h1>Amministrazione<span>.</span></h1>
         </div>
-
       </div>
 
-      <div
-        id="adminGate"
-        class="card">
+      <div id="adminGate" class="card">
 
-        <h2>
-          Accesso Admin
-        </h2>
+        <h2>Accesso Admin</h2>
 
-        <form
-          id="adminLogin"
-          class="form">
+        <form id="adminLogin" class="form">
 
           <div class="field">
-
-            <label for="adminPin">
-              PIN Admin
-            </label>
+            <label for="adminPin">PIN Admin</label>
 
             <input
               id="adminPin"
@@ -1195,7 +996,6 @@ input[type="file"]::file-selector-button {
               maxlength="6"
               pattern="[0-9]{6}"
               required>
-
           </div>
 
           <button
@@ -1221,9 +1021,7 @@ input[type="file"]::file-selector-button {
 
         <div class="card">
 
-          <h2>
-            Dispositivo
-          </h2>
+          <h2>Dispositivo</h2>
 
           <h3 id="adminDeviceName"></h3>
 
@@ -1231,17 +1029,11 @@ input[type="file"]::file-selector-button {
             id="adminDeviceId"
             class="hint id-text"></p>
 
-          <div
-            class="stat"
-            style="margin-top:18px">
+          <div class="stat" style="margin-top:18px">
 
-            <strong id="adminPunchCount">
-              0
-            </strong>
+            <strong id="adminPunchCount">0</strong>
 
-            <span>
-              Timbrature
-            </span>
+            <span>Timbrature</span>
 
           </div>
 
@@ -1249,16 +1041,11 @@ input[type="file"]::file-selector-button {
 
         <div class="card">
 
-          <h2>
-            Aggiorna dipendenti
-          </h2>
+          <h2>Aggiorna dipendenti</h2>
 
-          <form
-            id="importForm"
-            class="form">
+          <form id="importForm" class="form">
 
             <div class="field">
-
               <label for="importJson">
                 JSON Attendance
               </label>
@@ -1268,7 +1055,6 @@ input[type="file"]::file-selector-button {
                 type="file"
                 accept=".json,application/json"
                 required>
-
             </div>
 
             <button
@@ -1289,13 +1075,9 @@ input[type="file"]::file-selector-button {
 
         <div class="card">
 
-          <h2>
-            Ultime timbrature
-          </h2>
+          <h2>Ultime timbrature</h2>
 
-          <div
-            id="punchList"
-            class="log"></div>
+          <div id="punchList" class="log"></div>
 
         </div>
 
@@ -1327,16 +1109,14 @@ input[type="file"]::file-selector-button {
     </span>
 
     <span>
-      Attendance Center · versione 1.1
+      Attendance Center · versione 1.2
     </span>
 
   </footer>
 
 </div>
 
-<script
-  type="module"
-  src="./app.js"></script>
+<script type="module" src="./app.js"></script>
 
 </body>
 </html>
