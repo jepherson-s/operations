@@ -1,4 +1,4 @@
-const cacheName = "core-shell-v6";
+const cacheName = "core-shell-v7";
 
 const scope = new URL(
   "./",
