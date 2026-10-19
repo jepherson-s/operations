@@ -1,9 +1,6 @@
-const cacheName = "attendance-shell-v2";
+const cacheName = "attendance-shell-v3";
 
-const scope = new URL(
-  "./",
-  self.location.href
-);
+const scope = new URL("./", self.location.href);
 
 const files = [
   new URL("index.html", scope).href,
@@ -16,17 +13,17 @@ const files = [
 
 self.addEventListener("install", event => {
   event.waitUntil(
-    caches.open(cacheName)
-      .then(cache => {
-        const requests = files.map(
-          url => new Request(url, {
-            cache: "reload"
-          })
-        );
+    (async () => {
+      const cache = await caches.open(cacheName);
 
-        return cache.addAll(requests);
-      })
-      .then(() => self.skipWaiting())
+      await cache.addAll(
+        files.map(url => new Request(url, {
+          cache: "reload"
+        }))
+      );
+
+      await self.skipWaiting();
+    })()
   );
 });
 
@@ -50,35 +47,31 @@ self.addEventListener("activate", event => {
 });
 
 self.addEventListener("fetch", event => {
-  if (event.request.method !== "GET") {
-    return;
-  }
+  const request = event.request;
 
-  const url = new URL(event.request.url);
+  if (request.method !== "GET") return;
 
-  if (url.origin !== scope.origin) {
-    return;
-  }
+  const url = new URL(request.url);
+
+  if (url.origin !== scope.origin) return;
 
   const insideApp =
     url.pathname.startsWith(scope.pathname);
 
-  const shared =
+  const sharedFile =
     url.pathname ===
     new URL("../shared/core.js", scope).pathname;
 
-  if (!insideApp && !shared) {
-    return;
-  }
+  if (!insideApp && !sharedFile) return;
 
-  if (event.request.mode === "navigate") {
+  if (request.mode === "navigate") {
     event.respondWith(
       (async () => {
-        const cached = await caches.match(
-          files[0]
-        );
+        const cache = await caches.open(cacheName);
 
-        return cached || fetch(event.request);
+        const cached = await cache.match(files[0]);
+
+        return cached || fetch(request);
       })()
     );
 
@@ -87,11 +80,11 @@ self.addEventListener("fetch", event => {
 
   event.respondWith(
     (async () => {
-      const cached = await caches.match(
-        event.request
-      );
+      const cache = await caches.open(cacheName);
 
-      return cached || fetch(event.request);
+      const cached = await cache.match(request);
+
+      return cached || fetch(request);
     })()
   );
 });
@@ -109,9 +102,7 @@ self.addEventListener("message", event => {
   event.waitUntil(
     (async () => {
       try {
-        const cache = await caches.open(
-          cacheName
-        );
+        const cache = await caches.open(cacheName);
 
         const matches = await Promise.all(
           files.map(file => cache.match(file))
