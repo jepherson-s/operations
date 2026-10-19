@@ -4,12 +4,21 @@ import {
   verifyEmployeePin
 } from "../shared/core.js";
 
-import { createAttendanceStore } from "./store.js";
+import {
+  createAttendanceStore
+} from "./store.js";
 
+const appVersion = "1.3";
 const get = id => document.getElementById(id);
 const store = createAttendanceStore();
 
-const cacheName = "attendance-shell-v5";
+const dateFormat = new Intl.DateTimeFormat("it-IT", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit"
+});
 
 const shellFiles = [
   "index.html",
@@ -20,14 +29,6 @@ const shellFiles = [
   "../shared/core.js"
 ].map(path => new URL(path, import.meta.url).href);
 
-const dateFormat = new Intl.DateTimeFormat("it-IT", {
-  day: "2-digit",
-  month: "2-digit",
-  year: "numeric",
-  hour: "2-digit",
-  minute: "2-digit"
-});
-
 let state = null;
 let pendingSetup = null;
 let adminPinSession = null;
@@ -35,7 +36,14 @@ let adminTimer = null;
 let clockPin = "";
 let clockTimer = null;
 let busy = false;
-let offlineCheckId = 0;
+let appReady = false;
+
+let registration = null;
+let checkingUpdates = false;
+let waitingUpdate = null;
+let applyingUpdate = false;
+let updateTimer = null;
+let lastInteractionAt = Date.now();
 
 /* interfaccia */
 
@@ -49,12 +57,17 @@ function message(id, value = "", kind = "") {
 }
 
 function screen(id) {
-  document.querySelectorAll(".screen").forEach(element => {
-    element.hidden = element.id !== id;
-  });
+  document.querySelectorAll(".screen").forEach(
+    element => {
+      element.hidden = element.id !== id;
+    }
+  );
 
-  get("adminOpen").hidden = id !== "clockScreen";
-  get("adminBack").hidden = id !== "adminScreen";
+  get("adminOpen").hidden =
+    id !== "clockScreen";
+
+  get("adminBack").hidden =
+    id !== "adminScreen";
 
   window.scrollTo(0, 0);
 }
@@ -62,9 +75,11 @@ function screen(id) {
 function setBusy(value) {
   busy = value;
 
-  document.querySelectorAll(".key").forEach(button => {
-    button.disabled = value;
-  });
+  document.querySelectorAll(".key").forEach(
+    button => {
+      button.disabled = value;
+    }
+  );
 }
 
 /* pin automatico */
@@ -96,6 +111,7 @@ function cancelClockTimer() {
 
 function resetClockPin() {
   cancelClockTimer();
+
   clockPin = "";
   renderClockPin();
 }
@@ -109,6 +125,8 @@ function addClockDigit(digit) {
   ) {
     return;
   }
+
+  lastInteractionAt = Date.now();
 
   if (!clockPin.length) {
     message("clockMessage");
@@ -139,13 +157,17 @@ function addClockDigit(digit) {
 function eraseClockDigit() {
   if (busy) return;
 
+  lastInteractionAt = Date.now();
+
   cancelClockTimer();
+
   clockPin = clockPin.slice(0, -1);
   renderClockPin();
 }
 
 function refreshClock() {
-  get("deviceName").textContent = state.device.name;
+  get("deviceName").textContent =
+    state.device.name;
 
   resetClockPin();
   message("clockMessage");
@@ -166,6 +188,8 @@ function validState(data) {
     Boolean(data.adminChallenge)
   );
 }
+
+/* sicurezza */
 
 function security(kind) {
   return state.security?.[kind] || {
@@ -230,7 +254,7 @@ async function updateSecurity(kind, success) {
   }
 }
 
-/* file json */
+/* lettura json */
 
 async function readJsonFile(file) {
   if (
@@ -244,169 +268,195 @@ async function readJsonFile(file) {
 
   try {
     return JSON.parse(await file.text());
-  } catch (error) {
+  } catch {
     throw new Error("JSON non leggibile");
   }
 }
 
 /* configurazione iniziale */
 
-get("setupForm").addEventListener("submit", async event => {
-  event.preventDefault();
+get("setupForm").addEventListener(
+  "submit",
+  async event => {
+    event.preventDefault();
 
-  if (busy) return;
+    if (busy) return;
 
-  setBusy(true);
-  get("setupContinue").disabled = true;
-  message("setupMessage");
+    setBusy(true);
 
-  try {
-    const pin = get("setupPin").value;
+    const button = get("setupContinue");
+    button.disabled = true;
 
-    const json = await readJsonFile(
-      get("setupJson").files[0]
-    );
+    message("setupMessage");
 
-    const config = await openProvisioningPackage(
-      json,
-      pin
-    );
+    try {
+      const pin = get("setupPin").value;
 
-    if (!config.employees.length) {
-      throw new Error(
-        "Il JSON non contiene dipendenti attivi"
+      const json = await readJsonFile(
+        get("setupJson").files[0]
       );
-    }
 
-    pendingSetup = { config, pin };
+      const config =
+        await openProvisioningPackage(
+          json,
+          pin
+        );
 
-    get("setupImport").hidden = true;
-    get("setupDevice").hidden = false;
-
-    get("setupCount").textContent =
-      "Configurazione pronta";
-
-    get("setupPin").value = "";
-    get("deviceInput").focus();
-  } catch (error) {
-    message(
-      "setupMessage",
-      error.message,
-      "error"
-    );
-  } finally {
-    setBusy(false);
-    get("setupContinue").disabled = false;
-  }
-});
-
-get("deviceForm").addEventListener("submit", async event => {
-  event.preventDefault();
-
-  if (busy || !pendingSetup) return;
-
-  setBusy(true);
-  get("activateButton").disabled = true;
-  message("setupMessage");
-
-  try {
-    const name = get("deviceInput").value.trim();
-
-    if (!name || name.length > 80) {
-      throw new Error(
-        "Inserisci il nome dispositivo"
-      );
-    }
-
-    const { config, pin } = pendingSetup;
-    const now = new Date().toISOString();
-
-    const challenge = await createProvisioningPackage(
-      {
-        schemaVersion: 1,
-        kind: "center-provisioning",
-        sourceCenter: "core",
-        targetCenter: "attendance",
-        originId: config.originId,
-        exportId: crypto.randomUUID(),
-        issuedAt: now,
-        employees: []
-      },
-      pin
-    );
-
-    const newState = {
-      schemaVersion: 1,
-      center: "attendance",
-      originId: config.originId,
-
-      device: {
-        id: crypto.randomUUID(),
-        name,
-        createdAt: now
-      },
-
-      adminChallenge: challenge,
-
-      employees: structuredClone(config.employees),
-
-      punches: [],
-
-      imports: [
-        {
-          exportId: config.exportId,
-          at: now,
-          added: config.employees.length,
-          skipped: 0,
-          conflicts: 0
-        }
-      ],
-
-      security: {
-        employee: {
-          failures: 0,
-          lockedUntil: 0
-        },
-        admin: {
-          failures: 0,
-          lockedUntil: 0
-        }
+      if (!config.employees.length) {
+        throw new Error(
+          "Il JSON non contiene dipendenti attivi"
+        );
       }
-    };
 
-    await store.initialize(newState);
+      pendingSetup = { config, pin };
 
-    state = newState;
+      get("setupImport").hidden = true;
+      get("setupDevice").hidden = false;
+
+      get("setupCount").textContent =
+        "Configurazione pronta";
+
+      get("setupPin").value = "";
+      get("deviceInput").focus();
+
+    } catch (error) {
+      message(
+        "setupMessage",
+        error.message,
+        "error"
+      );
+    } finally {
+      setBusy(false);
+      button.disabled = false;
+    }
+  }
+);
+
+get("deviceForm").addEventListener(
+  "submit",
+  async event => {
+    event.preventDefault();
+
+    if (busy || !pendingSetup) return;
+
+    setBusy(true);
+
+    const button = get("activateButton");
+    button.disabled = true;
+
+    message("setupMessage");
+
+    try {
+      const name =
+        get("deviceInput").value.trim();
+
+      if (!name || name.length > 80) {
+        throw new Error(
+          "Inserisci il nome dispositivo"
+        );
+      }
+
+      const { config, pin } = pendingSetup;
+      const now = new Date().toISOString();
+
+      const challenge =
+        await createProvisioningPackage(
+          {
+            schemaVersion: 1,
+            kind: "center-provisioning",
+            sourceCenter: "core",
+            targetCenter: "attendance",
+            originId: config.originId,
+            exportId: crypto.randomUUID(),
+            issuedAt: now,
+            employees: []
+          },
+          pin
+        );
+
+      const newState = {
+        schemaVersion: 1,
+        center: "attendance",
+        originId: config.originId,
+
+        device: {
+          id: crypto.randomUUID(),
+          name,
+          createdAt: now
+        },
+
+        adminChallenge: challenge,
+
+        employees: structuredClone(
+          config.employees
+        ),
+
+        punches: [],
+
+        imports: [
+          {
+            exportId: config.exportId,
+            at: now,
+            added: config.employees.length,
+            skipped: 0,
+            conflicts: 0
+          }
+        ],
+
+        security: {
+          employee: {
+            failures: 0,
+            lockedUntil: 0
+          },
+          admin: {
+            failures: 0,
+            lockedUntil: 0
+          }
+        }
+      };
+
+      await store.initialize(newState);
+
+      state = newState;
+      pendingSetup = null;
+
+      get("deviceForm").reset();
+
+      if (navigator.storage?.persist) {
+        navigator.storage.persist().catch(
+          () => {}
+        );
+      }
+
+      screen("clockScreen");
+      refreshClock();
+
+    } catch (error) {
+      message(
+        "setupMessage",
+        error.message,
+        "error"
+      );
+    } finally {
+      setBusy(false);
+      button.disabled = false;
+    }
+  }
+);
+
+get("setupBack").addEventListener(
+  "click",
+  () => {
+    if (busy) return;
+
     pendingSetup = null;
 
-    get("deviceForm").reset();
+    get("setupImport").hidden = false;
+    get("setupDevice").hidden = true;
 
-    if (navigator.storage?.persist) {
-      navigator.storage.persist().catch(() => {});
-    }
-
-    screen("clockScreen");
-    refreshClock();
-  } catch (error) {
-    message(
-      "setupMessage",
-      error.message,
-      "error"
-    );
-  } finally {
-    setBusy(false);
-    get("activateButton").disabled = false;
+    message("setupMessage");
   }
-});
-
-get("setupBack").addEventListener("click", () => {
-  pendingSetup = null;
-
-  get("setupImport").hidden = false;
-  get("setupDevice").hidden = true;
-
-  message("setupMessage");
-});
+);
 
 /* tastierino */
 
@@ -425,7 +475,12 @@ get("erasePin").addEventListener(
 
 get("clearPin").addEventListener(
   "click",
-  resetClockPin
+  () => {
+    if (busy) return;
+
+    lastInteractionAt = Date.now();
+    resetClockPin();
+  }
 );
 
 /* tastiera fisica */
@@ -461,11 +516,13 @@ document.addEventListener("keydown", event => {
     eraseClockDigit();
   } else if (event.key === "Escape") {
     event.preventDefault();
+
+    lastInteractionAt = Date.now();
     resetClockPin();
   }
 });
 
-/* timbratura automatica */
+/* timbratura */
 
 async function registerPunch(pin) {
   if (busy || !state) return;
@@ -477,7 +534,9 @@ async function registerPunch(pin) {
     checkLock("employee");
 
     if (!/^[0-9]{4}$/.test(pin)) {
-      throw new Error("Inserisci un PIN di 4 cifre");
+      throw new Error(
+        "Inserisci un PIN di 4 cifre"
+      );
     }
 
     let found = null;
@@ -504,14 +563,15 @@ async function registerPunch(pin) {
 
     const previous = [...state.punches]
       .reverse()
-      .find(punch => punch.employeeId === found.id);
+      .find(
+        punch => punch.employeeId === found.id
+      );
 
     const type = previous?.type === "in"
       ? "out"
       : "in";
 
     const at = new Date().toISOString();
-
     const next = structuredClone(state);
 
     next.punches.push({
@@ -525,16 +585,15 @@ async function registerPunch(pin) {
     await store.save(next);
     state = next;
 
-    const time = dateFormat.format(new Date(at));
-
     message(
       "clockMessage",
       `${found.firstName} · ` +
       `${type === "in" ? "Entrata" : "Uscita"} · ` +
-      `${time} · ` +
+      `${dateFormat.format(new Date(at))} · ` +
       `${type === "in" ? "Buon lavoro!" : "Buon riposo!"}`,
       "success"
     );
+
   } catch (error) {
     message(
       "clockMessage",
@@ -543,6 +602,7 @@ async function registerPunch(pin) {
     );
   } finally {
     resetClockPin();
+    lastInteractionAt = Date.now();
     setBusy(false);
   }
 }
@@ -550,6 +610,8 @@ async function registerPunch(pin) {
 /* amministrazione */
 
 function closeAdmin() {
+  if (busy) return;
+
   clearTimeout(adminTimer);
 
   adminTimer = null;
@@ -568,13 +630,22 @@ function closeAdmin() {
     screen("clockScreen");
     refreshClock();
   }
+
+  lastInteractionAt = Date.now();
 }
 
 function refreshAdminTimeout() {
   clearTimeout(adminTimer);
 
   adminTimer = setTimeout(
-    closeAdmin,
+    () => {
+      if (busy) {
+        refreshAdminTimeout();
+        return;
+      }
+
+      closeAdmin();
+    },
     120000
   );
 }
@@ -599,17 +670,24 @@ function renderAdmin() {
   const list = get("punchList");
   list.replaceChildren();
 
-  for (const punch of state.punches.slice(-20).reverse()) {
-    const row = document.createElement("div");
+  for (
+    const punch of
+    state.punches.slice(-20).reverse()
+  ) {
+    const row =
+      document.createElement("div");
+
     row.className = "log-row";
 
-    const person = document.createElement("strong");
+    const person =
+      document.createElement("strong");
 
     person.textContent =
       names.get(punch.employeeId) ||
       "Dipendente non trovato";
 
-    const details = document.createElement("span");
+    const details =
+      document.createElement("span");
 
     details.textContent =
       `${punch.type === "in" ? "Entrata" : "Uscita"} · ` +
@@ -620,28 +698,35 @@ function renderAdmin() {
   }
 
   if (!state.punches.length) {
-    const empty = document.createElement("p");
+    const empty =
+      document.createElement("p");
 
     empty.className = "hint";
-    empty.textContent = "Nessuna timbratura";
+    empty.textContent =
+      "Nessuna timbratura";
 
     list.append(empty);
   }
 }
 
-get("adminOpen").addEventListener("click", () => {
-  if (busy) return;
+get("adminOpen").addEventListener(
+  "click",
+  () => {
+    if (busy) return;
 
-  screen("adminScreen");
+    lastInteractionAt = Date.now();
 
-  get("adminGate").hidden = false;
-  get("adminPanel").hidden = true;
+    screen("adminScreen");
 
-  get("adminLogin").reset();
-  message("adminMessage");
+    get("adminGate").hidden = false;
+    get("adminPanel").hidden = true;
 
-  get("adminPin").focus();
-});
+    get("adminLogin").reset();
+    message("adminMessage");
+
+    get("adminPin").focus();
+  }
+);
 
 get("adminBack").addEventListener(
   "click",
@@ -653,199 +738,220 @@ get("adminExit").addEventListener(
   closeAdmin
 );
 
-get("adminLogin").addEventListener("submit", async event => {
-  event.preventDefault();
+get("adminLogin").addEventListener(
+  "submit",
+  async event => {
+    event.preventDefault();
 
-  if (busy) return;
+    if (busy) return;
 
-  setBusy(true);
-  get("adminLoginButton").disabled = true;
+    setBusy(true);
 
-  message("adminMessage");
+    const button = get("adminLoginButton");
+    button.disabled = true;
 
-  try {
-    checkLock("admin");
-
-    const pin = get("adminPin").value;
-    let valid = false;
+    message("adminMessage");
 
     try {
-      const proof = await openProvisioningPackage(
-        state.adminChallenge,
-        pin
-      );
+      checkLock("admin");
 
-      valid = proof.originId === state.originId;
+      const pin = get("adminPin").value;
+      let valid = false;
+
+      try {
+        const proof =
+          await openProvisioningPackage(
+            state.adminChallenge,
+            pin
+          );
+
+        valid =
+          proof.originId === state.originId;
+      } catch {
+        valid = false;
+      }
+
+      if (!valid) {
+        await updateSecurity("admin", false);
+        return;
+      }
+
+      await updateSecurity("admin", true);
+
+      adminPinSession = pin;
+
+      get("adminLogin").reset();
+
+      get("adminGate").hidden = true;
+      get("adminPanel").hidden = false;
+
+      renderAdmin();
+      refreshAdminTimeout();
+
     } catch (error) {
-      valid = false;
+      message(
+        "adminMessage",
+        error.message,
+        "error"
+      );
+    } finally {
+      setBusy(false);
+      button.disabled = false;
     }
-
-    if (!valid) {
-      await updateSecurity("admin", false);
-      return;
-    }
-
-    await updateSecurity("admin", true);
-
-    adminPinSession = pin;
-
-    get("adminLogin").reset();
-    get("adminGate").hidden = true;
-    get("adminPanel").hidden = false;
-
-    renderAdmin();
-    refreshAdminTimeout();
-  } catch (error) {
-    message(
-      "adminMessage",
-      error.message,
-      "error"
-    );
-  } finally {
-    setBusy(false);
-    get("adminLoginButton").disabled = false;
   }
-});
+);
 
 /* importazione additiva */
 
-get("importForm").addEventListener("submit", async event => {
-  event.preventDefault();
+get("importForm").addEventListener(
+  "submit",
+  async event => {
+    event.preventDefault();
 
-  if (busy || !adminPinSession) return;
+    if (busy || !adminPinSession) return;
 
-  setBusy(true);
-  get("importButton").disabled = true;
+    setBusy(true);
 
-  message("importMessage");
+    const button = get("importButton");
+    button.disabled = true;
 
-  try {
-    const json = await readJsonFile(
-      get("importJson").files[0]
-    );
+    message("importMessage");
 
-    const incoming = await openProvisioningPackage(
-      json,
-      adminPinSession
-    );
-
-    if (incoming.originId !== state.originId) {
-      throw new Error(
-        "Configurazione di un altro Core Center"
-      );
-    }
-
-    if (
-      state.imports.some(
-        item => item.exportId === incoming.exportId
-      )
-    ) {
-      message(
-        "importMessage",
-        "JSON già importato",
-        "success"
+    try {
+      const json = await readJsonFile(
+        get("importJson").files[0]
       );
 
-      return;
-    }
+      const incoming =
+        await openProvisioningPackage(
+          json,
+          adminPinSession
+        );
 
-    const currentById = new Map(
-      state.employees.map(employee => [
-        employee.id,
-        employee
-      ])
-    );
+      if (
+        incoming.originId !== state.originId
+      ) {
+        throw new Error(
+          "Configurazione di un altro Core Center"
+        );
+      }
 
-    const names = new Set(
-      state.employees.map(employee =>
-        `${employee.firstName} ${employee.lastName}`
-          .trim()
-          .toLocaleLowerCase("it")
-      )
-    );
+      if (
+        state.imports.some(
+          item => item.exportId === incoming.exportId
+        )
+      ) {
+        message(
+          "importMessage",
+          "JSON già importato",
+          "success"
+        );
 
-    const added = [];
-    const conflicts = [];
-    let skipped = 0;
+        return;
+      }
 
-    for (const employee of incoming.employees) {
-      const existing = currentById.get(employee.id);
+      const currentById = new Map(
+        state.employees.map(employee => [
+          employee.id,
+          employee
+        ])
+      );
 
-      if (existing) {
-        if (
-          JSON.stringify(existing) ===
-          JSON.stringify(employee)
-        ) {
-          skipped += 1;
-        } else {
+      const names = new Set(
+        state.employees.map(employee =>
+          `${employee.firstName} ${employee.lastName}`
+            .trim()
+            .toLocaleLowerCase("it")
+        )
+      );
+
+      const added = [];
+      const conflicts = [];
+      let skipped = 0;
+
+      for (
+        const employee of incoming.employees
+      ) {
+        const existing =
+          currentById.get(employee.id);
+
+        if (existing) {
+          if (
+            JSON.stringify(existing) ===
+            JSON.stringify(employee)
+          ) {
+            skipped += 1;
+          } else {
+            conflicts.push(
+              `${employee.firstName} ${employee.lastName}`
+            );
+          }
+
+          continue;
+        }
+
+        const name =
+          `${employee.firstName} ${employee.lastName}`
+            .trim()
+            .toLocaleLowerCase("it");
+
+        if (names.has(name)) {
           conflicts.push(
             `${employee.firstName} ${employee.lastName}`
           );
+
+          continue;
         }
 
-        continue;
+        names.add(name);
+        added.push(structuredClone(employee));
       }
 
-      const name =
-        `${employee.firstName} ${employee.lastName}`
-          .trim()
-          .toLocaleLowerCase("it");
+      const next = structuredClone(state);
 
-      if (names.has(name)) {
-        conflicts.push(
-          `${employee.firstName} ${employee.lastName}`
-        );
+      next.employees.push(...added);
 
-        continue;
-      }
+      next.imports.push({
+        exportId: incoming.exportId,
+        at: new Date().toISOString(),
+        added: added.length,
+        skipped,
+        conflicts: conflicts.length
+      });
 
-      names.add(name);
-      added.push(structuredClone(employee));
+      await store.save(next);
+      state = next;
+
+      get("importForm").reset();
+
+      renderAdmin();
+      refreshAdminTimeout();
+
+      const summary =
+        `${added.length} aggiunti · ` +
+        `${skipped} già presenti · ` +
+        `${conflicts.length} conflitti`;
+
+      message(
+        "importMessage",
+        conflicts.length
+          ? `${summary}. Non modificati: ${conflicts.join(", ")}`
+          : summary,
+        conflicts.length ? "error" : "success"
+      );
+
+    } catch (error) {
+      message(
+        "importMessage",
+        error.message,
+        "error"
+      );
+    } finally {
+      setBusy(false);
+      button.disabled = false;
     }
-
-    const next = structuredClone(state);
-
-    next.employees.push(...added);
-
-    next.imports.push({
-      exportId: incoming.exportId,
-      at: new Date().toISOString(),
-      added: added.length,
-      skipped,
-      conflicts: conflicts.length
-    });
-
-    await store.save(next);
-    state = next;
-
-    get("importForm").reset();
-
-    renderAdmin();
-    refreshAdminTimeout();
-
-    const summary =
-      `${added.length} aggiunti · ` +
-      `${skipped} già presenti · ` +
-      `${conflicts.length} conflitti`;
-
-    message(
-      "importMessage",
-      conflicts.length
-        ? `${summary}. Non modificati: ${conflicts.join(", ")}`
-        : summary,
-      conflicts.length ? "error" : "success"
-    );
-  } catch (error) {
-    message(
-      "importMessage",
-      error.message,
-      "error"
-    );
-  } finally {
-    setBusy(false);
-    get("importButton").disabled = false;
   }
-});
+);
 
 /* temi */
 
@@ -866,7 +972,8 @@ function applyTheme(theme) {
     selected === "auto" ? "" : selected;
 
   themeButtons.forEach(button => {
-    const active = button.dataset.theme === selected;
+    const active =
+      button.dataset.theme === selected;
 
     button.classList.toggle("active", active);
 
@@ -895,8 +1002,8 @@ function applyTheme(theme) {
       "attendance-theme",
       selected
     );
-  } catch (error) {
-    // tema locale facoltativo
+  } catch {
+    // preferenza non persistente
   }
 }
 
@@ -904,26 +1011,33 @@ let storedTheme = "auto";
 
 try {
   storedTheme =
-    localStorage.getItem("attendance-theme") || "auto";
-} catch (error) {
+    localStorage.getItem("attendance-theme") ||
+    "auto";
+} catch {
   storedTheme = "auto";
 }
 
 applyTheme(storedTheme);
 
 themeButtons.forEach(button => {
-  button.addEventListener("click", () => {
-    applyTheme(button.dataset.theme);
-  });
+  button.addEventListener(
+    "click",
+    () => applyTheme(button.dataset.theme)
+  );
 });
 
-colorPreference.addEventListener?.("change", () => {
-  if (!document.documentElement.dataset.theme) {
-    applyTheme("auto");
+colorPreference.addEventListener?.(
+  "change",
+  () => {
+    if (
+      !document.documentElement.dataset.theme
+    ) {
+      applyTheme("auto");
+    }
   }
-});
+);
 
-/* verifica offline */
+/* sistema offline */
 
 function setOfflineStatus(ready, value) {
   get("offlineStatus").classList.toggle(
@@ -937,33 +1051,26 @@ function setOfflineStatus(ready, value) {
 function withTimeout(promise, milliseconds) {
   let timer;
 
-  const timeout = new Promise((resolve, reject) => {
-    timer = setTimeout(() => {
-      reject(new Error("Tempo di attesa superato"));
-    }, milliseconds);
-  });
-
   return Promise.race([
     promise,
-    timeout
+
+    new Promise((resolve, reject) => {
+      timer = setTimeout(() => {
+        reject(
+          new Error("Tempo di attesa superato")
+        );
+      }, milliseconds);
+    })
   ]).finally(() => clearTimeout(timer));
 }
 
-async function checkOfflineCache() {
-  const cache = await caches.open(cacheName);
-
-  const matches = await Promise.all(
-    shellFiles.map(file => cache.match(file))
-  );
-
-  return matches.every(Boolean);
+function delay(milliseconds) {
+  return new Promise(resolve => {
+    setTimeout(resolve, milliseconds);
+  });
 }
 
-async function registerOffline() {
-  const currentCheck = ++offlineCheckId;
-
-  setOfflineStatus(false, "Verifica offline...");
-
+async function refreshOfflineStatus() {
   if (
     !("serviceWorker" in navigator) ||
     !("caches" in window)
@@ -977,9 +1084,82 @@ async function registerOffline() {
   }
 
   try {
-    let registration;
+    const current = registration ||
+      await withTimeout(
+        navigator.serviceWorker.getRegistration("./"),
+        4000
+      );
 
-    if (navigator.onLine) {
+    if (!current?.active) {
+      setOfflineStatus(
+        false,
+        "Offline non pronto"
+      );
+
+      return;
+    }
+
+    const names = await withTimeout(
+      caches.keys(),
+      4000
+    );
+
+    const candidates = names.filter(
+      name => name.startsWith(
+        "attendance-shell-"
+      )
+    );
+
+    let ready = false;
+
+    for (const name of candidates) {
+      const cache = await caches.open(name);
+
+      const matches = await withTimeout(
+        Promise.all(
+          shellFiles.map(file => cache.match(file))
+        ),
+        4000
+      );
+
+      if (matches.every(Boolean)) {
+        ready = true;
+        break;
+      }
+    }
+
+    setOfflineStatus(
+      ready,
+      ready
+        ? "Disponibile offline"
+        : "Offline non pronto"
+    );
+
+  } catch {
+    setOfflineStatus(
+      false,
+      "Offline non pronto"
+    );
+  }
+}
+
+async function prepareOffline() {
+  if (!("serviceWorker" in navigator)) {
+    await refreshOfflineStatus();
+    return;
+  }
+
+  try {
+    registration = await withTimeout(
+      navigator.serviceWorker.getRegistration("./"),
+      4000
+    );
+
+    // La registrazione iniziale è necessaria
+    // per installare l'app offline.
+    // Non controlliamo aggiornamenti già installati.
+
+    if (!registration && navigator.onLine) {
       registration = await withTimeout(
         navigator.serviceWorker.register(
           "./sw.js",
@@ -988,75 +1168,395 @@ async function registerOffline() {
             updateViaCache: "none"
           }
         ),
-        7000
+        10000
       );
-    } else {
-      registration = await withTimeout(
-        navigator.serviceWorker.getRegistration("./"),
-        3000
-      );
-    }
 
-    if (
-      registration &&
-      !registration.active &&
-      navigator.onLine
-    ) {
-      registration = await withTimeout(
+      await withTimeout(
         navigator.serviceWorker.ready,
-        6000
+        10000
       );
     }
 
-    const cacheReady = await withTimeout(
-      checkOfflineCache(),
-      5000
-    );
-
-    if (currentCheck !== offlineCheckId) {
-      return;
-    }
-
-    const ready = Boolean(
-      registration?.active &&
-      cacheReady
-    );
-
-    setOfflineStatus(
-      ready,
-      ready
-        ? "Disponibile offline"
-        : "Offline non pronto"
-    );
   } catch (error) {
-    if (currentCheck !== offlineCheckId) {
-      return;
-    }
-
-    setOfflineStatus(
-      false,
-      "Offline non pronto"
-    );
-
-    console.error(
-      "verifica offline:",
+    console.warn(
+      "Preparazione offline:",
       error
     );
   }
+
+  await refreshOfflineStatus();
 }
+
+/* aggiornamento app manuale */
+
+function updateMessage(value = "", kind = "") {
+  message("updateMessage", value, kind);
+}
+
+function canApplyUpdate() {
+  return (
+    appReady &&
+    !busy &&
+    !pendingSetup &&
+    !adminPinSession &&
+    !get("clockScreen").hidden &&
+    clockPin.length === 0 &&
+    clockTimer === null &&
+    !document.hidden &&
+    Date.now() - lastInteractionAt >= 2000
+  );
+}
+
+function clearUpdateTimer() {
+  if (updateTimer !== null) {
+    clearInterval(updateTimer);
+    updateTimer = null;
+  }
+}
+
+async function readWorkerInfo(worker) {
+  return withTimeout(
+    new Promise(resolve => {
+      const channel = new MessageChannel();
+
+      channel.port1.onmessage = event => {
+        channel.port1.close();
+        channel.port2.close();
+
+        resolve(event.data);
+      };
+
+      try {
+        worker.postMessage(
+          { type: "app-status" },
+          [channel.port2]
+        );
+      } catch {
+        channel.port1.close();
+        channel.port2.close();
+        resolve(null);
+      }
+    }),
+    4000
+  );
+}
+
+async function activateUpdate() {
+  if (
+    applyingUpdate ||
+    !waitingUpdate ||
+    !canApplyUpdate()
+  ) {
+    return;
+  }
+
+  applyingUpdate = true;
+  clearUpdateTimer();
+
+  const worker = waitingUpdate;
+
+  get("checkUpdateButton").disabled = true;
+
+  updateMessage(
+    "Installazione aggiornamento..."
+  );
+
+  try {
+    worker.postMessage({
+      type: "activate-update"
+    });
+
+    let activated = false;
+
+    for (let attempt = 0; attempt < 40; attempt++) {
+      if (
+        registration?.active === worker &&
+        worker.state === "activated"
+      ) {
+        activated = true;
+        break;
+      }
+
+      await delay(300);
+    }
+
+    if (!activated) {
+      throw new Error(
+        "Installazione non completata"
+      );
+    }
+
+    location.reload();
+
+  } catch (error) {
+    applyingUpdate = false;
+    waitingUpdate = null;
+
+    get("checkUpdateButton").disabled = false;
+
+    updateMessage(
+      `${error.message}. Riprova il controllo.`,
+      "error"
+    );
+  }
+}
+
+function queueUpdate(worker, version) {
+  waitingUpdate = worker;
+
+  updateMessage(
+    `Aggiornamento ${version} pronto. ` +
+    "Installazione in corso...",
+    "success"
+  );
+
+  clearUpdateTimer();
+
+  updateTimer = setInterval(() => {
+    if (canApplyUpdate()) {
+      void activateUpdate();
+    } else {
+      updateMessage(
+        `Aggiornamento ${version} pronto. ` +
+        "In attesa della fine delle operazioni."
+      );
+    }
+  }, 500);
+
+  void activateUpdate();
+}
+
+async function findNewWorker(current) {
+  if (current.waiting) {
+    return current.waiting;
+  }
+
+  let foundInstallation = false;
+
+  const onUpdateFound = () => {
+    foundInstallation = true;
+  };
+
+  current.addEventListener(
+    "updatefound",
+    onUpdateFound
+  );
+
+  try {
+    await withTimeout(
+      current.update(),
+      12000
+    );
+
+    for (let attempt = 0; attempt < 35; attempt++) {
+      if (current.waiting) {
+        return current.waiting;
+      }
+
+      if (current.installing) {
+        foundInstallation = true;
+      }
+
+      if (
+        !foundInstallation &&
+        attempt >= 4
+      ) {
+        break;
+      }
+
+      if (
+        foundInstallation &&
+        !current.installing &&
+        !current.waiting
+      ) {
+        break;
+      }
+
+      await delay(350);
+    }
+
+    return current.waiting || null;
+
+  } finally {
+    current.removeEventListener(
+      "updatefound",
+      onUpdateFound
+    );
+  }
+}
+
+async function checkForUpdates() {
+  if (checkingUpdates || applyingUpdate) {
+    return;
+  }
+
+  checkingUpdates = true;
+
+  const button = get("checkUpdateButton");
+  button.disabled = true;
+
+  updateMessage(
+    "Controllo aggiornamenti..."
+  );
+
+  try {
+    if (!navigator.onLine) {
+      throw new Error(
+        "Connessione non disponibile"
+      );
+    }
+
+    if (!("serviceWorker" in navigator)) {
+      throw new Error(
+        "Aggiornamenti non supportati"
+      );
+    }
+
+    registration =
+      await withTimeout(
+        navigator.serviceWorker.getRegistration("./"),
+        5000
+      );
+
+    if (!registration) {
+      registration =
+        await withTimeout(
+          navigator.serviceWorker.register(
+            "./sw.js",
+            {
+              scope: "./",
+              updateViaCache: "none"
+            }
+          ),
+          12000
+        );
+
+      await withTimeout(
+        navigator.serviceWorker.ready,
+        10000
+      );
+    }
+
+    const worker =
+      await findNewWorker(registration);
+
+    if (!worker) {
+      // Un service worker può essersi attivato
+      // durante una migrazione precedente.
+      const active = registration.active;
+
+      if (active) {
+        const info =
+          await readWorkerInfo(active).catch(
+            () => null
+          );
+
+        if (
+          info?.ready &&
+          info.appVersion &&
+          info.appVersion !== appVersion
+        ) {
+          updateMessage(
+            "Aggiornamento pronto. Ricaricamento..."
+          );
+
+          if (canApplyUpdate()) {
+            location.reload();
+          } else {
+            queueReloadAfterWork();
+          }
+
+          return;
+        }
+      }
+
+      updateMessage(
+        "L'app è aggiornata",
+        "success"
+      );
+
+      return;
+    }
+
+    const info = await readWorkerInfo(worker);
+
+    if (
+      !info?.ready ||
+      !info?.appVersion
+    ) {
+      throw new Error(
+        "Aggiornamento non verificato"
+      );
+    }
+
+    if (info.appVersion === appVersion) {
+      updateMessage(
+        "L'app è aggiornata",
+        "success"
+      );
+
+      return;
+    }
+
+    queueUpdate(
+      worker,
+      info.appVersion
+    );
+
+  } catch (error) {
+    updateMessage(
+      error.message,
+      "error"
+    );
+
+  } finally {
+    checkingUpdates = false;
+
+    if (!waitingUpdate && !applyingUpdate) {
+      button.disabled = false;
+    }
+
+    await refreshOfflineStatus();
+  }
+}
+
+function queueReloadAfterWork() {
+  updateMessage(
+    "Aggiornamento pronto. " +
+    "In attesa della fine delle operazioni."
+  );
+
+  clearUpdateTimer();
+
+  updateTimer = setInterval(() => {
+    if (canApplyUpdate()) {
+      clearUpdateTimer();
+      location.reload();
+    }
+  }, 500);
+}
+
+get("checkUpdateButton").addEventListener(
+  "click",
+  () => {
+    lastInteractionAt = Date.now();
+
+    void checkForUpdates();
+  }
+);
+
+/* nessun controllo automatico delle versioni */
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.addEventListener(
     "controllerchange",
     () => {
-      void registerOffline();
+      // Aggiorna solo l'indicatore locale.
+      // Non avvia chiamate di rete.
+      void refreshOfflineStatus();
     }
   );
 }
-
-window.addEventListener("online", () => {
-  void registerOffline();
-});
 
 /* avvio */
 
@@ -1066,7 +1566,10 @@ async function start() {
   try {
     state = await store.load();
 
-    if (state && !validState(state)) {
+    if (
+      state &&
+      !validState(state)
+    ) {
       throw new Error(
         "Archivio non compatibile"
       );
@@ -1081,14 +1584,19 @@ async function start() {
       get("setupImport").hidden = false;
       get("setupDevice").hidden = true;
     }
+
   } catch (error) {
     get("bootMessage").textContent =
       error.message;
 
     screen("errorScreen");
+
+  } finally {
+    appReady = true;
   }
 }
 
 renderClockPin();
+
 void start();
-void registerOffline();
+void prepareOffline();
