@@ -1,9 +1,16 @@
 <!doctype html>
 <html lang="it">
+
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#f5f5f7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="core">
+
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+
 <title>core center</title>
 
 <style>
@@ -14,7 +21,6 @@
   --text: #18181b;
   --muted: #777780;
   --border: #e7e7eb;
-  --accent: #252528;
   --soft: #ebebef;
 }
 
@@ -25,7 +31,6 @@
   --text: #f5f5f7;
   --muted: #a1a1aa;
   --border: #343439;
-  --accent: #f5f5f7;
   --soft: #2d2d31;
 }
 
@@ -37,7 +42,6 @@
     --text: #f5f5f7;
     --muted: #a1a1aa;
     --border: #343439;
-    --accent: #f5f5f7;
     --soft: #2d2d31;
   }
 }
@@ -70,7 +74,6 @@ button {
 
 .topbar {
   display: flex;
-  align-items: center;
   justify-content: flex-end;
   margin-bottom: 38px;
 }
@@ -85,8 +88,8 @@ button {
 }
 
 .themes button {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   border: 0;
   border-radius: 50%;
   background: transparent;
@@ -99,7 +102,7 @@ button {
   color: var(--text);
 }
 
-/* pagine */
+/* navigazione */
 
 .page {
   display: none;
@@ -134,7 +137,6 @@ button {
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 2px;
-  text-transform: uppercase;
 }
 
 h1 {
@@ -202,30 +204,6 @@ h1 span {
   animation-delay: -4s;
 }
 
-/* animazioni */
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0) rotate(-8deg);
-  }
-
-  50% {
-    transform: translateY(-13px) rotate(8deg);
-  }
-}
-
-@keyframes appear {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 /* gestione */
 
 .section-title {
@@ -254,11 +232,6 @@ h1 span {
   background: var(--card);
   color: var(--text);
   transition: transform .2s, background .2s;
-}
-
-.tile:hover {
-  transform: translateY(-3px);
-  background: var(--soft);
 }
 
 .tile-icon {
@@ -298,13 +271,17 @@ h1 span {
   color: var(--muted);
 }
 
-/* navigazione interna */
+@media (hover: hover) {
+  .tile:hover {
+    transform: translateY(-3px);
+    background: var(--soft);
+  }
+}
+
+/* pagine interne */
 
 .back {
-  display: inline-flex;
-  align-items: center;
   min-height: 44px;
-  gap: 8px;
   margin-bottom: 25px;
   padding: 0 5px;
   border: 0;
@@ -328,23 +305,41 @@ h1 span {
 
 .empty strong {
   display: block;
-  font-size: 18px;
   margin-bottom: 10px;
+  font-size: 18px;
 }
 
 .empty p {
+  margin: 0;
   color: var(--muted);
   line-height: 1.7;
-  margin: 0;
 }
 
-/* footer */
+/* stato applicazione */
 
 .footer {
   padding: 35px 0 0;
   text-align: center;
   color: var(--muted);
   font-size: 12px;
+  line-height: 1.8;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.status.ready .status-dot {
+  background: #35a76b;
 }
 
 /* accessibilità */
@@ -397,7 +392,27 @@ button:focus-visible {
   }
 }
 
-/* movimento ridotto */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) rotate(-8deg);
+  }
+
+  50% {
+    transform: translateY(-13px) rotate(8deg);
+  }
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -414,32 +429,21 @@ button:focus-visible {
 
 <div class="shell">
 
-  <!-- barra superiore -->
-
   <header class="topbar">
 
     <div class="themes" role="group" aria-label="tema">
 
-      <button
-        type="button"
+      <button type="button"
         data-theme="light"
-        aria-label="tema chiaro">
-        ☀
-      </button>
+        aria-label="tema chiaro">☀</button>
 
-      <button
-        type="button"
+      <button type="button"
         data-theme="auto"
-        aria-label="tema automatico">
-        ◐
-      </button>
+        aria-label="tema automatico">◐</button>
 
-      <button
-        type="button"
+      <button type="button"
         data-theme="dark"
-        aria-label="tema scuro">
-        ☾
-      </button>
+        aria-label="tema scuro">☾</button>
 
     </div>
 
@@ -457,9 +461,7 @@ button:focus-visible {
 
           <span class="eyebrow">operations</span>
 
-          <h1>
-            core center<span>.</span>
-          </h1>
+          <h1>core center<span>.</span></h1>
 
           <p class="subtitle">
             il tuo centro di controllo.
@@ -468,57 +470,30 @@ button:focus-visible {
 
         </div>
 
-        <!-- doodle animati -->
-
         <div class="doodles" aria-hidden="true">
 
           <div class="doodle one">
             <svg viewBox="0 0 80 80">
-              <rect
-                x="15"
-                y="18"
-                width="50"
-                height="45"
-                rx="11"
-              />
-              <path
-                d="M27 18v-8M53 18v-8M15 32h50"
-              />
-              <path
-                d="M27 44h8M45 44h8M27 54h8"
-              />
+              <rect x="15" y="18"
+                width="50" height="45" rx="11"/>
+              <path d="M27 18v-8M53 18v-8M15 32h50"/>
+              <path d="M27 44h8M45 44h8M27 54h8"/>
             </svg>
           </div>
 
           <div class="doodle two">
             <svg viewBox="0 0 80 80">
-              <circle
-                cx="40"
-                cy="40"
-                r="28"
-              />
-              <path
-                d="M40 23v18l12 9"
-              />
-              <path
-                d="M40 5v5M40 70v5"
-              />
+              <circle cx="40" cy="40" r="28"/>
+              <path d="M40 23v18l12 9"/>
+              <path d="M40 5v5M40 70v5"/>
             </svg>
           </div>
 
           <div class="doodle three">
             <svg viewBox="0 0 80 80">
-              <circle
-                cx="40"
-                cy="26"
-                r="13"
-              />
-              <path
-                d="M16 68c0-14 11-24 24-24s24 10 24 24"
-              />
-              <path
-                d="M57 17l5-5M63 25h7"
-              />
+              <circle cx="40" cy="26" r="13"/>
+              <path d="M16 68c0-14 11-24 24-24s24 10 24 24"/>
+              <path d="M57 17l5-5M63 25h7"/>
             </svg>
           </div>
 
@@ -526,130 +501,77 @@ button:focus-visible {
 
       </div>
 
-      <!-- gestione -->
-
-      <h2 class="section-title">
-        gestione
-      </h2>
+      <h2 class="section-title">gestione</h2>
 
       <div class="grid">
 
-        <!-- dipendenti -->
-
-        <button
-          type="button"
-          class="tile"
-          data-open="employees">
+        <button type="button"
+          class="tile" data-open="employees">
 
           <span class="tile-icon">
             <svg viewBox="0 0 24 24">
               <circle cx="12" cy="7" r="4"/>
-              <path
-                d="M4 21v-2a8 8 0 0 1 16 0v2"
-              />
+              <path d="M4 21v-2a8 8 0 0 1 16 0v2"/>
             </svg>
           </span>
 
           <span class="tile-bottom">
-            <span class="tile-name">
-              dipendenti
-            </span>
+            <span class="tile-name">dipendenti</span>
             <span class="tile-arrow">›</span>
           </span>
 
         </button>
 
-        <!-- dispositivi -->
-
-        <button
-          type="button"
-          class="tile"
-          data-open="devices">
+        <button type="button"
+          class="tile" data-open="devices">
 
           <span class="tile-icon">
             <svg viewBox="0 0 24 24">
-              <rect
-                x="3"
-                y="4"
-                width="18"
-                height="13"
-                rx="2"
-              />
-              <path
-                d="M8 21h8M12 17v4"
-              />
+              <rect x="3" y="4"
+                width="18" height="13" rx="2"/>
+              <path d="M8 21h8M12 17v4"/>
             </svg>
           </span>
 
           <span class="tile-bottom">
-            <span class="tile-name">
-              dispositivi
-            </span>
+            <span class="tile-name">dispositivi</span>
             <span class="tile-arrow">›</span>
           </span>
 
         </button>
 
-        <!-- configurazioni -->
-
-        <button
-          type="button"
-          class="tile"
-          data-open="settings">
+        <button type="button"
+          class="tile" data-open="settings">
 
           <span class="tile-icon">
             <svg viewBox="0 0 24 24">
-              <circle
-                cx="12"
-                cy="12"
-                r="3"
-              />
-              <path
-                d="M12 2v3M12 19v3M2 12h3M19 12h3"
-              />
-              <path
-                d="M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"
-              />
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+              <path d="M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>
             </svg>
           </span>
 
           <span class="tile-bottom">
-            <span class="tile-name">
-              configurazioni
-            </span>
+            <span class="tile-name">configurazioni</span>
             <span class="tile-arrow">›</span>
           </span>
 
         </button>
 
-        <!-- sincronizzazione -->
-
-        <button
-          type="button"
-          class="tile"
-          data-open="sync">
+        <button type="button"
+          class="tile" data-open="sync">
 
           <span class="tile-icon">
             <svg viewBox="0 0 24 24">
-              <path
-                d="M20 7a9 9 0 0 0-15-2L3 7"
-              />
-              <path
-                d="M3 3v4h4"
-              />
-              <path
-                d="M4 17a9 9 0 0 0 15 2l2-2"
-              />
-              <path
-                d="M17 17h4v4"
-              />
+              <path d="M20 7a9 9 0 0 0-15-2L3 7"/>
+              <path d="M3 3v4h4"/>
+              <path d="M4 17a9 9 0 0 0 15 2l2-2"/>
+              <path d="M17 17h4v4"/>
             </svg>
           </span>
 
           <span class="tile-bottom">
-            <span class="tile-name">
-              sincronizzazione
-            </span>
+            <span class="tile-name">sincronizzazione</span>
             <span class="tile-arrow">›</span>
           </span>
 
@@ -663,30 +585,20 @@ button:focus-visible {
 
     <section id="employees" class="page">
 
-      <button
-        type="button"
-        class="back"
-        data-back>
-        ‹ indietro
-      </button>
+      <button type="button"
+        class="back" data-back>‹ indietro</button>
 
-      <h1 class="detail-title">
-        dipendenti
-      </h1>
+      <h1 class="detail-title">dipendenti</h1>
 
       <div class="empty">
-
-        <strong>
-          gestione del personale
-        </strong>
-
+        <strong>gestione del personale</strong>
         <p>
-          questa sezione ospiterà anagrafica,
-          pin, contratti, ore distribuite,
-          retribuzioni e stato dei dipendenti.
-          il database cifrato non è ancora collegato.
+          qui gestiremo anagrafica, pin,
+          contratti, ore distribuite,
+          stipendio e stato dei dipendenti.
+          il database locale sarà integrato
+          nella prossima fase.
         </p>
-
       </div>
 
     </section>
@@ -695,29 +607,18 @@ button:focus-visible {
 
     <section id="devices" class="page">
 
-      <button
-        type="button"
-        class="back"
-        data-back>
-        ‹ indietro
-      </button>
+      <button type="button"
+        class="back" data-back>‹ indietro</button>
 
-      <h1 class="detail-title">
-        dispositivi
-      </h1>
+      <h1 class="detail-title">dispositivi</h1>
 
       <div class="empty">
-
-        <strong>
-          gestione dispositivi
-        </strong>
-
+        <strong>dispositivi registrati</strong>
         <p>
-          qui saranno visualizzate le installazioni
+          qui saranno visualizzati i dispositivi
           dei center, con nome, identificativo
           e ultima sincronizzazione.
         </p>
-
       </div>
 
     </section>
@@ -726,29 +627,18 @@ button:focus-visible {
 
     <section id="settings" class="page">
 
-      <button
-        type="button"
-        class="back"
-        data-back>
-        ‹ indietro
-      </button>
+      <button type="button"
+        class="back" data-back>‹ indietro</button>
 
-      <h1 class="detail-title">
-        configurazioni
-      </h1>
+      <h1 class="detail-title">configurazioni</h1>
 
       <div class="empty">
-
-        <strong>
-          configurazione dei center
-        </strong>
-
+        <strong>configurazione dei center</strong>
         <p>
-          qui inseriremo la gestione del pin admin
-          e la generazione del json universale
-          per la configurazione iniziale.
+          gestione pin admin e generazione
+          del json universale per configurare
+          le applicazioni.
         </p>
-
       </div>
 
     </section>
@@ -757,102 +647,75 @@ button:focus-visible {
 
     <section id="sync" class="page">
 
-      <button
-        type="button"
-        class="back"
-        data-back>
-        ‹ indietro
-      </button>
+      <button type="button"
+        class="back" data-back>‹ indietro</button>
 
-      <h1 class="detail-title">
-        sincronizzazione
-      </h1>
+      <h1 class="detail-title">sincronizzazione</h1>
 
       <div class="empty">
-
-        <strong>
-          sincronizzazione non ancora attiva
-        </strong>
-
+        <strong>sincronizzazione non ancora attiva</strong>
         <p>
           il comando unico di sincronizzazione
-          sarà disponibile dopo l'integrazione
-          con il backend.
-          non verranno eseguite chiamate automatiche.
+          verrà integrato successivamente.
+          nessuna sincronizzazione viene
+          avviata automaticamente.
         </p>
-
       </div>
 
     </section>
 
   </main>
 
-  <!-- footer -->
-
   <footer class="footer">
-    core center · versione interfaccia 1.1
+
+    <div id="offlineStatus" class="status" role="status">
+      <span class="status-dot"></span>
+      <span id="offlineText">
+        verifica disponibilità offline...
+      </span>
+    </div>
+
+    <div>core center · versione 1.2</div>
+
   </footer>
 
 </div>
 
 <script>
 
-/* elementi */
+/* navigazione */
 
 const pages = document.querySelectorAll(".page");
 
-const themeButtons =
-  document.querySelectorAll("[data-theme]");
-
-/* navigazione */
-
 function openPage(pageId) {
-
   pages.forEach(page => {
-
     page.classList.toggle(
       "active",
       page.id === pageId
     );
-
   });
 
   window.scrollTo(0, 0);
-
 }
 
-/* apertura sezioni */
-
-document
-  .querySelectorAll("[data-open]")
-  .forEach(button => {
-
-    button.addEventListener("click", () => {
-
-      openPage(button.dataset.open);
-
-    });
-
+document.querySelectorAll("[data-open]").forEach(button => {
+  button.addEventListener("click", () => {
+    openPage(button.dataset.open);
   });
+});
 
-/* ritorno alla home */
-
-document
-  .querySelectorAll("[data-back]")
-  .forEach(button => {
-
-    button.addEventListener("click", () => {
-
-      openPage("home");
-
-    });
-
+document.querySelectorAll("[data-back]").forEach(button => {
+  button.addEventListener("click", () => {
+    openPage("home");
   });
+});
 
-/* gestione temi */
+/* temi */
+
+const themeButtons =
+  document.querySelectorAll("[data-theme]");
 
 function setTheme(theme) {
-
   const selected =
     ["light", "dark", "auto"].includes(theme)
       ? theme
@@ -862,65 +725,98 @@ function setTheme(theme) {
     selected === "auto" ? "" : selected;
 
   themeButtons.forEach(button => {
+    const active = button.dataset.theme === selected;
 
-    const active =
-      button.dataset.theme === selected;
-
-    button.classList.toggle(
-      "active",
-      active
-    );
-
-    button.setAttribute(
-      "aria-pressed",
-      String(active)
-    );
-
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
   });
+
+  const dark =
+    selected === "dark" ||
+    (selected === "auto" &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+  document
+    .querySelector('meta[name="theme-color"]')
+    .setAttribute(
+      "content",
+      dark ? "#111113" : "#f5f5f7"
+    );
 
   try {
-
-    localStorage.setItem(
-      "theme",
-      selected
-    );
-
+    localStorage.setItem("theme", selected);
   } catch (error) {
-
     // tema mantenuto nella sessione corrente
-
   }
-
 }
 
-/* eventi temi */
-
 themeButtons.forEach(button => {
-
   button.addEventListener("click", () => {
-
     setTheme(button.dataset.theme);
-
   });
-
 });
-
-/* recupero tema salvato */
 
 let savedTheme = "auto";
 
 try {
-
-  savedTheme =
-    localStorage.getItem("theme") || "auto";
-
+  savedTheme = localStorage.getItem("theme") || "auto";
 } catch (error) {
-
   savedTheme = "auto";
-
 }
 
 setTheme(savedTheme);
+
+window
+  .matchMedia("(prefers-color-scheme: dark)")
+  .addEventListener("change", () => {
+    if (!document.documentElement.dataset.theme) {
+      setTheme("auto");
+    }
+  });
+
+/* pwa offline */
+
+const offlineStatus =
+  document.getElementById("offlineStatus");
+
+const offlineText =
+  document.getElementById("offlineText");
+
+function setOfflineStatus(ready, message) {
+  offlineStatus.classList.toggle("ready", ready);
+  offlineText.textContent = message;
+}
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", async () => {
+    try {
+      await navigator.serviceWorker.register(
+        "./sw.js",
+        { scope: "./" }
+      );
+
+      await navigator.serviceWorker.ready;
+
+      setOfflineStatus(
+        true,
+        "interfaccia disponibile offline"
+      );
+
+    } catch (error) {
+      setOfflineStatus(
+        false,
+        "offline non disponibile"
+      );
+
+      console.error("service worker:", error);
+    }
+  });
+} else {
+  setOfflineStatus(
+    false,
+    "offline non supportato"
+  );
+}
 
 </script>
 
