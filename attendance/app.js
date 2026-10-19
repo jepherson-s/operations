@@ -9,7 +9,6 @@ import {
 } from "./store.js";
 
 const get = id => document.getElementById(id);
-
 const store = createAttendanceStore();
 
 const dateFormat = new Intl.DateTimeFormat("it-IT", {
@@ -20,12 +19,15 @@ const dateFormat = new Intl.DateTimeFormat("it-IT", {
   minute: "2-digit"
 });
 
+const expectedCache = "attendance-shell-v4";
+
 let state = null;
 let pendingSetup = null;
 let adminPinSession = null;
 let adminTimer = null;
 let busy = false;
 let clockPin = "";
+let offlineCheckId = 0;
 
 /* interfaccia */
 
@@ -91,7 +93,9 @@ function addClockDigit(digit) {
 }
 
 function eraseClockDigit() {
-  if (busy) return;
+  if (busy) {
+    return;
+  }
 
   clockPin = clockPin.slice(0, -1);
   renderClockPin();
@@ -184,7 +188,7 @@ async function clearPinFailures(kind) {
   await store.save(state);
 }
 
-/* file */
+/* lettura json */
 
 async function readJsonFile(file) {
   if (
@@ -210,7 +214,9 @@ get("setupForm").addEventListener(
   async event => {
     event.preventDefault();
 
-    if (busy) return;
+    if (busy) {
+      return;
+    }
 
     busy = true;
 
@@ -292,7 +298,6 @@ get("deviceForm").addEventListener(
       }
 
       const { config, pin } = pendingSetup;
-
       const now = new Date().toISOString();
 
       const challenge =
@@ -533,7 +538,9 @@ get("clockForm").addEventListener(
 
       const at = new Date().toISOString();
 
-      state.punches.push({
+      const next = structuredClone(state);
+
+      next.punches.push({
         id: crypto.randomUUID(),
         employeeId: found.id,
         deviceId: state.device.id,
@@ -541,7 +548,8 @@ get("clockForm").addEventListener(
         at
       });
 
-      await store.save(state);
+      await store.save(next);
+      state = next;
 
       resetClockPin();
 
@@ -620,7 +628,6 @@ function renderAdmin() {
   );
 
   const list = get("punchList");
-
   list.replaceChildren();
 
   for (
@@ -673,7 +680,6 @@ get("adminOpen").addEventListener(
     get("adminLogin").reset();
 
     message("adminMessage");
-
     get("adminPin").focus();
   }
 );
@@ -693,7 +699,9 @@ get("adminLogin").addEventListener(
   async event => {
     event.preventDefault();
 
-    if (busy) return;
+    if (busy) {
+      return;
+    }
 
     busy = true;
 
@@ -701,14 +709,12 @@ get("adminLogin").addEventListener(
       get("adminLoginButton");
 
     button.disabled = true;
-
     message("adminMessage");
 
     try {
       checkLock("admin");
 
       const pin = get("adminPin").value;
-
       let valid = false;
 
       try {
@@ -732,7 +738,6 @@ get("adminLogin").addEventListener(
       await clearPinFailures("admin");
 
       adminPinSession = pin;
-
       get("adminLogin").reset();
 
       get("adminGate").hidden = true;
@@ -1011,69 +1016,165 @@ colorPreference.addEventListener?.(
   }
 );
 
-/* offline */
+/* verifica offline */
 
-async function checkOfflineCache(worker) {
+function setOfflineStatus(ready, value) {
+  get("offlineStatus").classList.toggle(
+    "ready",
+    ready
+  );
+
+  get("offlineText").textContent = value;
+}
+
+async function withTimeout(promise, milliseconds) {
+  let timer;
+
+  try {
+    return await Promise.race([
+      promise,
+
+      new Promise((resolve, reject) => {
+        timer = setTimeout(() => {
+          reject(
+            new Error("tempo di attesa superato")
+          );
+        }, milliseconds);
+      })
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function checkOfflineCache(worker) {
   return new Promise(resolve => {
     const channel = new MessageChannel();
 
-    const timer = setTimeout(() => {
-      channel.port1.close();
-      resolve(false);
-    }, 3000);
+    let finished = false;
 
-    channel.port1.onmessage = event => {
+    const finish = result => {
+      if (finished) {
+        return;
+      }
+
+      finished = true;
       clearTimeout(timer);
       channel.port1.close();
 
-      resolve(
-        event.data?.ready === true
-      );
+      resolve(result);
     };
 
-    worker.postMessage(
-      { type: "cache-check" },
-      [channel.port2]
-    );
+    const timer = setTimeout(() => {
+      finish(null);
+    }, 4000);
+
+    channel.port1.onmessage = event => {
+      finish(event.data);
+    };
+
+    try {
+      worker.postMessage(
+        { type: "cache-check" },
+        [channel.port2]
+      );
+    } catch (error) {
+      finish(null);
+    }
   });
 }
 
 async function registerOffline() {
+  const checkId = ++offlineCheckId;
+
+  setOfflineStatus(
+    false,
+    "Verifica offline..."
+  );
+
   if (!("serviceWorker" in navigator)) {
-    get("offlineText").textContent =
-      "Offline non supportato";
+    setOfflineStatus(
+      false,
+      "Offline non supportato"
+    );
 
     return;
   }
 
   try {
-    await navigator.serviceWorker.register(
-      "./sw.js",
-      { scope: "./" }
+    const registration = await withTimeout(
+      navigator.serviceWorker.register(
+        "./sw.js",
+        {
+          scope: "./",
+          updateViaCache: "none"
+        }
+      ),
+      12000
     );
 
-    const registration =
-      await navigator.serviceWorker.ready;
+    const worker = registration.active ||
+      await withTimeout(
+        navigator.serviceWorker.ready.then(
+          result => result.active
+        ),
+        10000
+      );
 
-    const ready = await checkOfflineCache(
-      registration.active
+    if (!worker) {
+      throw new Error(
+        "service worker non attivo"
+      );
+    }
+
+    const result = await checkOfflineCache(
+      worker
     );
 
-    get("offlineStatus").classList.toggle(
-      "ready",
-      ready
-    );
+    if (checkId !== offlineCheckId) {
+      return;
+    }
 
-    get("offlineText").textContent =
+    const ready =
+      result?.ready === true &&
+      result?.cacheName === expectedCache;
+
+    setOfflineStatus(
+      ready,
       ready
         ? "Disponibile offline"
-        : "Cache da verificare";
+        : "Offline non pronto"
+    );
 
   } catch (error) {
-    get("offlineText").textContent =
-      "Offline non disponibile";
+    if (checkId !== offlineCheckId) {
+      return;
+    }
+
+    setOfflineStatus(
+      false,
+      "Offline non pronto"
+    );
+
+    console.error(
+      "verifica offline:",
+      error
+    );
   }
 }
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.addEventListener(
+    "controllerchange",
+    () => {
+      void registerOffline();
+    }
+  );
+}
+
+window.addEventListener("online", () => {
+  void registerOffline();
+});
 
 /* avvio */
 
