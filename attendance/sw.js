@@ -1,4 +1,4 @@
-const cacheName = "attendance-shell-v4";
+const cacheName = "attendance-shell-v5";
 
 const scope = new URL(
   "./",
@@ -19,9 +19,7 @@ const files = [
 self.addEventListener("install", event => {
   event.waitUntil(
     (async () => {
-      const cache = await caches.open(
-        cacheName
-      );
+      const cache = await caches.open(cacheName);
 
       const requests = files.map(
         url => new Request(url, {
@@ -30,7 +28,6 @@ self.addEventListener("install", event => {
       );
 
       await cache.addAll(requests);
-
       await self.skipWaiting();
     })()
   );
@@ -46,9 +43,7 @@ self.addEventListener("activate", event => {
       await Promise.all(
         names
           .filter(name =>
-            name.startsWith(
-              "attendance-shell-"
-            ) &&
+            name.startsWith("attendance-shell-") &&
             name !== cacheName
           )
           .map(name => caches.delete(name))
@@ -59,7 +54,7 @@ self.addEventListener("activate", event => {
   );
 });
 
-/* gestione richieste */
+/* richieste */
 
 self.addEventListener("fetch", event => {
   const request = event.request;
@@ -75,16 +70,11 @@ self.addEventListener("fetch", event => {
   }
 
   const insideApp =
-    url.pathname.startsWith(
-      scope.pathname
-    );
+    url.pathname.startsWith(scope.pathname);
 
   const sharedFile =
     url.pathname ===
-    new URL(
-      "../shared/core.js",
-      scope
-    ).pathname;
+    new URL("../shared/core.js", scope).pathname;
 
   if (!insideApp && !sharedFile) {
     return;
@@ -92,69 +82,17 @@ self.addEventListener("fetch", event => {
 
   event.respondWith(
     (async () => {
-      const cache = await caches.open(
-        cacheName
-      );
+      const cache = await caches.open(cacheName);
 
       if (request.mode === "navigate") {
-        const page = await cache.match(
-          files[0]
-        );
+        const page = await cache.match(files[0]);
 
-        if (page) {
-          return page;
-        }
-
-        return fetch(request);
+        return page || fetch(request);
       }
 
-      const cached = await cache.match(
-        request
-      );
+      const cached = await cache.match(request);
 
-      if (cached) {
-        return cached;
-      }
-
-      return fetch(request);
-    })()
-  );
-});
-
-/* verifica cache */
-
-self.addEventListener("message", event => {
-  if (
-    event.data?.type !== "cache-check" ||
-    !event.ports[0]
-  ) {
-    return;
-  }
-
-  const port = event.ports[0];
-
-  event.waitUntil(
-    (async () => {
-      try {
-        const cache = await caches.open(
-          cacheName
-        );
-
-        const matches = await Promise.all(
-          files.map(file => cache.match(file))
-        );
-
-        port.postMessage({
-          ready: matches.every(Boolean),
-          cacheName
-        });
-
-      } catch (error) {
-        port.postMessage({
-          ready: false,
-          cacheName
-        });
-      }
+      return cached || fetch(request);
     })()
   );
 });
