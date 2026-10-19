@@ -697,20 +697,28 @@ h1 span {
 
   <header class="topbar">
 
-    <button id="lockButton"
+    <button
+      id="lockButton"
       class="lock-button"
-      type="button" hidden>
+      type="button"
+      hidden>
       blocca
     </button>
 
     <div class="themes" role="group" aria-label="tema">
-      <button type="button" data-theme="light"
+      <button
+        type="button"
+        data-theme="light"
         aria-label="tema chiaro">☀</button>
 
-      <button type="button" data-theme="auto"
+      <button
+        type="button"
+        data-theme="auto"
         aria-label="tema automatico">◐</button>
 
-      <button type="button" data-theme="dark"
+      <button
+        type="button"
+        data-theme="dark"
         aria-label="tema scuro">☾</button>
     </div>
 
@@ -719,19 +727,20 @@ h1 span {
   <main>
 
     <section id="gate" class="gate">
+
       <span class="eyebrow">accesso locale</span>
 
       <h1 id="gateTitle">verifica archivio...</h1>
 
-      <p id="gateDescription" class="subtitle">
-        inizializzazione in corso.
-      </p>
+      <p id="gateDescription" class="subtitle"></p>
 
       <form id="setupForm" class="form" hidden>
+
         <div class="field">
           <label for="newPin">crea pin admin</label>
 
-          <input id="newPin"
+          <input
+            id="newPin"
             type="password"
             inputmode="numeric"
             autocomplete="new-password"
@@ -744,7 +753,8 @@ h1 span {
         <div class="field">
           <label for="confirmPin">conferma pin</label>
 
-          <input id="confirmPin"
+          <input
+            id="confirmPin"
             type="password"
             inputmode="numeric"
             autocomplete="new-password"
@@ -760,10 +770,12 @@ h1 span {
       </form>
 
       <form id="unlockForm" class="form" hidden>
+
         <div class="field">
           <label for="adminPin">pin admin</label>
 
-          <input id="adminPin"
+          <input
+            id="adminPin"
             type="password"
             inputmode="numeric"
             autocomplete="current-password"
@@ -778,35 +790,34 @@ h1 span {
         </button>
       </form>
 
-      <p id="gateError"
+      <p
+        id="gateError"
         class="message error"
         role="alert"></p>
+
     </section>
 
     <div id="workspace" hidden>
 
+      <!-- home -->
+
       <section id="home" class="page active">
 
         <div class="hero">
+
           <div class="hero-copy">
-
             <span class="eyebrow">operations</span>
-
             <h1>core center<span>.</span></h1>
-
-            <p class="subtitle">
-              il tuo centro di controllo.
-            </p>
-
           </div>
 
           <div class="doodles" aria-hidden="true">
 
             <div class="doodle one">
               <svg viewBox="0 0 80 80">
-                <rect x="15" y="18"
-                  width="50" height="45" rx="11"/>
-
+                <rect
+                  x="15" y="18"
+                  width="50" height="45"
+                  rx="11"/>
                 <path d="M27 18v-8M53 18v-8M15 32h50"/>
                 <path d="M27 44h8M45 44h8M27 54h8"/>
               </svg>
@@ -823,7 +834,8 @@ h1 span {
             <div class="doodle three">
               <svg viewBox="0 0 80 80">
                 <circle cx="40" cy="26" r="13"/>
-                <path d="M16 68c0-14 11-24 24-24s24 10 24 24"/>
+                <path
+                  d="M16 68c0-14 11-24 24-24s24 10 24 24"/>
                 <path d="M57 17l5-5M63 25h7"/>
               </svg>
             </div>
@@ -835,7 +847,8 @@ h1 span {
 
         <div class="grid">
 
-          <button class="tile"
+          <button
+            class="tile"
             type="button"
             data-open="employees">
 
@@ -852,15 +865,17 @@ h1 span {
             </span>
           </button>
 
-          <button class="tile"
+          <button
+            class="tile"
             type="button"
             data-open="devices">
 
             <span class="tile-icon">
               <svg viewBox="0 0 24 24">
-                <rect x="3" y="4"
-                  width="18" height="13" rx="2"/>
-
+                <rect
+                  x="3" y="4"
+                  width="18" height="13"
+                  rx="2"/>
                 <path d="M8 21h8M12 17v4"/>
               </svg>
             </span>
@@ -871,15 +886,18 @@ h1 span {
             </span>
           </button>
 
-          <button class="tile"
+          <button
+            class="tile"
             type="button"
             data-open="settings">
 
             <span class="tile-icon">
               <svg viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="3"/>
-                <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
-                <path d="M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>
+                <path
+                  d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+                <path
+                  d="M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>
               </svg>
             </span>
 
@@ -889,7 +907,8 @@ h1 span {
             </span>
           </button>
 
-          <button class="tile"
+          <button
+            class="tile"
             type="button"
             data-open="sync">
 
@@ -911,39 +930,46 @@ h1 span {
         </div>
       </section>
 
+      <!-- dipendenti -->
+
       <section id="employees" class="page">
 
-        <button class="back"
-          type="button" data-back>
+        <button class="back" type="button" data-back>
           ‹ indietro
         </button>
 
         <div id="employeeToolbar">
 
           <div class="titlebar">
+
             <h1 class="detail-title">dipendenti</h1>
 
-            <button id="addEmployee"
+            <button
+              id="addEmployee"
               class="primary-button"
               type="button">
               + aggiungi
             </button>
+
           </div>
 
-          <input id="employeeSearch"
+          <input
+            id="employeeSearch"
             class="search"
             type="search"
             placeholder="cerca dipendente"
             aria-label="cerca dipendente">
 
-          <div id="employeeList"
+          <div
+            id="employeeList"
             class="employee-list"></div>
 
         </div>
 
         <div id="employeeEditor" hidden>
 
-          <h1 id="employeeEditorTitle"
+          <h1
+            id="employeeEditorTitle"
             class="detail-title">
             nuovo dipendente
           </h1>
@@ -958,7 +984,8 @@ h1 span {
 
                 <div class="field">
                   <label for="firstName">nome</label>
-                  <input id="firstName"
+                  <input
+                    id="firstName"
                     type="text"
                     maxlength="100"
                     required>
@@ -966,7 +993,8 @@ h1 span {
 
                 <div class="field">
                   <label for="lastName">cognome</label>
-                  <input id="lastName"
+                  <input
+                    id="lastName"
                     type="text"
                     maxlength="100"
                     required>
@@ -981,14 +1009,16 @@ h1 span {
 
                 <div class="field">
                   <label for="phone">telefono</label>
-                  <input id="phone"
+                  <input
+                    id="phone"
                     type="tel"
                     maxlength="30">
                 </div>
 
                 <div class="field">
                   <label for="email">email</label>
-                  <input id="email"
+                  <input
+                    id="email"
                     type="email"
                     maxlength="150">
                 </div>
@@ -1012,21 +1042,27 @@ h1 span {
               <h2>accesso</h2>
 
               <div class="field">
-                <label id="employeePinLabel"
+
+                <label
+                  id="employeePinLabel"
                   for="employeePin">
                   pin dipendente
                 </label>
 
-                <input id="employeePin"
+                <input
+                  id="employeePin"
                   type="password"
                   inputmode="numeric"
                   autocomplete="new-password"
                   minlength="4"
                   maxlength="4"
                   pattern="[0-9]{4}">
+
               </div>
 
-              <p id="employeePinHint" class="hint"></p>
+              <p
+                id="employeePinHint"
+                class="hint"></p>
 
             </div>
 
@@ -1037,6 +1073,7 @@ h1 span {
               <div class="form-grid">
 
                 <div class="field">
+
                   <label for="contractType">
                     tipo di contratto
                   </label>
@@ -1045,23 +1082,18 @@ h1 span {
                     <option value="indeterminato">
                       indeterminato
                     </option>
-
                     <option value="determinato">
                       determinato
                     </option>
-
                     <option value="apprendistato">
                       apprendistato
                     </option>
-
                     <option value="chiamata">
                       a chiamata
                     </option>
-
                     <option value="tirocinio">
                       tirocinio
                     </option>
-
                     <option value="altro">
                       altro
                     </option>
@@ -1092,98 +1124,72 @@ h1 span {
 
                 <div class="field">
                   <label for="day-lun">lun</label>
-                  <input id="day-lun"
-                    data-day="lun"
-                    type="number"
-                    min="0"
-                    max="24"
-                    step="0.25"
-                    placeholder="—">
+                  <input id="day-lun" data-day="lun"
+                    type="number" min="0" max="24"
+                    step="0.25" placeholder="—">
                 </div>
 
                 <div class="field">
                   <label for="day-mar">mar</label>
-                  <input id="day-mar"
-                    data-day="mar"
-                    type="number"
-                    min="0"
-                    max="24"
-                    step="0.25"
-                    placeholder="—">
+                  <input id="day-mar" data-day="mar"
+                    type="number" min="0" max="24"
+                    step="0.25" placeholder="—">
                 </div>
 
                 <div class="field">
                   <label for="day-mer">mer</label>
-                  <input id="day-mer"
-                    data-day="mer"
-                    type="number"
-                    min="0"
-                    max="24"
-                    step="0.25"
-                    placeholder="—">
+                  <input id="day-mer" data-day="mer"
+                    type="number" min="0" max="24"
+                    step="0.25" placeholder="—">
                 </div>
 
                 <div class="field">
                   <label for="day-gio">gio</label>
-                  <input id="day-gio"
-                    data-day="gio"
-                    type="number"
-                    min="0"
-                    max="24"
-                    step="0.25"
-                    placeholder="—">
+                  <input id="day-gio" data-day="gio"
+                    type="number" min="0" max="24"
+                    step="0.25" placeholder="—">
                 </div>
 
                 <div class="field">
                   <label for="day-ven">ven</label>
-                  <input id="day-ven"
-                    data-day="ven"
-                    type="number"
-                    min="0"
-                    max="24"
-                    step="0.25"
-                    placeholder="—">
+                  <input id="day-ven" data-day="ven"
+                    type="number" min="0" max="24"
+                    step="0.25" placeholder="—">
                 </div>
 
                 <div class="field">
                   <label for="day-sab">sab</label>
-                  <input id="day-sab"
-                    data-day="sab"
-                    type="number"
-                    min="0"
-                    max="24"
-                    step="0.25"
-                    placeholder="—">
+                  <input id="day-sab" data-day="sab"
+                    type="number" min="0" max="24"
+                    step="0.25" placeholder="—">
                 </div>
 
                 <div class="field">
                   <label for="day-dom">dom</label>
-                  <input id="day-dom"
-                    data-day="dom"
-                    type="number"
-                    min="0"
-                    max="24"
-                    step="0.25"
-                    placeholder="—">
+                  <input id="day-dom" data-day="dom"
+                    type="number" min="0" max="24"
+                    step="0.25" placeholder="—">
                 </div>
 
               </div>
 
-              <div id="scheduleTotal"
-                class="schedule-total">
+              <div id="scheduleTotal" class="schedule-total">
 
                 <label for="weeklyHours">
                   totale settimanale
                 </label>
 
-                <input id="weeklyHours"
+                <input
+                  id="weeklyHours"
                   type="text"
                   value="0 ore"
                   readonly
                   aria-readonly="true">
+
               </div>
 
-              <p id="scheduleError"
+              <p
+                id="scheduleError"
                 class="message error"
                 aria-live="polite"></p>
 
@@ -1196,59 +1202,65 @@ h1 span {
               <div class="form-grid">
 
                 <div class="field">
+
                   <label for="salaryAmount">
                     importo (€)
                   </label>
 
-                  <input id="salaryAmount"
+                  <input
+                    id="salaryAmount"
                     type="number"
                     min="0"
                     step="0.01">
+
                 </div>
 
                 <div class="field">
+
                   <label for="salaryPeriod">
                     periodicità
                   </label>
 
                   <select id="salaryPeriod">
-                    <option value="monthly">
-                      mensile
-                    </option>
-
-                    <option value="hourly">
-                      oraria
-                    </option>
+                    <option value="monthly">mensile</option>
+                    <option value="hourly">oraria</option>
                   </select>
+
                 </div>
 
               </div>
 
               <div class="field spaced-field">
+
                 <label for="iban">iban</label>
 
-                <input id="iban"
+                <input
+                  id="iban"
                   type="text"
                   autocomplete="off"
                   autocapitalize="characters"
                   maxlength="34">
+
               </div>
 
             </div>
 
-            <p id="employeeMessage"
+            <p
+              id="employeeMessage"
               class="message error"
               role="alert"></p>
 
             <div class="actions">
 
-              <button id="cancelEmployee"
+              <button
+                id="cancelEmployee"
                 class="secondary-button"
                 type="button">
                 annulla
               </button>
 
-              <button id="saveEmployee"
+              <button
+                id="saveEmployee"
                 class="primary-button"
                 type="submit">
                 salva dipendente
@@ -1257,30 +1269,74 @@ h1 span {
             </div>
 
           </form>
-
         </div>
 
       </section>
 
+      <!-- dispositivi -->
+
       <section id="devices" class="page">
 
-        <button class="back"
-          type="button" data-back>
+        <button class="back" type="button" data-back>
           ‹ indietro
         </button>
 
         <h1 class="detail-title">dispositivi</h1>
 
         <div class="card">
-          <h2>nessun dispositivo registrato</h2>
+
+          <h2>attendance center</h2>
+
+          <p
+            id="exportCount"
+            class="hint"
+            aria-live="polite"></p>
+
+          <form
+            id="exportForm"
+            class="form">
+
+            <div class="field">
+
+              <label for="exportPin">
+                pin admin
+              </label>
+
+              <input
+                id="exportPin"
+                type="password"
+                inputmode="numeric"
+                autocomplete="off"
+                minlength="6"
+                maxlength="6"
+                pattern="[0-9]{6}"
+                required>
+
+            </div>
+
+            <button
+              id="exportButton"
+              class="primary-button"
+              type="submit">
+              genera json
+            </button>
+
+          </form>
+
+          <p
+            id="exportMessage"
+            class="message"
+            role="status"></p>
+
         </div>
 
       </section>
 
+      <!-- configurazioni -->
+
       <section id="settings" class="page">
 
-        <button class="back"
-          type="button" data-back>
+        <button class="back" type="button" data-back>
           ‹ indietro
         </button>
 
@@ -1293,9 +1349,11 @@ h1 span {
           <form id="changePinForm" class="form">
 
             <div class="field">
+
               <label for="oldPin">pin attuale</label>
 
-              <input id="oldPin"
+              <input
+                id="oldPin"
                 type="password"
                 inputmode="numeric"
                 autocomplete="current-password"
@@ -1303,14 +1361,17 @@ h1 span {
                 maxlength="12"
                 pattern="([0-9]{6}|[0-9]{10,12})"
                 required>
+
             </div>
 
             <div class="field">
+
               <label for="replacementPin">
                 nuovo pin
               </label>
 
-              <input id="replacementPin"
+              <input
+                id="replacementPin"
                 type="password"
                 inputmode="numeric"
                 autocomplete="new-password"
@@ -1318,14 +1379,17 @@ h1 span {
                 maxlength="6"
                 pattern="[0-9]{6}"
                 required>
+
             </div>
 
             <div class="field">
+
               <label for="replacementConfirm">
                 conferma pin
               </label>
 
-              <input id="replacementConfirm"
+              <input
+                id="replacementConfirm"
                 type="password"
                 inputmode="numeric"
                 autocomplete="new-password"
@@ -1333,16 +1397,19 @@ h1 span {
                 maxlength="6"
                 pattern="[0-9]{6}"
                 required>
+
             </div>
 
-            <button class="primary-button"
+            <button
+              class="primary-button"
               type="submit">
               aggiorna pin
             </button>
 
           </form>
 
-          <p id="pinMessage"
+          <p
+            id="pinMessage"
             class="message"
             role="status"></p>
 
@@ -1350,10 +1417,11 @@ h1 span {
 
       </section>
 
+      <!-- sincronizzazione -->
+
       <section id="sync" class="page">
 
-        <button class="back"
-          type="button" data-back>
+        <button class="back" type="button" data-back>
           ‹ indietro
         </button>
 
@@ -1373,7 +1441,8 @@ h1 span {
 
   <footer class="footer">
 
-    <div id="offlineStatus"
+    <div
+      id="offlineStatus"
       class="status"
       role="status">
 
@@ -1385,9 +1454,7 @@ h1 span {
 
     </div>
 
-    <div>
-      core center · versione 1.4.1
-    </div>
+    <div>core center · versione 1.5</div>
 
   </footer>
 
@@ -1398,7 +1465,8 @@ h1 span {
 import {
   createLocalVault,
   createEmployeePinVerifier,
-  verifyEmployeePin
+  verifyEmployeePin,
+  createProvisioningPackage
 } from "../shared/core.js";
 
 const vault = createLocalVault(
@@ -1415,6 +1483,7 @@ const setupForm = get("setupForm");
 const unlockForm = get("unlockForm");
 const changePinForm = get("changePinForm");
 const employeeForm = get("employeeForm");
+const exportForm = get("exportForm");
 
 const pages = document.querySelectorAll(".page");
 const themeButtons = document.querySelectorAll(
@@ -1442,6 +1511,13 @@ function openPage(pageId) {
     showEmployeeList();
   }
 
+  if (pageId === "devices") {
+    updateExportCount();
+
+    exportForm.reset();
+    showMessage("exportMessage", "");
+  }
+
   window.scrollTo(0, 0);
 }
 
@@ -1465,6 +1541,17 @@ document.querySelectorAll("[data-back]").forEach(button => {
   });
 });
 
+function showMessage(id, text, kind = "") {
+  const element = get(id);
+
+  element.textContent = text;
+  element.className = "message";
+
+  if (kind) {
+    element.classList.add(kind);
+  }
+}
+
 /* accesso */
 
 async function showGate() {
@@ -1475,14 +1562,13 @@ async function showGate() {
   setupForm.hidden = true;
   unlockForm.hidden = true;
 
-  get("gateError").textContent = "";
+  showMessage("gateError", "");
 
   try {
     const configured = await vault.hasData();
 
     if (configured) {
       get("gateTitle").textContent = "bentornato.";
-
       get("gateDescription").textContent =
         "inserisci il pin admin.";
 
@@ -1501,7 +1587,12 @@ async function showGate() {
       "archivio non disponibile.";
 
     get("gateDescription").textContent = "";
-    get("gateError").textContent = error.message;
+
+    showMessage(
+      "gateError",
+      error.message,
+      "error"
+    );
   }
 }
 
@@ -1511,7 +1602,7 @@ function showWorkspace() {
   get("lockButton").hidden = false;
 
   changePinForm.reset();
-  get("pinMessage").textContent = "";
+  showMessage("pinMessage", "");
 
   openPage("home");
 }
@@ -1522,8 +1613,11 @@ setupForm.addEventListener("submit", async event => {
   const pin = get("newPin").value;
 
   if (pin !== get("confirmPin").value) {
-    get("gateError").textContent =
-      "i pin non corrispondono";
+    showMessage(
+      "gateError",
+      "i pin non corrispondono",
+      "error"
+    );
     return;
   }
 
@@ -1532,13 +1626,17 @@ setupForm.addEventListener("submit", async event => {
   );
 
   button.disabled = true;
-  get("gateError").textContent = "";
+  showMessage("gateError", "");
 
   try {
     await vault.create(pin);
     showWorkspace();
   } catch (error) {
-    get("gateError").textContent = error.message;
+    showMessage(
+      "gateError",
+      error.message,
+      "error"
+    );
   } finally {
     setupForm.reset();
     button.disabled = false;
@@ -1553,13 +1651,17 @@ unlockForm.addEventListener("submit", async event => {
   );
 
   button.disabled = true;
-  get("gateError").textContent = "";
+  showMessage("gateError", "");
 
   try {
     await vault.unlock(get("adminPin").value);
     showWorkspace();
   } catch (error) {
-    get("gateError").textContent = error.message;
+    showMessage(
+      "gateError",
+      error.message,
+      "error"
+    );
   } finally {
     unlockForm.reset();
     button.disabled = false;
@@ -1570,13 +1672,15 @@ get("lockButton").addEventListener("click", async () => {
   vault.lock();
 
   employeeForm.reset();
+  exportForm.reset();
+
   editingEmployeeId = null;
 
   openPage("home");
   await showGate();
 });
 
-/* cambio pin admin */
+/* cambio pin */
 
 changePinForm.addEventListener("submit", async event => {
   event.preventDefault();
@@ -1584,17 +1688,18 @@ changePinForm.addEventListener("submit", async event => {
   const oldPin = get("oldPin").value;
   const newPin = get("replacementPin").value;
 
-  const message = get("pinMessage");
   const button = changePinForm.querySelector(
     'button[type="submit"]'
   );
 
-  message.textContent = "";
-  message.className = "message";
+  showMessage("pinMessage", "");
 
   if (newPin !== get("replacementConfirm").value) {
-    message.textContent = "i pin non corrispondono";
-    message.classList.add("error");
+    showMessage(
+      "pinMessage",
+      "i pin non corrispondono",
+      "error"
+    );
     return;
   }
 
@@ -1605,11 +1710,17 @@ changePinForm.addEventListener("submit", async event => {
 
     changePinForm.reset();
 
-    message.textContent = "pin aggiornato";
-    message.classList.add("success");
+    showMessage(
+      "pinMessage",
+      "pin aggiornato",
+      "success"
+    );
   } catch (error) {
-    message.textContent = error.message;
-    message.classList.add("error");
+    showMessage(
+      "pinMessage",
+      error.message,
+      "error"
+    );
   } finally {
     button.disabled = false;
   }
@@ -1636,7 +1747,7 @@ function showEmployeeList() {
   get("employeeEditor").hidden = true;
 
   employeeForm.reset();
-  get("employeeMessage").textContent = "";
+  showMessage("employeeMessage", "");
 
   renderEmployees();
 }
@@ -1651,11 +1762,13 @@ function showEmployeeForm(employeeId = null) {
   }
 
   editingEmployeeId = employeeId;
+
   employeeForm.reset();
 
   get("employeeToolbar").hidden = true;
   get("employeeEditor").hidden = false;
-  get("employeeMessage").textContent = "";
+
+  showMessage("employeeMessage", "");
 
   get("employeeEditorTitle").textContent = employee
     ? "modifica dipendente"
@@ -1710,7 +1823,8 @@ function showEmployeeForm(employeeId = null) {
       employee.iban || "";
 
     for (const day of days) {
-      const hours = employee.schedule?.[day] ?? 0;
+      const hours =
+        employee.schedule?.[day] ?? 0;
 
       get(`day-${day}`).value =
         hours > 0 ? String(hours) : "";
@@ -1731,7 +1845,6 @@ function formatNumber(value) {
 
 function readSchedule() {
   const schedule = {};
-
   let total = 0;
 
   for (const day of days) {
@@ -1772,17 +1885,23 @@ function readSchedule() {
 function updateHoursTotal() {
   const wrapper = get("scheduleTotal");
   const input = get("weeklyHours");
-  const error = get("scheduleError");
 
   try {
     const { total } = readSchedule();
 
     input.value = `${formatNumber(total)} ore`;
-    error.textContent = "";
+
+    showMessage("scheduleError", "");
     wrapper.classList.remove("invalid");
-  } catch (exception) {
+  } catch (error) {
     input.value = "—";
-    error.textContent = exception.message;
+
+    showMessage(
+      "scheduleError",
+      error.message,
+      "error"
+    );
+
     wrapper.classList.add("invalid");
   }
 }
@@ -1819,8 +1938,8 @@ function renderEmployees() {
 
   if (!employees.length) {
     const empty = document.createElement("div");
-    empty.className = "empty";
 
+    empty.className = "empty";
     empty.textContent = query
       ? "nessun risultato"
       : "nessun dipendente";
@@ -1860,6 +1979,7 @@ function renderEmployees() {
       employee.active ? "attivo" : "disattivo";
 
     const arrow = document.createElement("span");
+
     arrow.className = "tile-arrow";
     arrow.textContent = "›";
 
@@ -1887,7 +2007,10 @@ function validateIban(iban) {
     return false;
   }
 
-  if (iban.startsWith("IT") && iban.length !== 27) {
+  if (
+    iban.startsWith("IT") &&
+    iban.length !== 27
+  ) {
     return false;
   }
 
@@ -1910,7 +2033,7 @@ function validateIban(iban) {
   return remainder === 1;
 }
 
-/* lettura scheda */
+/* scheda dipendente */
 
 function readEmployeeFields() {
   const firstName = get("firstName").value.trim();
@@ -1964,9 +2087,7 @@ function readEmployeeFields() {
     .toUpperCase();
 
   if (!validateIban(iban)) {
-    throw new Error(
-      "iban non valido"
-    );
+    throw new Error("iban non valido");
   }
 
   return {
@@ -2008,10 +2129,9 @@ document.querySelectorAll("[data-day]").forEach(input => {
 employeeForm.addEventListener("submit", async event => {
   event.preventDefault();
 
-  const message = get("employeeMessage");
   const button = get("saveEmployee");
 
-  message.textContent = "";
+  showMessage("employeeMessage", "");
   button.disabled = true;
 
   try {
@@ -2096,11 +2216,140 @@ employeeForm.addEventListener("submit", async event => {
     }
 
     await vault.save(data);
-
     showEmployeeList();
   } catch (error) {
-    message.textContent = error.message;
+    showMessage(
+      "employeeMessage",
+      error.message,
+      "error"
+    );
   } finally {
+    button.disabled = false;
+  }
+});
+
+/* generazione json */
+
+function getActiveEmployees() {
+  return getEmployees().filter(
+    employee => employee.active === true
+  );
+}
+
+function updateExportCount() {
+  const count = getActiveEmployees().length;
+
+  get("exportCount").textContent =
+    `${count} dipendent${count === 1 ? "e" : "i"} attiv${count === 1 ? "o" : "i"}`;
+}
+
+function downloadJson(data, filename) {
+  const blob = new Blob(
+    [JSON.stringify(data, null, 2)],
+    { type: "application/json" }
+  );
+
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+
+  anchor.href = url;
+  anchor.download = filename;
+
+  document.body.append(anchor);
+  anchor.click();
+  anchor.remove();
+
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+  }, 60000);
+}
+
+exportForm.addEventListener("submit", async event => {
+  event.preventDefault();
+
+  const pin = get("exportPin").value;
+  const button = get("exportButton");
+
+  showMessage("exportMessage", "");
+  button.disabled = true;
+
+  try {
+    if (!/^[0-9]{6}$/.test(pin)) {
+      throw new Error(
+        "il pin admin deve avere 6 cifre"
+      );
+    }
+
+    // verifica del pin sul vero archivio locale
+    await vault.unlock(pin);
+
+    const data = vault.read();
+
+    if (
+      !data.settings ||
+      typeof data.settings !== "object" ||
+      Array.isArray(data.settings)
+    ) {
+      data.settings = {};
+    }
+
+    // identità stabile della configurazione
+    if (!data.settings.provisioningOriginId) {
+      data.settings.provisioningOriginId =
+        crypto.randomUUID();
+
+      await vault.save(data);
+    }
+
+    // esportazione con elenco esplicito dei campi
+    const employees = getActiveEmployees().map(employee => ({
+      id: employee.id,
+      firstName: employee.firstName,
+      lastName: employee.lastName,
+      active: true,
+      weeklyHours: employee.weeklyHours,
+      pinVerifier: employee.pinVerifier
+    }));
+
+    const payload = {
+      schemaVersion: 1,
+      kind: "center-provisioning",
+      sourceCenter: "core",
+      targetCenter: "attendance",
+      originId: data.settings.provisioningOriginId,
+      exportId: crypto.randomUUID(),
+      issuedAt: new Date().toISOString(),
+      employees
+    };
+
+    const packageData =
+      await createProvisioningPackage(
+        payload,
+        pin
+      );
+
+    const date = new Date()
+      .toISOString()
+      .slice(0, 10);
+
+    downloadJson(
+      packageData,
+      `attendance-config-${date}.json`
+    );
+
+    showMessage(
+      "exportMessage",
+      "download avviato",
+      "success"
+    );
+  } catch (error) {
+    showMessage(
+      "exportMessage",
+      error.message,
+      "error"
+    );
+  } finally {
+    exportForm.reset();
     button.disabled = false;
   }
 });
@@ -2146,7 +2395,7 @@ function setTheme(theme) {
   try {
     localStorage.setItem("theme", selected);
   } catch (error) {
-    // tema attivo nella sessione
+    // tema locale della sessione
   }
 }
 
@@ -2179,7 +2428,7 @@ if (colorPreference.addEventListener) {
   });
 }
 
-/* offline */
+/* disponibilità offline */
 
 const offlineStatus = get("offlineStatus");
 const offlineText = get("offlineText");
