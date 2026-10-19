@@ -28,7 +28,25 @@ function fromBase64(value) {
   return bytes;
 }
 
-async function deriveKey(pin, salt, rounds) {
+function validateNewPin(pin) {
+  if (!/^[0-9]{6}$/.test(pin)) {
+    throw new Error(
+      "il nuovo pin deve contenere esattamente 6 cifre"
+    );
+  }
+}
+
+function validateAccessPin(pin) {
+  if (
+    !/^(?:[0-9]{6}|[0-9]{10,12})$/.test(pin)
+  ) {
+    throw new Error(
+      "inserisci un pin di 6 cifre o il vecchio pin"
+    );
+  }
+}
+
+async function deriveKey(pin, salt) {
   const material = await crypto.subtle.importKey(
     "raw",
     encoder.encode(pin),
@@ -41,7 +59,7 @@ async function deriveKey(pin, salt, rounds) {
     {
       name: "PBKDF2",
       salt,
-      iterations: rounds,
+      iterations,
       hash: "SHA-256"
     },
     material,
@@ -59,17 +77,13 @@ async function encryptData(data, key) {
     new Uint8Array(12)
   );
 
-  const encoded = encoder.encode(
-    JSON.stringify(data)
-  );
-
   const encrypted = await crypto.subtle.encrypt(
     {
       name: "AES-GCM",
       iv
     },
     key,
-    encoded
+    encoder.encode(JSON.stringify(data))
   );
 
   return {
@@ -99,7 +113,10 @@ export function createLocalVault(
   databaseName,
   centerId
 ) {
-  if (!crypto?.subtle || !indexedDB) {
+  if (
+    !globalThis.crypto?.subtle ||
+    !globalThis.indexedDB
+  ) {
     throw new Error(
       "archiviazione sicura non supportata"
     );
@@ -107,8 +124,8 @@ export function createLocalVault(
 
   let databasePromise = null;
   let sessionKey = null;
-  let sessionSalt = null;
   let sessionData = null;
+  let sessionRecord = null;
 
   function openDatabase() {
     if (databasePromise) {
@@ -187,7 +204,7 @@ export function createLocalVault(
     });
   }
 
-  async function writeRecord(record, createOnly) {
+  async function createRecord(record) {
     const database = await openDatabase();
 
     return new Promise((resolve, reject) => {
@@ -196,46 +213,99 @@ export function createLocalVault(
         "readwrite"
       );
 
-      transaction.oncomplete = () => {
-        resolve();
-      };
+      transaction.objectStore(storeName).add(
+        record,
+        recordKey
+      );
 
-      transaction.onerror = () => {
-        reject(
-          transaction.error ||
-          new Error("salvataggio non riuscito")
-        );
-      };
+      transaction.oncomplete = () => resolve();
 
-      transaction.onabort = () => {
-        reject(
-          transaction.error ||
-          new Error("salvataggio annullato")
-        );
-      };
+      transaction.onerror = () => reject(
+        transaction.error ||
+        new Error("creazione non riuscita")
+      );
+
+      transaction.onabort = () => reject(
+        transaction.error ||
+        new Error("creazione annullata")
+      );
+    });
+  }
+
+  async function replaceRecord(
+    previousRecord,
+    nextRecord
+  ) {
+    const database = await openDatabase();
+
+    return new Promise((resolve, reject) => {
+      const transaction = database.transaction(
+        storeName,
+        "readwrite"
+      );
 
       const store = transaction.objectStore(
         storeName
       );
 
-      if (createOnly) {
-        store.add(record, recordKey);
-      } else {
-        store.put(record, recordKey);
-      }
+      let conflict = false;
+
+      const request = store.get(recordKey);
+
+      request.onsuccess = () => {
+        const current = request.result;
+
+        const unchanged =
+          current &&
+          current.version === previousRecord.version &&
+          current.rounds === previousRecord.rounds &&
+          current.salt === previousRecord.salt &&
+          current.iv === previousRecord.iv &&
+          current.encrypted === previousRecord.encrypted;
+
+        if (!unchanged) {
+          conflict = true;
+          transaction.abort();
+          return;
+        }
+
+        store.put(nextRecord, recordKey);
+      };
+
+      transaction.oncomplete = () => resolve();
+
+      transaction.onabort = () => {
+        reject(
+          new Error(
+            conflict
+              ? "archivio modificato altrove: blocca e riapri"
+              : "salvataggio annullato"
+          )
+        );
+      };
+
+      transaction.onerror = () => reject(
+        transaction.error ||
+        new Error("salvataggio non riuscito")
+      );
     });
   }
 
-  function validatePin(pin) {
-    if (!/^[0-9]{10,12}$/.test(pin)) {
+  function validateRecord(record) {
+    if (
+      !record ||
+      record.version !== 1 ||
+      record.rounds !== iterations
+    ) {
       throw new Error(
-        "il pin deve contenere da 10 a 12 cifre"
+        "versione archivio non compatibile"
       );
     }
   }
 
   function validateData(data) {
     if (
+      !data ||
       data.schemaVersion !== 1 ||
       data.center !== centerId
     ) {
@@ -245,28 +315,64 @@ export function createLocalVault(
     }
   }
 
+  async function decodeRecord(record, pin) {
+    validateRecord(record);
+
+    const salt = fromBase64(record.salt);
+    const key = await deriveKey(pin, salt);
+
+    let data;
+
+    try {
+      data = await decryptData(record, key);
+    } catch (error) {
+      throw new Error(
+        "pin non corretto o archivio danneggiato"
+      );
+    }
+
+    validateData(data);
+
+    return { key, data };
+  }
+
+  async function makeRecord(data, pin) {
+    const salt = crypto.getRandomValues(
+      new Uint8Array(16)
+    );
+
+    const key = await deriveKey(pin, salt);
+    const encrypted = await encryptData(data, key);
+
+    return {
+      key,
+      record: {
+        version: 1,
+        rounds: iterations,
+        salt: toBase64(salt),
+        ...encrypted
+      }
+    };
+  }
+
+  function setSession(key, data, record) {
+    sessionKey = key;
+    sessionData = structuredClone(data);
+    sessionRecord = structuredClone(record);
+  }
+
   async function hasData() {
     return Boolean(await readRecord());
   }
 
   async function create(pin) {
-    validatePin(pin);
+    validateNewPin(pin);
 
     if (await hasData()) {
       throw new Error(
         "configurazione già presente"
       );
     }
-
-    const salt = crypto.getRandomValues(
-      new Uint8Array(16)
-    );
-
-    const key = await deriveKey(
-      pin,
-      salt,
-      iterations
-    );
 
     const data = {
       schemaVersion: 1,
@@ -277,30 +383,21 @@ export function createLocalVault(
       settings: {}
     };
 
-    const encrypted = await encryptData(
+    const result = await makeRecord(data, pin);
+
+    await createRecord(result.record);
+
+    setSession(
+      result.key,
       data,
-      key
+      result.record
     );
-
-    await writeRecord(
-      {
-        version: 1,
-        rounds: iterations,
-        salt: toBase64(salt),
-        ...encrypted
-      },
-      true
-    );
-
-    sessionKey = key;
-    sessionSalt = salt;
-    sessionData = data;
 
     return structuredClone(data);
   }
 
   async function unlock(pin) {
-    validatePin(pin);
+    validateAccessPin(pin);
 
     const record = await readRecord();
 
@@ -310,44 +407,18 @@ export function createLocalVault(
       );
     }
 
-    if (
-      record.version !== 1 ||
-      !Number.isInteger(record.rounds) ||
-      record.rounds !== iterations
-    ) {
-      throw new Error(
-        "versione archivio non compatibile"
-      );
-    }
-
-    const salt = fromBase64(record.salt);
-
-    const key = await deriveKey(
-      pin,
-      salt,
-      record.rounds
+    const result = await decodeRecord(
+      record,
+      pin
     );
 
-    let data;
+    setSession(
+      result.key,
+      result.data,
+      record
+    );
 
-    try {
-      data = await decryptData(
-        record,
-        key
-      );
-    } catch (error) {
-      throw new Error(
-        "pin non corretto o archivio danneggiato"
-      );
-    }
-
-    validateData(data);
-
-    sessionKey = key;
-    sessionSalt = salt;
-    sessionData = data;
-
-    return structuredClone(data);
+    return structuredClone(result.data);
   }
 
   function read() {
@@ -361,7 +432,7 @@ export function createLocalVault(
   }
 
   async function save(data) {
-    if (!sessionKey || !sessionSalt) {
+    if (!sessionKey || !sessionRecord) {
       throw new Error(
         "archivio bloccato"
       );
@@ -374,23 +445,75 @@ export function createLocalVault(
       sessionKey
     );
 
-    await writeRecord(
-      {
-        version: 1,
-        rounds: iterations,
-        salt: toBase64(sessionSalt),
-        ...encrypted
-      },
-      false
+    const nextRecord = {
+      ...sessionRecord,
+      ...encrypted
+    };
+
+    await replaceRecord(
+      sessionRecord,
+      nextRecord
     );
 
-    sessionData = structuredClone(data);
+    setSession(
+      sessionKey,
+      data,
+      nextRecord
+    );
+  }
+
+  async function changePin(oldPin, newPin) {
+    if (!sessionKey || !sessionRecord) {
+      throw new Error(
+        "archivio bloccato"
+      );
+    }
+
+    validateAccessPin(oldPin);
+    validateNewPin(newPin);
+
+    if (oldPin === newPin) {
+      throw new Error(
+        "scegli un pin diverso da quello attuale"
+      );
+    }
+
+    const previousRecord = await readRecord();
+
+    if (!previousRecord) {
+      throw new Error(
+        "archivio non disponibile"
+      );
+    }
+
+    const previous = await decodeRecord(
+      previousRecord,
+      oldPin
+    );
+
+    const next = await makeRecord(
+      previous.data,
+      newPin
+    );
+
+    await replaceRecord(
+      previousRecord,
+      next.record
+    );
+
+    setSession(
+      next.key,
+      previous.data,
+      next.record
+    );
+
+    return true;
   }
 
   function lock() {
     sessionKey = null;
-    sessionSalt = null;
     sessionData = null;
+    sessionRecord = null;
   }
 
   return {
@@ -399,6 +522,7 @@ export function createLocalVault(
     unlock,
     read,
     save,
+    changePin,
     lock
   };
 }
