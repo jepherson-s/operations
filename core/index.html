@@ -68,7 +68,9 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-button, input, select {
+button,
+input,
+select {
   font: inherit;
 }
 
@@ -205,6 +207,12 @@ h1 span {
   background: var(--bg);
   color: var(--text);
   font-size: 16px;
+}
+
+.field input[readonly] {
+  background: var(--soft);
+  font-weight: 750;
+  cursor: default;
 }
 
 .gate .field input {
@@ -428,12 +436,6 @@ h1 span {
   letter-spacing: -.5px;
 }
 
-.card p {
-  margin: 0;
-  color: var(--muted);
-  line-height: 1.6;
-}
-
 .card .form {
   margin-top: 20px;
 }
@@ -465,13 +467,31 @@ h1 span {
   padding: 0 4px;
 }
 
-.hours-total {
-  color: var(--muted);
-  font-size: 13px;
+.schedule-total {
+  display: grid;
+  gap: 9px;
+  margin-top: 20px;
 }
 
-.hours-total.invalid {
-  color: var(--error);
+.schedule-total label {
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.schedule-total input {
+  width: 100%;
+  min-height: 54px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--soft);
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 750;
+}
+
+.schedule-total.invalid input {
+  border-color: var(--error);
 }
 
 .employee-list {
@@ -544,6 +564,10 @@ h1 span {
 
 .actions button {
   flex: 1 1 130px;
+}
+
+.spaced-field {
+  margin-top: 17px;
 }
 
 .footer {
@@ -673,19 +697,19 @@ h1 span {
 
   <header class="topbar">
 
-    <button
-      id="lockButton"
+    <button id="lockButton"
       class="lock-button"
-      type="button"
-      hidden>
+      type="button" hidden>
       blocca
     </button>
 
     <div class="themes" role="group" aria-label="tema">
       <button type="button" data-theme="light"
         aria-label="tema chiaro">☀</button>
+
       <button type="button" data-theme="auto"
         aria-label="tema automatico">◐</button>
+
       <button type="button" data-theme="dark"
         aria-label="tema scuro">☾</button>
     </div>
@@ -693,8 +717,6 @@ h1 span {
   </header>
 
   <main>
-
-    <!-- accesso -->
 
     <section id="gate" class="gate">
       <span class="eyebrow">accesso locale</span>
@@ -708,18 +730,28 @@ h1 span {
       <form id="setupForm" class="form" hidden>
         <div class="field">
           <label for="newPin">crea pin admin</label>
-          <input id="newPin" type="password"
-            inputmode="numeric" autocomplete="new-password"
-            minlength="6" maxlength="6"
-            pattern="[0-9]{6}" required>
+
+          <input id="newPin"
+            type="password"
+            inputmode="numeric"
+            autocomplete="new-password"
+            minlength="6"
+            maxlength="6"
+            pattern="[0-9]{6}"
+            required>
         </div>
 
         <div class="field">
           <label for="confirmPin">conferma pin</label>
-          <input id="confirmPin" type="password"
-            inputmode="numeric" autocomplete="new-password"
-            minlength="6" maxlength="6"
-            pattern="[0-9]{6}" required>
+
+          <input id="confirmPin"
+            type="password"
+            inputmode="numeric"
+            autocomplete="new-password"
+            minlength="6"
+            maxlength="6"
+            pattern="[0-9]{6}"
+            required>
         </div>
 
         <button class="primary-button" type="submit">
@@ -730,10 +762,15 @@ h1 span {
       <form id="unlockForm" class="form" hidden>
         <div class="field">
           <label for="adminPin">pin admin</label>
-          <input id="adminPin" type="password"
-            inputmode="numeric" autocomplete="current-password"
-            minlength="6" maxlength="12"
-            pattern="([0-9]{6}|[0-9]{10,12})" required>
+
+          <input id="adminPin"
+            type="password"
+            inputmode="numeric"
+            autocomplete="current-password"
+            minlength="6"
+            maxlength="12"
+            pattern="([0-9]{6}|[0-9]{10,12})"
+            required>
         </div>
 
         <button class="primary-button" type="submit">
@@ -741,34 +778,35 @@ h1 span {
         </button>
       </form>
 
-      <p id="gateError" class="message error" role="alert"></p>
+      <p id="gateError"
+        class="message error"
+        role="alert"></p>
     </section>
 
-    <!-- area amministrativa -->
-
     <div id="workspace" hidden>
-
-      <!-- home -->
 
       <section id="home" class="page active">
 
         <div class="hero">
           <div class="hero-copy">
+
             <span class="eyebrow">operations</span>
+
             <h1>core center<span>.</span></h1>
 
             <p class="subtitle">
               il tuo centro di controllo.
-              semplice, organizzato e sempre disponibile.
             </p>
+
           </div>
 
           <div class="doodles" aria-hidden="true">
 
             <div class="doodle one">
               <svg viewBox="0 0 80 80">
-                <rect x="15" y="18" width="50"
-                  height="45" rx="11"/>
+                <rect x="15" y="18"
+                  width="50" height="45" rx="11"/>
+
                 <path d="M27 18v-8M53 18v-8M15 32h50"/>
                 <path d="M27 44h8M45 44h8M27 54h8"/>
               </svg>
@@ -797,37 +835,46 @@ h1 span {
 
         <div class="grid">
 
-          <button class="tile" type="button"
+          <button class="tile"
+            type="button"
             data-open="employees">
+
             <span class="tile-icon">
               <svg viewBox="0 0 24 24">
                 <circle cx="12" cy="7" r="4"/>
                 <path d="M4 21v-2a8 8 0 0 1 16 0v2"/>
               </svg>
             </span>
+
             <span class="tile-bottom">
               <span class="tile-name">dipendenti</span>
               <span class="tile-arrow">›</span>
             </span>
           </button>
 
-          <button class="tile" type="button"
+          <button class="tile"
+            type="button"
             data-open="devices">
+
             <span class="tile-icon">
               <svg viewBox="0 0 24 24">
-                <rect x="3" y="4" width="18"
-                  height="13" rx="2"/>
+                <rect x="3" y="4"
+                  width="18" height="13" rx="2"/>
+
                 <path d="M8 21h8M12 17v4"/>
               </svg>
             </span>
+
             <span class="tile-bottom">
               <span class="tile-name">dispositivi</span>
               <span class="tile-arrow">›</span>
             </span>
           </button>
 
-          <button class="tile" type="button"
+          <button class="tile"
+            type="button"
             data-open="settings">
+
             <span class="tile-icon">
               <svg viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="3"/>
@@ -835,14 +882,17 @@ h1 span {
                 <path d="M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>
               </svg>
             </span>
+
             <span class="tile-bottom">
               <span class="tile-name">configurazioni</span>
               <span class="tile-arrow">›</span>
             </span>
           </button>
 
-          <button class="tile" type="button"
+          <button class="tile"
+            type="button"
             data-open="sync">
+
             <span class="tile-icon">
               <svg viewBox="0 0 24 24">
                 <path d="M20 7a9 9 0 0 0-15-2L3 7"/>
@@ -851,6 +901,7 @@ h1 span {
                 <path d="M17 17h4v4"/>
               </svg>
             </span>
+
             <span class="tile-bottom">
               <span class="tile-name">sincronizzazione</span>
               <span class="tile-arrow">›</span>
@@ -860,11 +911,10 @@ h1 span {
         </div>
       </section>
 
-      <!-- dipendenti -->
-
       <section id="employees" class="page">
 
-        <button class="back" type="button" data-back>
+        <button class="back"
+          type="button" data-back>
           ‹ indietro
         </button>
 
@@ -874,13 +924,15 @@ h1 span {
             <h1 class="detail-title">dipendenti</h1>
 
             <button id="addEmployee"
-              class="primary-button" type="button">
+              class="primary-button"
+              type="button">
               + aggiungi
             </button>
           </div>
 
           <input id="employeeSearch"
-            class="search" type="search"
+            class="search"
+            type="search"
             placeholder="cerca dipendente"
             aria-label="cerca dipendente">
 
@@ -888,8 +940,6 @@ h1 span {
             class="employee-list"></div>
 
         </div>
-
-        <!-- scheda dipendente -->
 
         <div id="employeeEditor" hidden>
 
@@ -908,34 +958,46 @@ h1 span {
 
                 <div class="field">
                   <label for="firstName">nome</label>
-                  <input id="firstName" type="text"
-                    maxlength="100" required>
+                  <input id="firstName"
+                    type="text"
+                    maxlength="100"
+                    required>
                 </div>
 
                 <div class="field">
                   <label for="lastName">cognome</label>
-                  <input id="lastName" type="text"
-                    maxlength="100" required>
+                  <input id="lastName"
+                    type="text"
+                    maxlength="100"
+                    required>
                 </div>
 
                 <div class="field">
-                  <label for="birthDate">data di nascita</label>
+                  <label for="birthDate">
+                    data di nascita
+                  </label>
                   <input id="birthDate" type="date">
                 </div>
 
                 <div class="field">
                   <label for="phone">telefono</label>
-                  <input id="phone" type="tel" maxlength="30">
+                  <input id="phone"
+                    type="tel"
+                    maxlength="30">
                 </div>
 
                 <div class="field">
                   <label for="email">email</label>
-                  <input id="email" type="email"
+                  <input id="email"
+                    type="email"
                     maxlength="150">
                 </div>
 
                 <div class="field">
-                  <label for="employeeStatus">stato</label>
+                  <label for="employeeStatus">
+                    stato
+                  </label>
+
                   <select id="employeeStatus">
                     <option value="active">attivo</option>
                     <option value="inactive">disattivo</option>
@@ -943,7 +1005,6 @@ h1 span {
                 </div>
 
               </div>
-
             </div>
 
             <div class="card">
@@ -951,7 +1012,8 @@ h1 span {
               <h2>accesso</h2>
 
               <div class="field">
-                <label id="employeePinLabel" for="employeePin">
+                <label id="employeePinLabel"
+                  for="employeePin">
                   pin dipendente
                 </label>
 
@@ -983,18 +1045,23 @@ h1 span {
                     <option value="indeterminato">
                       indeterminato
                     </option>
+
                     <option value="determinato">
                       determinato
                     </option>
+
                     <option value="apprendistato">
                       apprendistato
                     </option>
+
                     <option value="chiamata">
                       a chiamata
                     </option>
+
                     <option value="tirocinio">
                       tirocinio
                     </option>
+
                     <option value="altro">
                       altro
                     </option>
@@ -1015,79 +1082,110 @@ h1 span {
                   <input id="contractEnd" type="date">
                 </div>
 
-                <div class="field">
-                  <label for="weeklyHours">
-                    ore settimanali
-                  </label>
-                  <input id="weeklyHours"
-                    type="number" min="0" max="80"
-                    step="0.25" value="0" required>
-                </div>
-
               </div>
 
               <h3 class="form-heading">
-                ore distribuite
+                ore distribuite · indicative
               </h3>
 
               <div class="schedule-grid">
 
                 <div class="field">
                   <label for="day-lun">lun</label>
-                  <input id="day-lun" data-day="lun"
-                    type="number" min="0" max="24"
-                    step="0.25" value="0" required>
+                  <input id="day-lun"
+                    data-day="lun"
+                    type="number"
+                    min="0"
+                    max="24"
+                    step="0.25"
+                    placeholder="—">
                 </div>
 
                 <div class="field">
                   <label for="day-mar">mar</label>
-                  <input id="day-mar" data-day="mar"
-                    type="number" min="0" max="24"
-                    step="0.25" value="0" required>
+                  <input id="day-mar"
+                    data-day="mar"
+                    type="number"
+                    min="0"
+                    max="24"
+                    step="0.25"
+                    placeholder="—">
                 </div>
 
                 <div class="field">
                   <label for="day-mer">mer</label>
-                  <input id="day-mer" data-day="mer"
-                    type="number" min="0" max="24"
-                    step="0.25" value="0" required>
+                  <input id="day-mer"
+                    data-day="mer"
+                    type="number"
+                    min="0"
+                    max="24"
+                    step="0.25"
+                    placeholder="—">
                 </div>
 
                 <div class="field">
                   <label for="day-gio">gio</label>
-                  <input id="day-gio" data-day="gio"
-                    type="number" min="0" max="24"
-                    step="0.25" value="0" required>
+                  <input id="day-gio"
+                    data-day="gio"
+                    type="number"
+                    min="0"
+                    max="24"
+                    step="0.25"
+                    placeholder="—">
                 </div>
 
                 <div class="field">
                   <label for="day-ven">ven</label>
-                  <input id="day-ven" data-day="ven"
-                    type="number" min="0" max="24"
-                    step="0.25" value="0" required>
+                  <input id="day-ven"
+                    data-day="ven"
+                    type="number"
+                    min="0"
+                    max="24"
+                    step="0.25"
+                    placeholder="—">
                 </div>
 
                 <div class="field">
                   <label for="day-sab">sab</label>
-                  <input id="day-sab" data-day="sab"
-                    type="number" min="0" max="24"
-                    step="0.25" value="0" required>
+                  <input id="day-sab"
+                    data-day="sab"
+                    type="number"
+                    min="0"
+                    max="24"
+                    step="0.25"
+                    placeholder="—">
                 </div>
 
                 <div class="field">
                   <label for="day-dom">dom</label>
-                  <input id="day-dom" data-day="dom"
-                    type="number" min="0" max="24"
-                    step="0.25" value="0" required>
+                  <input id="day-dom"
+                    data-day="dom"
+                    type="number"
+                    min="0"
+                    max="24"
+                    step="0.25"
+                    placeholder="—">
                 </div>
 
               </div>
 
-              <p id="hoursTotal"
-                class="hours-total"
-                aria-live="polite">
-                totale: 0 / 0 ore
-              </p>
+              <div id="scheduleTotal"
+                class="schedule-total">
+
+                <label for="weeklyHours">
+                  totale settimanale
+                </label>
+
+                <input id="weeklyHours"
+                  type="text"
+                  value="0 ore"
+                  readonly
+                  aria-readonly="true">
+              </div>
+
+              <p id="scheduleError"
+                class="message error"
+                aria-live="polite"></p>
 
             </div>
 
@@ -1101,8 +1199,10 @@ h1 span {
                   <label for="salaryAmount">
                     importo (€)
                   </label>
+
                   <input id="salaryAmount"
-                    type="number" min="0"
+                    type="number"
+                    min="0"
                     step="0.01">
                 </div>
 
@@ -1110,20 +1210,28 @@ h1 span {
                   <label for="salaryPeriod">
                     periodicità
                   </label>
+
                   <select id="salaryPeriod">
-                    <option value="monthly">mensile</option>
-                    <option value="hourly">oraria</option>
+                    <option value="monthly">
+                      mensile
+                    </option>
+
+                    <option value="hourly">
+                      oraria
+                    </option>
                   </select>
                 </div>
 
               </div>
 
-              <div class="field" style="margin-top:17px">
+              <div class="field spaced-field">
                 <label for="iban">iban</label>
-                <input id="iban" type="text"
+
+                <input id="iban"
+                  type="text"
                   autocomplete="off"
                   autocapitalize="characters"
-                  maxlength="42">
+                  maxlength="34">
               </div>
 
             </div>
@@ -1133,6 +1241,7 @@ h1 span {
               role="alert"></p>
 
             <div class="actions">
+
               <button id="cancelEmployee"
                 class="secondary-button"
                 type="button">
@@ -1144,6 +1253,7 @@ h1 span {
                 type="submit">
                 salva dipendente
               </button>
+
             </div>
 
           </form>
@@ -1152,11 +1262,10 @@ h1 span {
 
       </section>
 
-      <!-- dispositivi -->
-
       <section id="devices" class="page">
 
-        <button class="back" type="button" data-back>
+        <button class="back"
+          type="button" data-back>
           ‹ indietro
         </button>
 
@@ -1168,11 +1277,10 @@ h1 span {
 
       </section>
 
-      <!-- configurazioni -->
-
       <section id="settings" class="page">
 
-        <button class="back" type="button" data-back>
+        <button class="back"
+          type="button" data-back>
           ‹ indietro
         </button>
 
@@ -1186,35 +1294,49 @@ h1 span {
 
             <div class="field">
               <label for="oldPin">pin attuale</label>
-              <input id="oldPin" type="password"
+
+              <input id="oldPin"
+                type="password"
                 inputmode="numeric"
                 autocomplete="current-password"
-                minlength="6" maxlength="12"
+                minlength="6"
+                maxlength="12"
                 pattern="([0-9]{6}|[0-9]{10,12})"
                 required>
             </div>
 
             <div class="field">
-              <label for="replacementPin">nuovo pin</label>
-              <input id="replacementPin" type="password"
+              <label for="replacementPin">
+                nuovo pin
+              </label>
+
+              <input id="replacementPin"
+                type="password"
                 inputmode="numeric"
                 autocomplete="new-password"
-                minlength="6" maxlength="6"
-                pattern="[0-9]{6}" required>
+                minlength="6"
+                maxlength="6"
+                pattern="[0-9]{6}"
+                required>
             </div>
 
             <div class="field">
               <label for="replacementConfirm">
                 conferma pin
               </label>
-              <input id="replacementConfirm" type="password"
+
+              <input id="replacementConfirm"
+                type="password"
                 inputmode="numeric"
                 autocomplete="new-password"
-                minlength="6" maxlength="6"
-                pattern="[0-9]{6}" required>
+                minlength="6"
+                maxlength="6"
+                pattern="[0-9]{6}"
+                required>
             </div>
 
-            <button class="primary-button" type="submit">
+            <button class="primary-button"
+              type="submit">
               aggiorna pin
             </button>
 
@@ -1228,15 +1350,16 @@ h1 span {
 
       </section>
 
-      <!-- sincronizzazione -->
-
       <section id="sync" class="page">
 
-        <button class="back" type="button" data-back>
+        <button class="back"
+          type="button" data-back>
           ‹ indietro
         </button>
 
-        <h1 class="detail-title">sincronizzazione</h1>
+        <h1 class="detail-title">
+          sincronizzazione
+        </h1>
 
         <div class="card">
           <h2>non ancora attiva</h2>
@@ -1251,14 +1374,20 @@ h1 span {
   <footer class="footer">
 
     <div id="offlineStatus"
-      class="status" role="status">
+      class="status"
+      role="status">
+
       <span class="status-dot"></span>
+
       <span id="offlineText">
         verifica disponibilità offline...
       </span>
+
     </div>
 
-    <div>core center · versione 1.4</div>
+    <div>
+      core center · versione 1.4.1
+    </div>
 
   </footer>
 
@@ -1271,8 +1400,6 @@ import {
   createEmployeePinVerifier,
   verifyEmployeePin
 } from "../shared/core.js";
-
-/* archivio */
 
 const vault = createLocalVault(
   "operations-core",
@@ -1290,7 +1417,9 @@ const changePinForm = get("changePinForm");
 const employeeForm = get("employeeForm");
 
 const pages = document.querySelectorAll(".page");
-const themeButtons = document.querySelectorAll("[data-theme]");
+const themeButtons = document.querySelectorAll(
+  "[data-theme]"
+);
 
 const days = [
   "lun", "mar", "mer", "gio",
@@ -1324,6 +1453,14 @@ document.querySelectorAll("[data-open]").forEach(button => {
 
 document.querySelectorAll("[data-back]").forEach(button => {
   button.addEventListener("click", () => {
+    if (
+      button.closest("#employees") &&
+      !get("employeeEditor").hidden
+    ) {
+      showEmployeeList();
+      return;
+    }
+
     openPage("home");
   });
 });
@@ -1337,6 +1474,7 @@ async function showGate() {
 
   setupForm.hidden = true;
   unlockForm.hidden = true;
+
   get("gateError").textContent = "";
 
   try {
@@ -1344,6 +1482,7 @@ async function showGate() {
 
     if (configured) {
       get("gateTitle").textContent = "bentornato.";
+
       get("gateDescription").textContent =
         "inserisci il pin admin.";
 
@@ -1512,32 +1651,42 @@ function showEmployeeForm(employeeId = null) {
   }
 
   editingEmployeeId = employeeId;
-
   employeeForm.reset();
 
   get("employeeToolbar").hidden = true;
   get("employeeEditor").hidden = false;
   get("employeeMessage").textContent = "";
 
-  get("employeeEditorTitle").textContent =
-    employee ? "modifica dipendente" : "nuovo dipendente";
+  get("employeeEditorTitle").textContent = employee
+    ? "modifica dipendente"
+    : "nuovo dipendente";
 
-  get("employeePin").required = !employee;
+  get("employeePin").required =
+    !employee || !employee.pinVerifier;
 
   get("employeePinLabel").textContent = employee
-    ? "nuovo pin (facoltativo)"
+    ? "nuovo pin"
     : "pin dipendente";
 
   get("employeePinHint").textContent = employee
-    ? "lascia vuoto per mantenere il pin attuale"
+    ? "vuoto per mantenere il pin attuale"
     : "4 cifre";
 
   if (employee) {
-    get("firstName").value = employee.firstName || "";
-    get("lastName").value = employee.lastName || "";
-    get("birthDate").value = employee.birthDate || "";
-    get("phone").value = employee.phone || "";
-    get("email").value = employee.email || "";
+    get("firstName").value =
+      employee.firstName || "";
+
+    get("lastName").value =
+      employee.lastName || "";
+
+    get("birthDate").value =
+      employee.birthDate || "";
+
+    get("phone").value =
+      employee.phone || "";
+
+    get("email").value =
+      employee.email || "";
 
     get("employeeStatus").value =
       employee.active ? "active" : "inactive";
@@ -1551,26 +1700,20 @@ function showEmployeeForm(employeeId = null) {
     get("contractEnd").value =
       employee.contractEnd || "";
 
-    get("weeklyHours").value =
-      employee.weeklyHours ?? 0;
-
     get("salaryAmount").value =
       employee.salaryAmount ?? "";
 
     get("salaryPeriod").value =
       employee.salaryPeriod || "monthly";
 
-    get("iban").value = employee.iban || "";
+    get("iban").value =
+      employee.iban || "";
 
     for (const day of days) {
+      const hours = employee.schedule?.[day] ?? 0;
+
       get(`day-${day}`).value =
-        employee.schedule?.[day] ?? 0;
-    }
-  } else {
-    get("weeklyHours").value = "0";
-
-    for (const day of days) {
-      get(`day-${day}`).value = "0";
+        hours > 0 ? String(hours) : "";
     }
   }
 
@@ -1586,8 +1729,67 @@ function formatNumber(value) {
   }).format(value);
 }
 
+function readSchedule() {
+  const schedule = {};
+
+  let total = 0;
+
+  for (const day of days) {
+    const input = get(`day-${day}`);
+    const raw = input.value.trim();
+
+    const hours = raw === ""
+      ? 0
+      : Number(raw);
+
+    if (
+      !Number.isFinite(hours) ||
+      hours < 0 ||
+      hours > 24 ||
+      Math.abs(hours * 4 - Math.round(hours * 4)) > 0.001
+    ) {
+      throw new Error(
+        `ore non valide per ${day}`
+      );
+    }
+
+    schedule[day] = hours;
+    total += hours;
+  }
+
+  if (total > 80) {
+    throw new Error(
+      "il totale non può superare 80 ore"
+    );
+  }
+
+  return {
+    schedule,
+    total: Math.round(total * 100) / 100
+  };
+}
+
+function updateHoursTotal() {
+  const wrapper = get("scheduleTotal");
+  const input = get("weeklyHours");
+  const error = get("scheduleError");
+
+  try {
+    const { total } = readSchedule();
+
+    input.value = `${formatNumber(total)} ore`;
+    error.textContent = "";
+    wrapper.classList.remove("invalid");
+  } catch (exception) {
+    input.value = "—";
+    error.textContent = exception.message;
+    wrapper.classList.add("invalid");
+  }
+}
+
 function renderEmployees() {
   const list = get("employeeList");
+
   const query = get("employeeSearch")
     .value.trim().toLocaleLowerCase("it");
 
@@ -1629,6 +1831,7 @@ function renderEmployees() {
 
   for (const employee of employees) {
     const button = document.createElement("button");
+
     button.type = "button";
     button.className = "employee-row";
 
@@ -1649,6 +1852,7 @@ function renderEmployees() {
     meta.className = "employee-meta";
 
     const badge = document.createElement("span");
+
     badge.className =
       employee.active ? "badge active" : "badge";
 
@@ -1670,48 +1874,7 @@ function renderEmployees() {
   }
 }
 
-function getNumber(id, min, max) {
-  const input = get(id);
-
-  if (input.value.trim() === "") {
-    throw new Error("compila tutti i campi delle ore");
-  }
-
-  const number = Number(input.value);
-
-  if (
-    !Number.isFinite(number) ||
-    number < min ||
-    number > max ||
-    Math.abs(number * 4 - Math.round(number * 4)) > 0.001
-  ) {
-    throw new Error(
-      "le ore devono essere multipli di 15 minuti"
-    );
-  }
-
-  return number;
-}
-
-function updateHoursTotal() {
-  const weekly = Number(get("weeklyHours").value);
-
-  const total = days.reduce((sum, day) => {
-    return sum + (Number(get(`day-${day}`).value) || 0);
-  }, 0);
-
-  const valid =
-    Number.isFinite(weekly) &&
-    Math.abs(total - weekly) < 0.01;
-
-  const label = get("hoursTotal");
-
-  label.textContent =
-    `totale: ${formatNumber(total)} / ` +
-    `${formatNumber(Number.isFinite(weekly) ? weekly : 0)} ore`;
-
-  label.classList.toggle("invalid", !valid);
-}
+/* iban */
 
 function validateIban(iban) {
   if (!iban) {
@@ -1728,7 +1891,8 @@ function validateIban(iban) {
     return false;
   }
 
-  const rearranged = iban.slice(4) + iban.slice(0, 4);
+  const rearranged =
+    iban.slice(4) + iban.slice(0, 4);
 
   let remainder = 0;
 
@@ -1746,37 +1910,25 @@ function validateIban(iban) {
   return remainder === 1;
 }
 
+/* lettura scheda */
+
 function readEmployeeFields() {
   const firstName = get("firstName").value.trim();
   const lastName = get("lastName").value.trim();
 
   if (!firstName || !lastName) {
-    throw new Error("nome e cognome obbligatori");
-  }
-
-  const weeklyHours = getNumber(
-    "weeklyHours", 0, 80
-  );
-
-  const schedule = {};
-
-  for (const day of days) {
-    schedule[day] = getNumber(
-      `day-${day}`, 0, 24
-    );
-  }
-
-  const total = Object.values(schedule)
-    .reduce((sum, value) => sum + value, 0);
-
-  if (Math.abs(total - weeklyHours) >= 0.01) {
     throw new Error(
-      "le ore distribuite non corrispondono al totale"
+      "nome e cognome obbligatori"
     );
   }
 
-  const contractStart = get("contractStart").value;
-  const contractEnd = get("contractEnd").value;
+  const { schedule, total } = readSchedule();
+
+  const contractStart =
+    get("contractStart").value;
+
+  const contractEnd =
+    get("contractEnd").value;
 
   if (
     contractStart &&
@@ -1788,17 +1940,23 @@ function readEmployeeFields() {
     );
   }
 
-  const salaryInput = get("salaryAmount").value;
+  const salaryInput =
+    get("salaryAmount").value;
+
   const salaryAmount = salaryInput === ""
     ? null
     : Number(salaryInput);
 
   if (
     salaryAmount !== null &&
-    (!Number.isFinite(salaryAmount) ||
-      salaryAmount < 0)
+    (
+      !Number.isFinite(salaryAmount) ||
+      salaryAmount < 0
+    )
   ) {
-    throw new Error("retribuzione non valida");
+    throw new Error(
+      "retribuzione non valida"
+    );
   }
 
   const iban = get("iban").value
@@ -1806,7 +1964,9 @@ function readEmployeeFields() {
     .toUpperCase();
 
   if (!validateIban(iban)) {
-    throw new Error("iban non valido");
+    throw new Error(
+      "iban non valido"
+    );
   }
 
   return {
@@ -1819,13 +1979,15 @@ function readEmployeeFields() {
     contractType: get("contractType").value,
     contractStart,
     contractEnd,
-    weeklyHours,
+    weeklyHours: total,
     schedule,
     salaryAmount,
     salaryPeriod: get("salaryPeriod").value,
     iban
   };
 }
+
+/* eventi dipendenti */
 
 get("addEmployee").addEventListener("click", () => {
   showEmployeeForm();
@@ -1838,10 +2000,6 @@ get("cancelEmployee").addEventListener("click", () => {
 get("employeeSearch").addEventListener("input", () => {
   renderEmployees();
 });
-
-get("weeklyHours").addEventListener(
-  "input", updateHoursTotal
-);
 
 document.querySelectorAll("[data-day]").forEach(input => {
   input.addEventListener("input", updateHoursTotal);
@@ -1864,7 +2022,9 @@ employeeForm.addEventListener("submit", async event => {
     const employees = data.employees;
 
     if (!Array.isArray(employees)) {
-      throw new Error("archivio dipendenti non valido");
+      throw new Error(
+        "archivio dipendenti non valido"
+      );
     }
 
     const index = editingEmployeeId
@@ -1874,18 +2034,23 @@ employeeForm.addEventListener("submit", async event => {
       : -1;
 
     if (editingEmployeeId && index === -1) {
-      throw new Error("dipendente non trovato");
+      throw new Error(
+        "dipendente non trovato"
+      );
     }
 
     const previous = index >= 0
       ? employees[index]
       : null;
 
-    if (!previous && !pin) {
-      throw new Error("inserisci il pin dipendente");
+    if (!previous?.pinVerifier && !pin) {
+      throw new Error(
+        "inserisci il pin dipendente"
+      );
     }
 
-    let pinVerifier = previous?.pinVerifier || null;
+    let pinVerifier =
+      previous?.pinVerifier || null;
 
     if (pin) {
       if (!/^[0-9]{4}$/.test(pin)) {
@@ -1904,7 +2069,7 @@ employeeForm.addEventListener("submit", async event => {
           )
         ) {
           throw new Error(
-            "pin già assegnato a un altro dipendente"
+            "pin già assegnato"
           );
         }
       }
@@ -1952,9 +2117,11 @@ function setTheme(theme) {
     selected === "auto" ? "" : selected;
 
   themeButtons.forEach(button => {
-    const active = button.dataset.theme === selected;
+    const active =
+      button.dataset.theme === selected;
 
     button.classList.toggle("active", active);
+
     button.setAttribute(
       "aria-pressed",
       String(active)
@@ -1992,7 +2159,8 @@ themeButtons.forEach(button => {
 let savedTheme = "auto";
 
 try {
-  savedTheme = localStorage.getItem("theme") || "auto";
+  savedTheme =
+    localStorage.getItem("theme") || "auto";
 } catch (error) {
   savedTheme = "auto";
 }
@@ -2033,6 +2201,7 @@ async function checkOfflineCache(worker) {
     channel.port1.onmessage = event => {
       clearTimeout(timer);
       channel.port1.close();
+
       resolve(event.data?.ready === true);
     };
 
@@ -2045,7 +2214,10 @@ async function checkOfflineCache(worker) {
 
 async function registerOffline() {
   if (!("serviceWorker" in navigator)) {
-    setOfflineStatus(false, "offline non supportato");
+    setOfflineStatus(
+      false,
+      "offline non supportato"
+    );
     return;
   }
 
@@ -2069,7 +2241,11 @@ async function registerOffline() {
         : "cache offline da verificare"
     );
   } catch (error) {
-    setOfflineStatus(false, "offline non disponibile");
+    setOfflineStatus(
+      false,
+      "offline non disponibile"
+    );
+
     console.error(error);
   }
 }
