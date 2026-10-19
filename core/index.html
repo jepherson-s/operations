@@ -23,6 +23,7 @@
   --border: #e7e7eb;
   --soft: #ebebef;
   --error: #bc3434;
+  --success: #238453;
 }
 
 :root[data-theme="dark"] {
@@ -34,6 +35,7 @@
   --border: #343439;
   --soft: #2d2d31;
   --error: #ff8585;
+  --success: #69d69a;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -46,6 +48,7 @@
     --border: #343439;
     --soft: #2d2d31;
     --error: #ff8585;
+    --success: #69d69a;
   }
 }
 
@@ -129,20 +132,15 @@ input:focus-visible {
 .lock-button {
   min-height: 44px;
   padding: 0 17px;
-  border-radius: 24px;
   border: 1px solid var(--border);
-  color: var(--text);
+  border-radius: 24px;
   background: var(--card);
+  color: var(--text);
   font-size: 13px;
   font-weight: 700;
 }
 
-/* accesso */
-
-.gate {
-  max-width: 430px;
-  margin: 60px auto 80px;
-}
+/* tipografia */
 
 .eyebrow {
   display: block;
@@ -167,9 +165,16 @@ h1 span {
 
 .subtitle {
   margin: 16px 0 0;
+  color: var(--muted);
   font-size: 16px;
   line-height: 1.6;
-  color: var(--muted);
+}
+
+/* accesso */
+
+.gate {
+  max-width: 430px;
+  margin: 60px auto 80px;
 }
 
 .gate h1 {
@@ -177,10 +182,12 @@ h1 span {
   letter-spacing: -2px;
 }
 
-.auth-form {
+/* moduli */
+
+.form {
   display: grid;
   gap: 17px;
-  margin-top: 32px;
+  margin-top: 28px;
 }
 
 .field {
@@ -206,6 +213,7 @@ h1 span {
 
 .primary-button {
   min-height: 55px;
+  padding: 12px 20px;
   border: none;
   border-radius: 18px;
   background: var(--text);
@@ -215,20 +223,27 @@ h1 span {
 
 .hint {
   margin: 0;
+  color: var(--muted);
   font-size: 13px;
   line-height: 1.65;
-  color: var(--muted);
 }
 
-.error {
-  margin-top: 18px;
-  color: var(--error);
+.message {
+  margin: 15px 0 0;
   font-size: 13px;
-  line-height: 1.6;
+  line-height: 1.65;
 }
 
-.error:empty {
+.message:empty {
   display: none;
+}
+
+.message.error {
+  color: var(--error);
+}
+
+.message.success {
+  color: var(--success);
 }
 
 /* pagine */
@@ -305,7 +320,7 @@ h1 span {
   animation-delay: -4s;
 }
 
-/* gestione */
+/* dashboard */
 
 .section-title {
   margin: 0 0 20px;
@@ -355,11 +370,11 @@ h1 span {
 }
 
 .tile-bottom {
-  width: 100%;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
+  width: 100%;
 }
 
 .tile-name {
@@ -368,8 +383,8 @@ h1 span {
 }
 
 .tile-arrow {
-  font-size: 24px;
   color: var(--muted);
+  font-size: 24px;
 }
 
 @media (hover: hover) {
@@ -379,7 +394,7 @@ h1 span {
   }
 }
 
-/* navigazione */
+/* pagine interne */
 
 .back {
   min-height: 44px;
@@ -397,23 +412,39 @@ h1 span {
   font-size: clamp(30px, 5vw, 45px);
 }
 
-.empty {
-  padding: 35px 25px;
+.card {
+  padding: 30px;
   border: 1px solid var(--border);
   border-radius: 25px;
   background: var(--card);
 }
 
-.empty strong {
-  display: block;
-  margin-bottom: 10px;
-  font-size: 18px;
+.card + .card {
+  margin-top: 15px;
 }
 
-.empty p {
+.card h2 {
+  margin: 0 0 12px;
+  font-size: 19px;
+  letter-spacing: -.5px;
+}
+
+.card p {
   margin: 0;
   color: var(--muted);
   line-height: 1.7;
+}
+
+.card .form {
+  margin-top: 25px;
+}
+
+.card .field input {
+  background: var(--bg);
+}
+
+.card .primary-button {
+  margin-top: 3px;
 }
 
 /* footer */
@@ -440,7 +471,7 @@ h1 span {
 }
 
 .status.ready .status-dot {
-  background: #35a76b;
+  background: var(--success);
 }
 
 /* animazioni */
@@ -512,6 +543,10 @@ h1 span {
     min-height: 105px;
     padding: 18px 20px;
   }
+
+  .card {
+    padding: 22px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -541,18 +576,15 @@ h1 span {
 
     <div class="themes" role="group" aria-label="tema">
 
-      <button
-        type="button"
+      <button type="button"
         data-theme="light"
         aria-label="tema chiaro">☀</button>
 
-      <button
-        type="button"
+      <button type="button"
         data-theme="auto"
         aria-label="tema automatico">◐</button>
 
-      <button
-        type="button"
+      <button type="button"
         data-theme="dark"
         aria-label="tema scuro">☾</button>
 
@@ -562,7 +594,7 @@ h1 span {
 
   <main>
 
-    <!-- accesso locale -->
+    <!-- accesso -->
 
     <section id="gate" class="gate">
 
@@ -578,7 +610,7 @@ h1 span {
 
       <!-- prima configurazione -->
 
-      <form id="setupForm" class="auth-form" hidden>
+      <form id="setupForm" class="form" hidden>
 
         <div class="field">
           <label for="newPin">
@@ -590,9 +622,9 @@ h1 span {
             type="password"
             inputmode="numeric"
             autocomplete="new-password"
-            minlength="10"
-            maxlength="12"
-            pattern="[0-9]{10,12}"
+            minlength="6"
+            maxlength="6"
+            pattern="[0-9]{6}"
             required>
         </div>
 
@@ -606,17 +638,15 @@ h1 span {
             type="password"
             inputmode="numeric"
             autocomplete="new-password"
-            minlength="10"
-            maxlength="12"
-            pattern="[0-9]{10,12}"
+            minlength="6"
+            maxlength="6"
+            pattern="[0-9]{6}"
             required>
         </div>
 
         <p class="hint">
-          utilizza da 10 a 12 cifre.
+          utilizza esattamente 6 cifre.
           conserva il pin in un luogo sicuro.
-          senza il pin e senza un backup,
-          i dati cifrati non saranno recuperabili.
         </p>
 
         <button
@@ -627,12 +657,11 @@ h1 span {
 
       </form>
 
-      <!-- accesso successivo -->
+      <!-- accesso -->
 
-      <form id="unlockForm" class="auth-form" hidden>
+      <form id="unlockForm" class="form" hidden>
 
         <div class="field">
-
           <label for="adminPin">
             pin admin
           </label>
@@ -642,11 +671,10 @@ h1 span {
             type="password"
             inputmode="numeric"
             autocomplete="current-password"
-            minlength="10"
+            minlength="6"
             maxlength="12"
-            pattern="[0-9]{10,12}"
+            pattern="([0-9]{6}|[0-9]{10,12})"
             required>
-
         </div>
 
         <button
@@ -657,11 +685,15 @@ h1 span {
 
       </form>
 
-      <p id="gateError" class="error" role="alert"></p>
+      <p
+        id="gateError"
+        class="message error"
+        role="alert">
+      </p>
 
     </section>
 
-    <!-- applicazione -->
+    <!-- area amministrativa -->
 
     <div id="workspace" hidden>
 
@@ -673,9 +705,7 @@ h1 span {
 
           <div class="hero-copy">
 
-            <span class="eyebrow">
-              operations
-            </span>
+            <span class="eyebrow">operations</span>
 
             <h1>
               core center<span>.</span>
@@ -694,8 +724,7 @@ h1 span {
               <svg viewBox="0 0 80 80">
                 <rect
                   x="15" y="18"
-                  width="50" height="45"
-                  rx="11"/>
+                  width="50" height="45" rx="11"/>
                 <path d="M27 18v-8M53 18v-8M15 32h50"/>
                 <path d="M27 44h8M45 44h8M27 54h8"/>
               </svg>
@@ -721,13 +750,9 @@ h1 span {
 
         </div>
 
-        <h2 class="section-title">
-          gestione
-        </h2>
+        <h2 class="section-title">gestione</h2>
 
         <div class="grid">
-
-          <!-- dipendenti -->
 
           <button
             type="button"
@@ -750,8 +775,6 @@ h1 span {
 
           </button>
 
-          <!-- dispositivi -->
-
           <button
             type="button"
             class="tile"
@@ -761,8 +784,7 @@ h1 span {
               <svg viewBox="0 0 24 24">
                 <rect
                   x="3" y="4"
-                  width="18" height="13"
-                  rx="2"/>
+                  width="18" height="13" rx="2"/>
                 <path d="M8 21h8M12 17v4"/>
               </svg>
             </span>
@@ -776,8 +798,6 @@ h1 span {
 
           </button>
 
-          <!-- configurazioni -->
-
           <button
             type="button"
             class="tile"
@@ -786,10 +806,8 @@ h1 span {
             <span class="tile-icon">
               <svg viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="3"/>
-                <path
-                  d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
-                <path
-                  d="M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>
+                <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+                <path d="M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>
               </svg>
             </span>
 
@@ -802,8 +820,6 @@ h1 span {
 
           </button>
 
-          <!-- sincronizzazione -->
-
           <button
             type="button"
             class="tile"
@@ -811,11 +827,9 @@ h1 span {
 
             <span class="tile-icon">
               <svg viewBox="0 0 24 24">
-                <path
-                  d="M20 7a9 9 0 0 0-15-2L3 7"/>
+                <path d="M20 7a9 9 0 0 0-15-2L3 7"/>
                 <path d="M3 3v4h4"/>
-                <path
-                  d="M4 17a9 9 0 0 0 15 2l2-2"/>
+                <path d="M4 17a9 9 0 0 0 15 2l2-2"/>
                 <path d="M17 17h4v4"/>
               </svg>
             </span>
@@ -848,20 +862,14 @@ h1 span {
           dipendenti
         </h1>
 
-        <div class="empty">
-
-          <strong>
-            gestione del personale
-          </strong>
-
+        <div class="card">
+          <h2>gestione del personale</h2>
           <p>
-            il database locale cifrato è attivo.
-            la gestione di anagrafica, pin,
-            contratti, ore distribuite,
-            stipendio e iban sarà disponibile
-            nella prossima versione.
+            questa sezione sarà dedicata ad
+            anagrafica, contratto, ore distribuite,
+            pin, retribuzione, iban e stato
+            dei dipendenti.
           </p>
-
         </div>
 
       </section>
@@ -881,19 +889,13 @@ h1 span {
           dispositivi
         </h1>
 
-        <div class="empty">
-
-          <strong>
-            dispositivi registrati
-          </strong>
-
+        <div class="card">
+          <h2>dispositivi registrati</h2>
           <p>
-            questa sezione conterrà
-            i dispositivi configurati
-            attraverso i json generati
-            dal core center.
+            qui saranno visualizzate
+            le installazioni dei center
+            configurate tramite json.
           </p>
-
         </div>
 
       </section>
@@ -913,20 +915,100 @@ h1 span {
           configurazioni
         </h1>
 
-        <div class="empty">
+        <div class="card">
 
-          <strong>
-            archivio locale protetto
-          </strong>
+          <h2>cambia pin admin</h2>
 
           <p>
-            il database è cifrato con aes-gcm
-            e viene sbloccato tramite pin admin.
-            il pin non viene memorizzato in chiaro.
-            la generazione dei json per gli altri
-            center sarà integrata successivamente.
+            aggiorna il pin amministratore
+            senza cancellare il database locale.
           </p>
 
+          <form id="changePinForm" class="form">
+
+            <div class="field">
+
+              <label for="oldPin">
+                pin attuale
+              </label>
+
+              <input
+                id="oldPin"
+                type="password"
+                inputmode="numeric"
+                autocomplete="current-password"
+                minlength="6"
+                maxlength="12"
+                pattern="([0-9]{6}|[0-9]{10,12})"
+                required>
+
+            </div>
+
+            <div class="field">
+
+              <label for="replacementPin">
+                nuovo pin
+              </label>
+
+              <input
+                id="replacementPin"
+                type="password"
+                inputmode="numeric"
+                autocomplete="new-password"
+                minlength="6"
+                maxlength="6"
+                pattern="[0-9]{6}"
+                required>
+
+            </div>
+
+            <div class="field">
+
+              <label for="replacementConfirm">
+                conferma nuovo pin
+              </label>
+
+              <input
+                id="replacementConfirm"
+                type="password"
+                inputmode="numeric"
+                autocomplete="new-password"
+                minlength="6"
+                maxlength="6"
+                pattern="[0-9]{6}"
+                required>
+
+            </div>
+
+            <p class="hint">
+              il nuovo pin deve contenere
+              esattamente 6 cifre.
+              la modifica ricifra l'archivio.
+            </p>
+
+            <button
+              class="primary-button"
+              type="submit">
+              aggiorna pin admin
+            </button>
+
+          </form>
+
+          <p
+            id="pinMessage"
+            class="message"
+            role="status"
+            aria-live="polite">
+          </p>
+
+        </div>
+
+        <div class="card">
+          <h2>configurazione dei center</h2>
+          <p>
+            la generazione dei json universali
+            sarà integrata nella prossima fase.
+          </p>
         </div>
 
       </section>
@@ -946,21 +1028,15 @@ h1 span {
           sincronizzazione
         </h1>
 
-        <div class="empty">
-
-          <strong>
-            sincronizzazione non ancora attiva
-          </strong>
-
+        <div class="card">
+          <h2>sincronizzazione non ancora attiva</h2>
           <p>
-            i dati rimangono conservati localmente.
+            i dati rimangono locali.
             la sincronizzazione bidirezionale
-            verrà integrata successivamente
-            attraverso google apps script.
-            non viene eseguita alcuna
-            sincronizzazione automatica.
+            verrà integrata successivamente.
+            nessuna operazione viene avviata
+            automaticamente.
           </p>
-
         </div>
 
       </section>
@@ -971,15 +1047,21 @@ h1 span {
 
   <footer class="footer">
 
-    <div id="offlineStatus" class="status" role="status">
+    <div
+      id="offlineStatus"
+      class="status"
+      role="status">
+
       <span class="status-dot"></span>
+
       <span id="offlineText">
         verifica disponibilità offline...
       </span>
+
     </div>
 
     <div>
-      core center · versione 1.3
+      core center · versione 1.3.1
     </div>
 
   </footer>
@@ -992,7 +1074,7 @@ import {
   createLocalVault
 } from "../shared/core.js";
 
-/* database */
+/* archivio */
 
 const vault = createLocalVault(
   "operations-core",
@@ -1006,18 +1088,20 @@ const workspace = document.getElementById("workspace");
 
 const setupForm = document.getElementById("setupForm");
 const unlockForm = document.getElementById("unlockForm");
+const changePinForm =
+  document.getElementById("changePinForm");
 
 const gateTitle = document.getElementById("gateTitle");
 const gateDescription =
   document.getElementById("gateDescription");
 
 const gateError = document.getElementById("gateError");
+const pinMessage = document.getElementById("pinMessage");
 
 const lockButton =
   document.getElementById("lockButton");
 
 const pages = document.querySelectorAll(".page");
-
 const themeButtons =
   document.querySelectorAll("[data-theme]");
 
@@ -1046,7 +1130,7 @@ document.querySelectorAll("[data-back]").forEach(button => {
   });
 });
 
-/* visualizzazione accesso */
+/* accesso */
 
 async function showGate() {
   gate.hidden = false;
@@ -1065,14 +1149,14 @@ async function showGate() {
       gateTitle.textContent = "bentornato.";
 
       gateDescription.textContent =
-        "inserisci il pin admin per sbloccare il tuo archivio locale.";
+        "inserisci il pin admin per sbloccare l'archivio locale.";
 
       unlockForm.hidden = false;
     } else {
       gateTitle.textContent = "prima configurazione.";
 
       gateDescription.textContent =
-        "crea il pin admin per inizializzare il database locale cifrato.";
+        "crea un pin admin di 6 cifre per inizializzare l'archivio.";
 
       setupForm.hidden = false;
     }
@@ -1086,17 +1170,18 @@ async function showGate() {
   }
 }
 
-/* apertura dashboard */
-
 function showWorkspace() {
   gate.hidden = true;
   workspace.hidden = false;
   lockButton.hidden = false;
 
+  changePinForm.reset();
+  pinMessage.textContent = "";
+
   openPage("home");
 }
 
-/* configurazione iniziale */
+/* prima configurazione */
 
 setupForm.addEventListener("submit", async event => {
   event.preventDefault();
@@ -1122,7 +1207,6 @@ setupForm.addEventListener("submit", async event => {
 
   try {
     await vault.create(pin);
-
     showWorkspace();
   } catch (error) {
     gateError.textContent = error.message;
@@ -1132,7 +1216,7 @@ setupForm.addEventListener("submit", async event => {
   }
 });
 
-/* accesso admin */
+/* sblocco */
 
 unlockForm.addEventListener("submit", async event => {
   event.preventDefault();
@@ -1148,7 +1232,6 @@ unlockForm.addEventListener("submit", async event => {
 
   try {
     await vault.unlock(pin);
-
     showWorkspace();
   } catch (error) {
     gateError.textContent = error.message;
@@ -1158,13 +1241,58 @@ unlockForm.addEventListener("submit", async event => {
   }
 });
 
-/* blocco manuale */
+/* cambio pin */
+
+changePinForm.addEventListener("submit", async event => {
+  event.preventDefault();
+
+  const oldPin = document.getElementById("oldPin").value;
+
+  const newPin =
+    document.getElementById("replacementPin").value;
+
+  const confirmPin =
+    document.getElementById("replacementConfirm").value;
+
+  const button = changePinForm.querySelector(
+    'button[type="submit"]'
+  );
+
+  pinMessage.textContent = "";
+  pinMessage.className = "message";
+
+  if (newPin !== confirmPin) {
+    pinMessage.textContent =
+      "i nuovi pin non corrispondono";
+
+    pinMessage.classList.add("error");
+    return;
+  }
+
+  button.disabled = true;
+
+  try {
+    await vault.changePin(oldPin, newPin);
+
+    changePinForm.reset();
+
+    pinMessage.textContent =
+      "pin aggiornato correttamente. l'archivio è stato ricifrato.";
+
+    pinMessage.classList.add("success");
+  } catch (error) {
+    pinMessage.textContent = error.message;
+    pinMessage.classList.add("error");
+  } finally {
+    button.disabled = false;
+  }
+});
+
+/* blocco */
 
 lockButton.addEventListener("click", async () => {
   vault.lock();
-
   openPage("home");
-
   await showGate();
 });
 
@@ -1183,6 +1311,7 @@ function setTheme(theme) {
     const active = button.dataset.theme === selected;
 
     button.classList.toggle("active", active);
+
     button.setAttribute(
       "aria-pressed",
       String(active)
@@ -1242,7 +1371,7 @@ if (colorPreference.addEventListener) {
   );
 }
 
-/* verifica pwa */
+/* verifica cache offline */
 
 const offlineStatus =
   document.getElementById("offlineStatus");
