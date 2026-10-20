@@ -2,1020 +2,208 @@
 <html lang="it">
 <head>
   <meta charset="utf-8">
-  <meta
-    name="viewport"
-    content="width=device-width,initial-scale=1,viewport-fit=cover"
-  >
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#f5f5f7">
+  <meta name="app-version" content="1.4">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Attendance">
-
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
-
   <title>Attendance Center</title>
-
   <style>
-    :root {
-      color-scheme: light;
-      --bg: #f5f5f7;
-      --card: #ffffff;
-      --text: #18181b;
-      --muted: #777780;
-      --border: #e7e7eb;
-      --soft: #ebebef;
-      --error: #bc3434;
-      --success: #238453;
-    }
-
-    :root[data-theme="dark"] {
-      color-scheme: dark;
-      --bg: #111113;
-      --card: #202023;
-      --text: #f5f5f7;
-      --muted: #a1a1aa;
-      --border: #343439;
-      --soft: #2d2d31;
-      --error: #ff8585;
-      --success: #69d69a;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root:not([data-theme="light"]):not([data-theme="dark"]) {
-        color-scheme: dark;
-        --bg: #111113;
-        --card: #202023;
-        --text: #f5f5f7;
-        --muted: #a1a1aa;
-        --border: #343439;
-        --soft: #2d2d31;
-        --error: #ff8585;
-        --success: #69d69a;
-      }
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    [hidden] {
-      display: none !important;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: var(--bg);
-      color: var(--text);
-      font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    button,
-    input {
-      font: inherit;
-    }
-
-    button {
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    button:disabled {
-      opacity: .5;
-      cursor: wait;
-    }
-
-    button:focus-visible,
-    input:focus-visible {
-      outline: 3px solid var(--muted);
-      outline-offset: 3px;
-    }
-
-    .shell {
-      width: min(100%, 760px);
-      margin: auto;
-      padding: 20px 20px 50px;
-    }
-
-    /* barra */
-
-    .bar {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 10px;
-      min-height: 48px;
-    }
-
-    .bar .back {
-      margin-right: auto;
-    }
-
-    .back,
-    .small-button {
-      min-height: 43px;
-      padding: 0 15px;
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      background: var(--card);
-      color: var(--text);
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    /* temi */
-
-    .themes {
-      display: flex;
-      gap: 3px;
-      padding: 3px;
-      border: 1px solid var(--border);
-      border-radius: 25px;
-      background: var(--card);
-    }
-
-    .themes button {
-      width: 38px;
-      height: 38px;
-      border: 0;
-      border-radius: 50%;
-      background: transparent;
-      color: var(--muted);
-      font-size: 18px;
-    }
-
-    .themes button.active {
-      background: var(--soft);
-      color: var(--text);
-    }
-
-    /* schermate */
-
-    .screen {
-      padding-top: 42px;
-      animation: appear .25s ease;
-    }
-
-    .hero {
-      position: relative;
-      display: flex;
-      align-items: center;
-      min-height: 135px;
-      margin-bottom: 28px;
-      overflow: hidden;
-    }
-
-    .hero-copy {
-      position: relative;
-      z-index: 1;
-    }
-
-    .kicker {
-      display: block;
-      margin-bottom: 12px;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 750;
-      letter-spacing: 2px;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: clamp(40px, 7vw, 65px);
-      line-height: 1.05;
-      letter-spacing: -2.5px;
-      font-weight: 800;
-    }
-
-    h1 span {
-      color: var(--muted);
-    }
-
-    h2 {
-      margin: 0 0 20px;
-      font-size: 20px;
-      letter-spacing: -.4px;
-    }
-
-    h3 {
-      margin: 0 0 12px;
-      font-size: 16px;
-    }
-
-    /* doodle */
-
-    .doodles {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-    }
-
-    .doodle {
-      position: absolute;
-      width: 72px;
-      height: 72px;
-      top: 2%;
-      right: 10%;
-      color: var(--muted);
-      opacity: .23;
-      animation: float 7s ease-in-out infinite;
-    }
-
-    .doodle.two {
-      width: 48px;
-      height: 48px;
-      top: auto;
-      bottom: 0;
-      right: 0;
-      animation-delay: -2s;
-    }
-
-    .doodle svg {
-      width: 100%;
-      height: 100%;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 1.5;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    /* schede */
-
-    .card {
-      padding: 26px;
-      border: 1px solid var(--border);
-      border-radius: 26px;
-      background: var(--card);
-    }
-
-    .card + .card {
-      margin-top: 14px;
-    }
-
-    .stack {
-      display: grid;
-      gap: 12px;
-    }
-
-    /* moduli */
-
-    .form {
-      display: grid;
-      gap: 17px;
-    }
-
-    .field {
-      display: grid;
-      gap: 8px;
-      min-width: 0;
-    }
-
-    label,
-    .pin-label {
-      font-size: 13px;
-      font-weight: 750;
-    }
-
-    input {
-      width: 100%;
-      min-width: 0;
-      min-height: 54px;
-      padding: 0 16px;
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      background: var(--bg);
-      color: var(--text);
-      font-size: 16px;
-    }
-
-    input[type="file"] {
-      height: auto;
-      padding: 14px;
-    }
-
-    input[type="file"]::file-selector-button {
-      margin-right: 10px;
-      padding: 8px 10px;
-      border: 0;
-      border-radius: 10px;
-      background: var(--soft);
-      color: var(--text);
-      font-size: 13px;
-    }
-
-    .primary {
-      min-height: 54px;
-      padding: 13px 18px;
-      border: 0;
-      border-radius: 17px;
-      background: var(--text);
-      color: var(--bg);
-      font-size: 15px;
-      font-weight: 750;
-    }
-
-    .secondary {
-      min-height: 48px;
-      padding: 12px 17px;
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      background: var(--card);
-      color: var(--text);
-      font-weight: 700;
-    }
-
-    .hint {
-      margin: 0;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.6;
-    }
-
-    .message {
-      margin: 15px 0 0;
-      font-size: 14px;
-      line-height: 1.5;
-      overflow-wrap: anywhere;
-    }
-
-    .message:empty {
-      display: none;
-    }
-
-    .message.error {
-      color: var(--error);
-    }
-
-    .message.success {
-      color: var(--success);
-      font-weight: 700;
-    }
-
-    /* timbratura */
-
-    .clock-card {
-      max-width: 470px;
-      margin: auto;
-    }
-
-    .clock-head {
-      text-align: center;
-      margin-bottom: 25px;
-    }
-
-    .clock-head h2 {
-      margin-bottom: 0;
-    }
-
-    .device-label {
-      margin: 0 0 16px;
-      color: var(--muted);
-      font-size: 13px;
-      text-align: center;
-      overflow-wrap: anywhere;
-    }
-
-    .pin-area {
-      display: grid;
-      gap: 13px;
-    }
-
-    .pin-dots {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 22px;
-      min-height: 72px;
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      background: var(--bg);
-      user-select: none;
-      -webkit-user-select: none;
-    }
-
-    .pin-dot {
-      width: 15px;
-      height: 15px;
-      border: 2px solid var(--muted);
-      border-radius: 50%;
-      background: transparent;
-      transition: background .15s, transform .15s;
-    }
-
-    .pin-dot.filled {
-      border-color: var(--text);
-      background: var(--text);
-      transform: scale(1.12);
-    }
-
-    /* tastierino */
-
-    .keypad {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      width: min(100%, 325px);
-      margin: 18px auto 0;
-    }
-
-    .key {
-      min-height: 65px;
-      border: 1px solid var(--border);
-      border-radius: 19px;
-      background: var(--bg);
-      color: var(--text);
-      font-size: 24px;
-      font-weight: 650;
-      transition: transform .1s, background .1s;
-    }
-
-    .key:active {
-      background: var(--soft);
-      transform: scale(.95);
-    }
-
-    .key.minor {
-      font-size: 17px;
-      color: var(--muted);
-    }
-
-    .clock-result {
-      max-width: 480px;
-      margin: 20px auto;
-      text-align: center;
-    }
-
-    /* amministrazione */
-
-    .stat {
-      margin-top: 18px;
-      padding: 16px;
-      border-radius: 18px;
-      background: var(--bg);
-    }
-
-    .stat strong {
-      display: block;
-      font-size: 22px;
-    }
-
-    .stat span {
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .id-text {
-      overflow-wrap: anywhere;
-    }
-
-    .log {
-      display: grid;
-      gap: 12px;
-    }
-
-    .log-row {
-      display: grid;
-      gap: 4px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .log-row:last-child {
-      padding-bottom: 0;
-      border-bottom: 0;
-    }
-
-    .log-row strong {
-      font-size: 14px;
-    }
-
-    .log-row span {
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    /* footer */
-
-    .footer {
-      display: grid;
-      justify-content: center;
-      gap: 8px;
-      padding: 42px 0 0;
-      color: var(--muted);
-      text-align: center;
-      font-size: 12px;
-    }
-
-    .status {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 7px;
-    }
-
-    .dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--muted);
-    }
-
-    .status.ready .dot {
-      background: var(--success);
-    }
-
-    .footer-button {
-      padding: 8px;
-      border: 0;
-      background: transparent;
-      color: var(--text);
-      font-size: 12px;
-      font-weight: 650;
-      text-decoration: underline;
-      text-underline-offset: 3px;
-    }
-
-    .footer .message {
-      max-width: 330px;
-      margin: 0;
-      justify-self: center;
-      text-align: center;
-    }
-
-    /* animazioni */
-
-    @keyframes float {
-      0%, 100% {
-        transform: translateY(0) rotate(-8deg);
-      }
-
-      50% {
-        transform: translateY(-10px) rotate(7deg);
-      }
-    }
-
-    @keyframes appear {
-      from {
-        opacity: 0;
-        transform: translateY(7px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @media (max-width: 520px) {
-      .shell {
-        padding: 16px 15px 35px;
-      }
-
-      .screen {
-        padding-top: 32px;
-      }
-
-      .hero {
-        min-height: 120px;
-      }
-
-      .doodle {
-        opacity: .13;
-      }
-
-      .card {
-        padding: 20px;
-      }
-
-      .key {
-        min-height: 61px;
-      }
-
-      .pin-dots {
-        min-height: 66px;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *,
-      *::before,
-      *::after {
-        animation: none !important;
-        transition: none !important;
-      }
-    }
+    :root { color-scheme:light; --bg:#f5f5f7; --card:#fff; --text:#18181b; --muted:#777780; --border:#e7e7eb; --soft:#ebebef; --error:#bc3434; --success:#238453 }
+    :root[data-theme="dark"] { color-scheme:dark; --bg:#111113; --card:#202023; --text:#f5f5f7; --muted:#a1a1aa; --border:#343439; --soft:#2d2d31; --error:#ff8585; --success:#69d69a }
+    @media(prefers-color-scheme:dark) { :root:not([data-theme="light"]):not([data-theme="dark"]) { color-scheme:dark; --bg:#111113; --card:#202023; --text:#f5f5f7; --muted:#a1a1aa; --border:#343439; --soft:#2d2d31; --error:#ff8585; --success:#69d69a } }
+    * { box-sizing:border-box }
+    [hidden] { display:none!important }
+    body { margin:0; min-height:100vh; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; -webkit-font-smoothing:antialiased }
+    button,input { font:inherit }
+    button { cursor:pointer; -webkit-tap-highlight-color:transparent }
+    button:disabled { opacity:.55; cursor:wait }
+    button:focus-visible,input:focus-visible { outline:3px solid var(--muted); outline-offset:3px }
+    .shell { width:min(100%,760px); margin:auto; padding:20px 20px 50px }
+    .bar { display:flex; align-items:center; justify-content:flex-end; gap:10px; min-height:48px }
+    .bar .back { margin-right:auto }
+    .back,.small-button,.theme-toggle { min-height:43px; border:1px solid var(--border); border-radius:16px; background:var(--card); color:var(--text); font-size:13px; font-weight:700 }
+    .back,.small-button { padding:0 15px }
+    .theme-toggle { width:46px; height:46px; border-radius:50%; display:grid; place-items:center; font-size:22px; line-height:1 }
+    .screen { padding-top:42px; animation:appear .25s ease }
+    .hero { position:relative; display:flex; align-items:center; min-height:135px; margin-bottom:28px; overflow:hidden }
+    .hero-copy { position:relative; z-index:1 }
+    .kicker { display:block; margin-bottom:12px; color:var(--muted); font-size:12px; font-weight:750; letter-spacing:2px }
+    h1 { margin:0; font-size:clamp(40px,7vw,65px); line-height:1.05; letter-spacing:-2.5px; font-weight:800 }
+    h1 span { color:var(--muted) }
+    h2 { margin:0 0 20px; font-size:20px; letter-spacing:-.4px }
+    h3 { margin:0 0 12px; font-size:16px }
+    .doodles { position:absolute; inset:0; pointer-events:none }
+    .doodle { position:absolute; width:72px; height:72px; top:2%; right:10%; color:var(--muted); opacity:.23; animation:float 7s ease-in-out infinite }
+    .doodle.two { width:48px; height:48px; top:auto; bottom:0; right:0; animation-delay:-2s }
+    .doodle svg { width:100%; height:100%; fill:none; stroke:currentColor; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round }
+    .card { padding:26px; border:1px solid var(--border); border-radius:26px; background:var(--card) }
+    .stack { display:grid; gap:12px }
+    .stack .card + .card { margin-top:0 }
+    .form { display:grid; gap:17px }
+    .field { display:grid; gap:8px; min-width:0 }
+    label,.pin-label { font-size:13px; font-weight:750 }
+    input { width:100%; min-width:0; min-height:54px; padding:0 16px; border:1px solid var(--border); border-radius:16px; background:var(--bg); color:var(--text); font-size:16px }
+    input[type="file"] { height:auto; padding:14px }
+    input[type="file"]::file-selector-button { margin-right:10px; padding:8px 10px; border:0; border-radius:10px; background:var(--soft); color:var(--text); font-size:13px }
+    .primary { min-height:54px; padding:13px 18px; border:0; border-radius:17px; background:var(--text); color:var(--bg); font-size:15px; font-weight:750 }
+    .secondary { min-height:48px; padding:12px 17px; border:1px solid var(--border); border-radius:16px; background:var(--card); color:var(--text); font-weight:700 }
+    .hint { margin:0; color:var(--muted); font-size:13px; line-height:1.6 }
+    .message { margin:15px 0 0; font-size:14px; line-height:1.5; overflow-wrap:anywhere }
+    .message:empty { display:none }
+    .message.error { color:var(--error) }
+    .message.success { color:var(--success); font-weight:700 }
+    .clock-card { max-width:470px; margin:auto }
+    .clock-head { text-align:center; margin-bottom:25px }
+    .clock-head h2 { margin-bottom:0 }
+    .device-label { margin:0 0 16px; color:var(--muted); font-size:13px; text-align:center; overflow-wrap:anywhere }
+    .pin-area { display:grid; gap:13px }
+    .pin-dots { display:flex; align-items:center; justify-content:center; gap:22px; min-height:72px; border:1px solid var(--border); border-radius:18px; background:var(--bg); user-select:none; -webkit-user-select:none }
+    .pin-dot { width:15px; height:15px; border:2px solid var(--muted); border-radius:50%; background:transparent; transition:background .15s,transform .15s }
+    .pin-dot.filled { border-color:var(--text); background:var(--text); transform:scale(1.12) }
+    .keypad { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; width:min(100%,325px); margin:18px auto 0 }
+    .key { min-height:65px; border:1px solid var(--border); border-radius:19px; background:var(--bg); color:var(--text); font-size:24px; font-weight:650; transition:transform .1s,background .1s }
+    .key:active { background:var(--soft); transform:scale(.95) }
+    .key.minor { font-size:17px; color:var(--muted) }
+    .clock-result { max-width:480px; margin:20px auto; text-align:center }
+    .stat { padding:16px; border-radius:18px; background:var(--bg); margin-top:18px }
+    .stat strong { display:block; font-size:22px }
+    .stat span { color:var(--muted); font-size:12px }
+    .id-text { overflow-wrap:anywhere }
+    .log { display:grid; gap:12px }
+    .log-row { display:grid; gap:4px; padding-bottom:12px; border-bottom:1px solid var(--border) }
+    .log-row:last-child { padding-bottom:0; border-bottom:0 }
+    .log-row strong { font-size:14px }
+    .log-row span { color:var(--muted); font-size:12px }
+    .footer { display:grid; justify-content:center; gap:8px; padding:42px 0 0; color:var(--muted); text-align:center; font-size:12px }
+    .status { display:inline-flex; align-items:center; justify-content:center; gap:7px }
+    .dot { width:7px; height:7px; border-radius:50%; background:var(--muted) }
+    .status.ready .dot { background:var(--success) }
+    .footer-button { padding:8px; border:0; background:transparent; color:var(--text); font-size:12px; font-weight:650; text-decoration:underline; text-underline-offset:3px }
+    .footer .message { max-width:330px; margin:0; justify-self:center; text-align:center }
+    @keyframes float { 0%,100% { transform:translateY(0) rotate(-8deg) } 50% { transform:translateY(-10px) rotate(7deg) } }
+    @keyframes appear { from { opacity:0; transform:translateY(7px) } to { opacity:1; transform:translateY(0) } }
+    @media(max-width:520px) { .shell { padding:16px 15px 35px } .screen { padding-top:32px } .hero { min-height:120px } .doodle { opacity:.13 } .card { padding:20px } .key { min-height:61px } .pin-dots { min-height:66px } }
+    @media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none!important; transition:none!important } }
   </style>
 </head>
-
 <body>
-  <div class="shell">
-    <header class="bar">
-      <button
-        id="adminBack"
-        class="back"
-        type="button"
-        hidden
-      >‹ Indietro</button>
+<div class="shell">
+  <header class="bar">
+    <button id="adminBack" class="back" type="button" hidden>‹ Indietro</button>
+    <button id="adminOpen" class="small-button" type="button" hidden>Admin</button>
+    <button id="themeToggle" class="theme-toggle" type="button" aria-label="Tema automatico" title="Tema automatico">◐</button>
+  </header>
 
-      <button
-        id="adminOpen"
-        class="small-button"
-        type="button"
-        hidden
-      >Admin</button>
+  <main>
+    <section id="bootScreen" class="screen">
+      <div class="hero"><div class="hero-copy"><span class="kicker">Operations</span><h1>Attendance Center<span>.</span></h1></div></div>
+      <p class="hint">Apertura archivio...</p>
+    </section>
 
-      <div class="themes" role="group" aria-label="Tema">
-        <button
-          type="button"
-          data-theme="light"
-          aria-label="Tema chiaro"
-        >☀</button>
+    <section id="errorScreen" class="screen" hidden>
+      <h1>Archivio non disponibile.</h1>
+      <p id="bootMessage" class="message error" role="alert"></p>
+    </section>
 
-        <button
-          type="button"
-          data-theme="auto"
-          aria-label="Tema automatico"
-        >◐</button>
-
-        <button
-          type="button"
-          data-theme="dark"
-          aria-label="Tema scuro"
-        >☾</button>
+    <section id="setupScreen" class="screen" hidden>
+      <div class="hero"><div class="hero-copy"><span class="kicker">Prima configurazione</span><h1>Attendance Center<span>.</span></h1></div></div>
+      <div id="setupImport" class="card">
+        <h2>Importa configurazione</h2>
+        <form id="setupForm" class="form">
+          <div class="field"><label for="setupPin">PIN Admin</label><input id="setupPin" type="password" inputmode="numeric" autocomplete="off" minlength="6" maxlength="6" pattern="[0-9]{6}" required></div>
+          <div class="field"><label for="setupJson">JSON Attendance</label><input id="setupJson" type="file" accept=".json,application/json" required></div>
+          <button id="setupContinue" class="primary" type="submit">Continua</button>
+        </form>
       </div>
-    </header>
+      <div id="setupDevice" class="card" hidden>
+        <h2>Nome dispositivo</h2>
+        <form id="deviceForm" class="form">
+          <div class="field"><label for="deviceInput">Dispositivo</label><input id="deviceInput" type="text" maxlength="80" placeholder="Es. Tablet ingresso" required></div>
+          <p id="setupCount" class="hint"></p>
+          <button id="activateButton" class="primary" type="submit">Attiva dispositivo</button>
+          <button id="setupBack" class="secondary" type="button">‹ Indietro</button>
+        </form>
+      </div>
+      <p id="setupMessage" class="message" role="alert"></p>
+    </section>
 
-    <main>
-      <!-- avvio -->
-
-      <section id="bootScreen" class="screen">
-        <div class="hero">
-          <div class="hero-copy">
-            <span class="kicker">Operations</span>
-            <h1>Attendance Center<span>.</span></h1>
+    <section id="clockScreen" class="screen" hidden>
+      <div class="hero">
+        <div class="hero-copy"><span class="kicker">Operations</span><h1>Attendance Center<span>.</span></h1></div>
+        <div class="doodles" aria-hidden="true">
+          <div class="doodle"><svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="27"/><path d="M40 23v18l12 9"/></svg></div>
+          <div class="doodle two"><svg viewBox="0 0 80 80"><rect x="15" y="18" width="50" height="45" rx="11"/><path d="M27 18v-8M53 18v-8M15 32h50"/></svg></div>
+        </div>
+      </div>
+      <p id="deviceName" class="device-label"></p>
+      <div class="card clock-card">
+        <div class="clock-head"><h2>Timbratura</h2></div>
+        <div class="pin-area">
+          <span class="pin-label">PIN dipendente</span>
+          <div id="pinDisplay" class="pin-dots" role="status" aria-live="polite" aria-label="PIN: 0 cifre su 4">
+            <span class="pin-dot" aria-hidden="true"></span>
+            <span class="pin-dot" aria-hidden="true"></span>
+            <span class="pin-dot" aria-hidden="true"></span>
+            <span class="pin-dot" aria-hidden="true"></span>
           </div>
         </div>
-
-        <p class="hint">Apertura archivio...</p>
-      </section>
-
-      <!-- errore archivio -->
-
-      <section
-        id="errorScreen"
-        class="screen"
-        hidden
-      >
-        <h1>Archivio non disponibile.</h1>
-
-        <p
-          id="bootMessage"
-          class="message error"
-          role="alert"
-        ></p>
-      </section>
-
-      <!-- configurazione iniziale -->
-
-      <section
-        id="setupScreen"
-        class="screen"
-        hidden
-      >
-        <div class="hero">
-          <div class="hero-copy">
-            <span class="kicker">
-              Prima configurazione
-            </span>
-            <h1>Attendance Center<span>.</span></h1>
-          </div>
-
-          <div class="doodles" aria-hidden="true">
-            <div class="doodle">
-              <svg viewBox="0 0 80 80">
-                <circle cx="40" cy="40" r="27"/>
-                <path d="M40 23v18l12 9"/>
-              </svg>
-            </div>
-          </div>
+        <div class="keypad" aria-label="Tastierino numerico">
+          <button class="key" type="button" data-digit="1">1</button>
+          <button class="key" type="button" data-digit="2">2</button>
+          <button class="key" type="button" data-digit="3">3</button>
+          <button class="key" type="button" data-digit="4">4</button>
+          <button class="key" type="button" data-digit="5">5</button>
+          <button class="key" type="button" data-digit="6">6</button>
+          <button class="key" type="button" data-digit="7">7</button>
+          <button class="key" type="button" data-digit="8">8</button>
+          <button class="key" type="button" data-digit="9">9</button>
+          <button id="clearPin" class="key minor" type="button" aria-label="Cancella tutto">C</button>
+          <button class="key" type="button" data-digit="0">0</button>
+          <button id="erasePin" class="key minor" type="button" aria-label="Cancella ultima cifra">⌫</button>
         </div>
+      </div>
+      <p id="clockMessage" class="message clock-result" role="status" aria-live="polite"></p>
+    </section>
 
-        <div id="setupImport" class="card">
-          <h2>Importa configurazione</h2>
-
-          <form id="setupForm" class="form">
-            <div class="field">
-              <label for="setupPin">PIN Admin</label>
-              <input
-                id="setupPin"
-                type="password"
-                inputmode="numeric"
-                autocomplete="off"
-                minlength="6"
-                maxlength="6"
-                pattern="[0-9]{6}"
-                required
-              >
-            </div>
-
-            <div class="field">
-              <label for="setupJson">
-                JSON Attendance
-              </label>
-              <input
-                id="setupJson"
-                type="file"
-                accept=".json,application/json"
-                required
-              >
-            </div>
-
-            <button
-              id="setupContinue"
-              class="primary"
-              type="submit"
-            >Continua</button>
+    <section id="adminScreen" class="screen" hidden>
+      <div class="hero"><div class="hero-copy"><span class="kicker">Attendance Center</span><h1>Amministrazione<span>.</span></h1></div></div>
+      <div id="adminGate" class="card">
+        <h2>Accesso Admin</h2>
+        <form id="adminLogin" class="form">
+          <div class="field"><label for="adminPin">PIN Admin</label><input id="adminPin" type="password" inputmode="numeric" autocomplete="off" minlength="6" maxlength="6" pattern="[0-9]{6}" required></div>
+          <button id="adminLoginButton" class="primary" type="submit">Sblocca</button>
+        </form>
+        <p id="adminMessage" class="message" role="alert"></p>
+      </div>
+      <div id="adminPanel" class="stack" hidden>
+        <div class="card">
+          <h2>Dispositivo</h2><h3 id="adminDeviceName"></h3><p id="adminDeviceId" class="hint id-text"></p>
+          <div class="stat"><strong id="adminPunchCount">0</strong><span>Timbrature</span></div>
+        </div>
+        <div class="card">
+          <h2>Aggiorna dipendenti</h2>
+          <form id="importForm" class="form">
+            <div class="field"><label for="importJson">JSON Attendance</label><input id="importJson" type="file" accept=".json,application/json" required></div>
+            <button id="importButton" class="primary" type="submit">Importa JSON</button>
           </form>
+          <p id="importMessage" class="message" role="status"></p>
         </div>
+        <div class="card"><h2>Ultime timbrature</h2><div id="punchList" class="log"></div></div>
+        <button id="adminExit" class="secondary" type="button">Blocca amministrazione</button>
+      </div>
+    </section>
+  </main>
 
-        <div id="setupDevice" class="card" hidden>
-          <h2>Nome dispositivo</h2>
-
-          <form id="deviceForm" class="form">
-            <div class="field">
-              <label for="deviceInput">
-                Dispositivo
-              </label>
-
-              <input
-                id="deviceInput"
-                type="text"
-                maxlength="80"
-                placeholder="Es. Tablet ingresso"
-                required
-              >
-            </div>
-
-            <p id="setupCount" class="hint"></p>
-
-            <button
-              id="activateButton"
-              class="primary"
-              type="submit"
-            >Attiva dispositivo</button>
-
-            <button
-              id="setupBack"
-              class="secondary"
-              type="button"
-            >‹ Indietro</button>
-          </form>
-        </div>
-
-        <p
-          id="setupMessage"
-          class="message"
-          role="alert"
-        ></p>
-      </section>
-
-      <!-- timbratura -->
-
-      <section
-        id="clockScreen"
-        class="screen"
-        hidden
-      >
-        <div class="hero">
-          <div class="hero-copy">
-            <span class="kicker">Operations</span>
-            <h1>Attendance Center<span>.</span></h1>
-          </div>
-
-          <div class="doodles" aria-hidden="true">
-            <div class="doodle">
-              <svg viewBox="0 0 80 80">
-                <circle cx="40" cy="40" r="27"/>
-                <path d="M40 23v18l12 9"/>
-              </svg>
-            </div>
-
-            <div class="doodle two">
-              <svg viewBox="0 0 80 80">
-                <rect
-                  x="15"
-                  y="18"
-                  width="50"
-                  height="45"
-                  rx="11"
-                />
-                <path d="M27 18v-8M53 18v-8M15 32h50"/>
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <p id="deviceName" class="device-label"></p>
-
-        <div class="card clock-card">
-          <div class="clock-head">
-            <h2>Timbratura</h2>
-          </div>
-
-          <div class="pin-area">
-            <span class="pin-label">
-              PIN dipendente
-            </span>
-
-            <div
-              id="pinDisplay"
-              class="pin-dots"
-              role="status"
-              aria-live="polite"
-              aria-label="PIN: 0 cifre su 4"
-            >
-              <span class="pin-dot" aria-hidden="true"></span>
-              <span class="pin-dot" aria-hidden="true"></span>
-              <span class="pin-dot" aria-hidden="true"></span>
-              <span class="pin-dot" aria-hidden="true"></span>
-            </div>
-          </div>
-
-          <div class="keypad" aria-label="Tastierino numerico">
-            <button class="key" type="button" data-digit="1">1</button>
-            <button class="key" type="button" data-digit="2">2</button>
-            <button class="key" type="button" data-digit="3">3</button>
-            <button class="key" type="button" data-digit="4">4</button>
-            <button class="key" type="button" data-digit="5">5</button>
-            <button class="key" type="button" data-digit="6">6</button>
-            <button class="key" type="button" data-digit="7">7</button>
-            <button class="key" type="button" data-digit="8">8</button>
-            <button class="key" type="button" data-digit="9">9</button>
-
-            <button
-              id="clearPin"
-              class="key minor"
-              type="button"
-              aria-label="Cancella tutto"
-            >C</button>
-
-            <button class="key" type="button" data-digit="0">0</button>
-
-            <button
-              id="erasePin"
-              class="key minor"
-              type="button"
-              aria-label="Cancella ultima cifra"
-            >⌫</button>
-          </div>
-        </div>
-
-        <p
-          id="clockMessage"
-          class="message clock-result"
-          role="status"
-          aria-live="polite"
-        ></p>
-      </section>
-
-      <!-- amministrazione -->
-
-      <section
-        id="adminScreen"
-        class="screen"
-        hidden
-      >
-        <div class="hero">
-          <div class="hero-copy">
-            <span class="kicker">Attendance Center</span>
-            <h1>Amministrazione<span>.</span></h1>
-          </div>
-        </div>
-
-        <div id="adminGate" class="card">
-          <h2>Accesso Admin</h2>
-
-          <form id="adminLogin" class="form">
-            <div class="field">
-              <label for="adminPin">PIN Admin</label>
-              <input
-                id="adminPin"
-                type="password"
-                inputmode="numeric"
-                autocomplete="off"
-                minlength="6"
-                maxlength="6"
-                pattern="[0-9]{6}"
-                required
-              >
-            </div>
-
-            <button
-              id="adminLoginButton"
-              class="primary"
-              type="submit"
-            >Sblocca</button>
-          </form>
-
-          <p
-            id="adminMessage"
-            class="message"
-            role="alert"
-          ></p>
-        </div>
-
-        <div id="adminPanel" class="stack" hidden>
-          <div class="card">
-            <h2>Dispositivo</h2>
-            <h3 id="adminDeviceName"></h3>
-
-            <p
-              id="adminDeviceId"
-              class="hint id-text"
-            ></p>
-
-            <div class="stat">
-              <strong id="adminPunchCount">0</strong>
-              <span>Timbrature</span>
-            </div>
-          </div>
-
-          <div class="card">
-            <h2>Aggiorna dipendenti</h2>
-
-            <form id="importForm" class="form">
-              <div class="field">
-                <label for="importJson">
-                  JSON Attendance
-                </label>
-
-                <input
-                  id="importJson"
-                  type="file"
-                  accept=".json,application/json"
-                  required
-                >
-              </div>
-
-              <button
-                id="importButton"
-                class="primary"
-                type="submit"
-              >Importa JSON</button>
-            </form>
-
-            <p
-              id="importMessage"
-              class="message"
-              role="status"
-            ></p>
-          </div>
-
-          <div class="card">
-            <h2>Ultime timbrature</h2>
-            <div id="punchList" class="log"></div>
-          </div>
-
-          <button
-            id="adminExit"
-            class="secondary"
-            type="button"
-          >Blocca amministrazione</button>
-        </div>
-      </section>
-    </main>
-
-    <!-- controllo pubblico degli aggiornamenti -->
-
-    <footer class="footer">
-      <span id="offlineStatus" class="status">
-        <span class="dot"></span>
-        <span id="offlineText">Verifica offline...</span>
-      </span>
-
-      <button
-        id="checkUpdateButton"
-        class="footer-button"
-        type="button"
-      >↻ Controlla aggiornamenti</button>
-
-      <p
-        id="updateMessage"
-        class="message"
-        role="status"
-        aria-live="polite"
-      ></p>
-
-      <span>Attendance Center · versione 1.3</span>
-    </footer>
-  </div>
-
-  <script type="module" src="./app.js"></script>
+  <footer class="footer">
+    <span id="offlineStatus" class="status"><span class="dot"></span><span id="offlineText">Verifica offline...</span></span>
+    <button id="checkUpdateButton" class="footer-button" type="button">↻ Controlla aggiornamenti</button>
+    <p id="updateMessage" class="message" role="status" aria-live="polite"></p>
+    <span>Attendance Center · versione 1.4</span>
+  </footer>
+</div>
+<script type="module" src="./app.js"></script>
 </body>
 </html>
