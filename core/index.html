@@ -1,9 +1,11 @@
+
 <!doctype html>
 <html lang="it">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#f5f5f7">
+<meta name="app-version" content="1.6">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="core">
 
@@ -104,28 +106,18 @@ select:focus-visible {
   margin-bottom: 38px;
 }
 
-.themes {
-  display: flex;
-  gap: 4px;
-  padding: 4px;
-  background: var(--card);
+.theme-toggle {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  padding: 0;
   border: 1px solid var(--border);
-  border-radius: 30px;
-}
-
-.themes button {
-  width: 40px;
-  height: 40px;
-  border: 0;
   border-radius: 50%;
-  background: transparent;
-  color: var(--muted);
-  font-size: 19px;
-}
-
-.themes button.active {
-  background: var(--soft);
+  background: var(--card);
   color: var(--text);
+  font-size: 22px;
+  line-height: 1;
 }
 
 .lock-button,
@@ -595,6 +587,25 @@ h1 span {
   background: var(--success);
 }
 
+.footer-update {
+  display: block;
+  margin: 6px auto 0;
+  padding: 5px 8px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.footer-message {
+  max-width: 420px;
+  margin: 3px auto 0;
+  overflow-wrap: anywhere;
+}
+
 @keyframes float {
   0%, 100% {
     transform: translateY(0) rotate(-8deg);
@@ -705,22 +716,12 @@ h1 span {
       blocca
     </button>
 
-    <div class="themes" role="group" aria-label="tema">
-      <button
-        type="button"
-        data-theme="light"
-        aria-label="tema chiaro">☀</button>
-
-      <button
-        type="button"
-        data-theme="auto"
-        aria-label="tema automatico">◐</button>
-
-      <button
-        type="button"
-        data-theme="dark"
-        aria-label="tema scuro">☾</button>
-    </div>
+    <button
+      id="themeToggle"
+      class="theme-toggle"
+      type="button"
+      aria-label="tema automatico"
+      title="tema automatico">◐</button>
 
   </header>
 
@@ -1454,7 +1455,14 @@ h1 span {
 
     </div>
 
-    <div>core center · versione 1.5</div>
+    <button
+      id="checkUpdateButton"
+      class="footer-update"
+      type="button">↻ controlla aggiornamenti</button>
+
+    <p id="updateMessage" class="message footer-message" role="status" aria-live="polite"></p>
+
+    <div>core center · versione 1.6</div>
 
   </footer>
 
@@ -1486,9 +1494,14 @@ const employeeForm = get("employeeForm");
 const exportForm = get("exportForm");
 
 const pages = document.querySelectorAll(".page");
-const themeButtons = document.querySelectorAll(
-  "[data-theme]"
-);
+const appVersion = "1.6";
+const expectedCache = "core-shell-v8";
+const themeModes = ["light", "auto", "dark"];
+const themeSymbols = { light: "☀", auto: "◐", dark: "☾" };
+const themeNames = { light: "chiaro", auto: "automatico", dark: "scuro" };
+const colorPreference = window.matchMedia("(prefers-color-scheme: dark)");
+let themeMode = "auto";
+let activeOperations = 0;
 
 const days = [
   "lun", "mar", "mer", "gio",
@@ -1626,6 +1639,7 @@ setupForm.addEventListener("submit", async event => {
   );
 
   button.disabled = true;
+  activeOperations += 1;
   showMessage("gateError", "");
 
   try {
@@ -1640,6 +1654,7 @@ setupForm.addEventListener("submit", async event => {
   } finally {
     setupForm.reset();
     button.disabled = false;
+    activeOperations -= 1;
   }
 });
 
@@ -1651,6 +1666,7 @@ unlockForm.addEventListener("submit", async event => {
   );
 
   button.disabled = true;
+  activeOperations += 1;
   showMessage("gateError", "");
 
   try {
@@ -1665,6 +1681,7 @@ unlockForm.addEventListener("submit", async event => {
   } finally {
     unlockForm.reset();
     button.disabled = false;
+    activeOperations -= 1;
   }
 });
 
@@ -1704,6 +1721,7 @@ changePinForm.addEventListener("submit", async event => {
   }
 
   button.disabled = true;
+  activeOperations += 1;
 
   try {
     await vault.changePin(oldPin, newPin);
@@ -1723,6 +1741,7 @@ changePinForm.addEventListener("submit", async event => {
     );
   } finally {
     button.disabled = false;
+    activeOperations -= 1;
   }
 });
 
@@ -2133,6 +2152,7 @@ employeeForm.addEventListener("submit", async event => {
 
   showMessage("employeeMessage", "");
   button.disabled = true;
+  activeOperations += 1;
 
   try {
     const fields = readEmployeeFields();
@@ -2225,6 +2245,7 @@ employeeForm.addEventListener("submit", async event => {
     );
   } finally {
     button.disabled = false;
+    activeOperations -= 1;
   }
 });
 
@@ -2272,6 +2293,7 @@ exportForm.addEventListener("submit", async event => {
 
   showMessage("exportMessage", "");
   button.disabled = true;
+  activeOperations += 1;
 
   try {
     if (!/^[0-9]{6}$/.test(pin)) {
@@ -2351,158 +2373,337 @@ exportForm.addEventListener("submit", async event => {
   } finally {
     exportForm.reset();
     button.disabled = false;
+    activeOperations -= 1;
   }
 });
 
-/* temi */
+/* tema unico */
 
 function setTheme(theme) {
-  const selected =
-    ["light", "dark", "auto"].includes(theme)
-      ? theme
-      : "auto";
-
-  document.documentElement.dataset.theme =
-    selected === "auto" ? "" : selected;
-
-  themeButtons.forEach(button => {
-    const active =
-      button.dataset.theme === selected;
-
-    button.classList.toggle("active", active);
-
-    button.setAttribute(
-      "aria-pressed",
-      String(active)
-    );
-  });
-
-  const prefersDark = window.matchMedia(
-    "(prefers-color-scheme: dark)"
-  ).matches;
-
-  const dark =
-    selected === "dark" ||
-    (selected === "auto" && prefersDark);
-
-  document
-    .querySelector('meta[name="theme-color"]')
-    .setAttribute(
-      "content",
-      dark ? "#111113" : "#f5f5f7"
-    );
-
-  try {
-    localStorage.setItem("theme", selected);
-  } catch (error) {
-    // tema locale della sessione
-  }
+  themeMode = themeModes.includes(theme) ? theme : "auto";
+  document.documentElement.dataset.theme = themeMode === "auto" ? "" : themeMode;
+  const button = get("themeToggle");
+  button.textContent = themeSymbols[themeMode];
+  button.setAttribute("aria-label", `tema ${themeNames[themeMode]}. tocca per cambiare`);
+  button.title = `tema ${themeNames[themeMode]}`;
+  const dark = themeMode === "dark" || (themeMode === "auto" && colorPreference.matches);
+  document.querySelector('meta[name="theme-color"]').setAttribute(
+    "content", dark ? "#111113" : "#f5f5f7"
+  );
+  try { localStorage.setItem("theme", themeMode); }
+  catch { /* preferenza facoltativa */ }
 }
-
-themeButtons.forEach(button => {
-  button.addEventListener("click", () => {
-    setTheme(button.dataset.theme);
-  });
-});
 
 let savedTheme = "auto";
-
-try {
-  savedTheme =
-    localStorage.getItem("theme") || "auto";
-} catch (error) {
-  savedTheme = "auto";
-}
-
+try { savedTheme = localStorage.getItem("theme") || "auto"; }
+catch { /* usa automatico */ }
 setTheme(savedTheme);
 
-const colorPreference = window.matchMedia(
-  "(prefers-color-scheme: dark)"
-);
+get("themeToggle").addEventListener("click", () => {
+  setTheme(themeModes[(themeModes.indexOf(themeMode) + 1) % themeModes.length]);
+});
 
-if (colorPreference.addEventListener) {
-  colorPreference.addEventListener("change", () => {
-    if (!document.documentElement.dataset.theme) {
-      setTheme("auto");
-    }
-  });
-}
+colorPreference.addEventListener?.("change", () => {
+  if (themeMode === "auto") setTheme("auto");
+});
 
-/* disponibilità offline */
+/* disponibilità offline: solo verifica locale */
 
 const offlineStatus = get("offlineStatus");
 const offlineText = get("offlineText");
+let registration = null;
+let checkingUpdates = false;
+let pendingUpdate = null;
+let applyingUpdate = false;
+let updateTimer = null;
+let bootReady = false;
 
-function setOfflineStatus(ready, message) {
+function setOfflineStatus(ready, value) {
   offlineStatus.classList.toggle("ready", ready);
-  offlineText.textContent = message;
+  offlineText.textContent = value;
 }
 
-async function checkOfflineCache(worker) {
+function updateMessage(value = "", kind = "") {
+  showMessage("updateMessage", value, kind);
+}
+
+function delay(milliseconds) {
+  return new Promise(resolve => setTimeout(resolve, milliseconds));
+}
+
+function withTimeout(promise, milliseconds) {
+  let timer;
+  return Promise.race([
+    promise,
+    new Promise((resolve, reject) => {
+      timer = setTimeout(() => reject(new Error("tempo di attesa superato")), milliseconds);
+    })
+  ]).finally(() => clearTimeout(timer));
+}
+
+function workerInfo(worker, type = "app-status") {
+  if (!worker) return Promise.resolve(null);
   return new Promise(resolve => {
     const channel = new MessageChannel();
-
-    const timer = setTimeout(() => {
-      channel.port1.close();
-      resolve(false);
-    }, 3000);
-
-    channel.port1.onmessage = event => {
+    let finished = false;
+    const finish = result => {
+      if (finished) return;
+      finished = true;
       clearTimeout(timer);
       channel.port1.close();
-
-      resolve(event.data?.ready === true);
+      channel.port2.close();
+      resolve(result);
     };
-
-    worker.postMessage(
-      { type: "cache-check" },
-      [channel.port2]
-    );
+    const timer = setTimeout(() => finish(null), 3500);
+    channel.port1.onmessage = event => finish(event.data);
+    try { worker.postMessage({ type }, [channel.port2]); }
+    catch { finish(null); }
   });
 }
 
-async function registerOffline() {
+async function getRegistration() {
+  if (!("serviceWorker" in navigator)) return null;
+  registration = await withTimeout(
+    navigator.serviceWorker.getRegistration("./"), 7000
+  );
+  return registration;
+}
+
+async function refreshOfflineStatus() {
   if (!("serviceWorker" in navigator)) {
-    setOfflineStatus(
-      false,
-      "offline non supportato"
-    );
+    setOfflineStatus(false, "offline non supportato");
+    return false;
+  }
+  try {
+    const current = await getRegistration();
+    if (!current?.active) {
+      setOfflineStatus(false, current?.installing ? "preparazione offline..." : "offline non pronto");
+      return false;
+    }
+    const info = await workerInfo(current.active);
+    const ready = info?.ready === true &&
+      info.appVersion === appVersion &&
+      info.cacheName === expectedCache;
+    setOfflineStatus(ready, ready
+      ? "disponibile offline"
+      : info?.ready === true ? "versione offline da aggiornare" : "offline non pronto");
+    return ready;
+  } catch (error) {
+    console.warn("stato offline:", error);
+    setOfflineStatus(false, "verifica offline non riuscita");
+    return false;
+  }
+}
+
+async function prepareOffline() {
+  if (!("serviceWorker" in navigator)) {
+    setOfflineStatus(false, "offline non supportato");
     return;
   }
-
   try {
-    await navigator.serviceWorker.register(
-      "./sw.js",
-      { scope: "./" }
-    );
-
-    const registration =
-      await navigator.serviceWorker.ready;
-
-    const ready = await checkOfflineCache(
-      registration.active
-    );
-
-    setOfflineStatus(
-      ready,
-      ready
-        ? "interfaccia disponibile offline"
-        : "cache offline da verificare"
-    );
+    let current = await getRegistration();
+    if (!current && navigator.onLine) {
+      current = await withTimeout(
+        navigator.serviceWorker.register("./sw.js", {
+          scope: "./", updateViaCache: "none"
+        }), 15000
+      );
+      registration = current;
+    }
+    if (current && !current.active && current.installing) {
+      setOfflineStatus(false, "preparazione offline...");
+      await withTimeout(navigator.serviceWorker.ready, 12000);
+    }
   } catch (error) {
-    setOfflineStatus(
-      false,
-      "offline non disponibile"
-    );
-
-    console.error(error);
+    console.warn("preparazione offline:", error);
   }
+  await refreshOfflineStatus();
+}
+
+/* aggiornamenti: ricerca di rete soltanto dopo il click */
+
+function canApplyUpdate() {
+  const homeReady = !workspace.hidden && get("home").classList.contains("active");
+  const lockedReady = !gate.hidden &&
+    !get("newPin").value && !get("confirmPin").value && !get("adminPin").value;
+  return bootReady && activeOperations === 0 &&
+    !document.hidden && (homeReady || lockedReady);
+}
+
+function queueUpdate(worker = null) {
+  pendingUpdate = worker || "reload";
+  updateMessage("aggiornamento pronto. attendo la fine delle operazioni.");
+  if (updateTimer !== null) clearInterval(updateTimer);
+  updateTimer = setInterval(() => {
+    if (canApplyUpdate()) void applyUpdate();
+  }, 500);
+  if (canApplyUpdate()) void applyUpdate();
+}
+
+async function applyUpdate() {
+  if (applyingUpdate || !pendingUpdate || !canApplyUpdate()) return;
+  applyingUpdate = true;
+  if (updateTimer !== null) clearInterval(updateTimer);
+  updateTimer = null;
+  get("checkUpdateButton").disabled = true;
+  updateMessage("installazione aggiornamento...");
+  try {
+    if (pendingUpdate !== "reload") {
+      const worker = pendingUpdate;
+      worker.postMessage({ type: "activate-update" });
+      let activated = false;
+      for (let attempt = 0; attempt < 60; attempt++) {
+        const current = await getRegistration();
+        if (current?.active?.scriptURL === worker.scriptURL &&
+            worker.state === "activated") {
+          activated = true;
+          break;
+        }
+        await delay(350);
+      }
+      if (!activated) throw new Error("attivazione non completata");
+    }
+    location.reload();
+  } catch (error) {
+    applyingUpdate = false;
+    pendingUpdate = null;
+    get("checkUpdateButton").disabled = false;
+    updateMessage(`${error.message}. riprova il controllo.`, "error");
+  }
+}
+
+async function remoteVersion() {
+  // sw.js non è nella shell; il parametro impedisce di usare una copia vecchia.
+  const url = new URL("./sw.js", location.href);
+  url.searchParams.set("manual-update", String(Date.now()));
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 18000);
+  try {
+    const response = await fetch(url, { cache: "no-store", signal: controller.signal });
+    if (!response.ok) throw new Error("server aggiornamenti non disponibile");
+    const source = await response.text();
+    const match = source.match(/const appVersion\s*=\s*["']([0-9.]+)["']/);
+    if (!match) throw new Error("versione online non leggibile");
+    return match[1];
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function repairShell(worker) {
+  const result = await workerInfo(worker, "repair-shell");
+  return result?.ready === true;
+}
+
+async function waitForVersion(version) {
+  const deadline = Date.now() + 26000;
+  while (Date.now() < deadline) {
+    const current = await getRegistration();
+    if (current?.waiting) {
+      const info = await workerInfo(current.waiting);
+      if (info?.ready && info.appVersion === version) {
+        return { worker: current.waiting, active: false };
+      }
+    }
+    if (current?.active) {
+      const info = await workerInfo(current.active);
+      if (info?.ready && info.appVersion === version) {
+        return { worker: current.active, active: true };
+      }
+    }
+    if (current?.installing?.state === "redundant") {
+      throw new Error("installazione non riuscita");
+    }
+    await delay(400);
+  }
+  return null;
+}
+
+async function checkForUpdates() {
+  if (checkingUpdates || applyingUpdate || pendingUpdate) return;
+  checkingUpdates = true;
+  const button = get("checkUpdateButton");
+  button.disabled = true;
+  updateMessage("controllo aggiornamenti...");
+  try {
+    if (!navigator.onLine) throw new Error("connessione non disponibile");
+    if (!("serviceWorker" in navigator)) throw new Error("aggiornamenti non supportati");
+    let current = await getRegistration();
+    if (!current) {
+      current = await withTimeout(navigator.serviceWorker.register("./sw.js", {
+        scope: "./", updateViaCache: "none"
+      }), 15000);
+      registration = current;
+    }
+    const version = await remoteVersion();
+    const waiting = await workerInfo(current.waiting);
+    if (waiting?.ready && waiting.appVersion === version) {
+      queueUpdate(current.waiting);
+      return;
+    }
+    const active = await workerInfo(current.active);
+    if (active?.appVersion === version) {
+      if (!active.ready) {
+        updateMessage("ripristino file offline...");
+        const repaired = await repairShell(current.active);
+        if (!repaired) throw new Error("file offline non ripristinati");
+      }
+      if (version !== appVersion || !navigator.serviceWorker.controller) {
+        queueUpdate();
+      } else {
+        updateMessage("l'app è aggiornata", "success");
+      }
+      return;
+    }
+    updateMessage(`versione ${version} disponibile. download...`);
+    try {
+      await withTimeout(current.update(), 20000);
+    } catch (error) {
+      // una registrazione obsoleta può essere sparita tra get e update.
+      current = await getRegistration();
+      if (!current) {
+        current = await withTimeout(navigator.serviceWorker.register("./sw.js", {
+          scope: "./", updateViaCache: "none"
+        }), 15000);
+        registration = current;
+      } else if (!current.installing && !current.waiting) {
+        throw error;
+      }
+    }
+    const result = await waitForVersion(version);
+    if (!result) throw new Error("installazione non completata. riprova.");
+    if (result.active) {
+      if (version !== appVersion || !navigator.serviceWorker.controller) queueUpdate();
+      else updateMessage("l'app è aggiornata", "success");
+    } else {
+      queueUpdate(result.worker);
+    }
+  } catch (error) {
+    updateMessage(error.name === "AbortError"
+      ? "connessione troppo lenta. riprova."
+      : error.message, "error");
+  } finally {
+    checkingUpdates = false;
+    if (!pendingUpdate && !applyingUpdate) button.disabled = false;
+    void refreshOfflineStatus();
+  }
+}
+
+get("checkUpdateButton").addEventListener("click", () => {
+  void checkForUpdates();
+});
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    // solo controllo locale: nessuna richiesta di nuove versioni.
+    void refreshOfflineStatus();
+  });
 }
 
 /* avvio */
 
-showGate();
-registerOffline();
+void showGate().finally(() => { bootReady = true; });
+void prepareOffline();
 
 </script>
 </body>
