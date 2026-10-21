@@ -1,3 +1,4 @@
+
 import {
   openProvisioningPackage,
   createProvisioningPackage,
@@ -6,8 +7,8 @@ import {
 
 import { createAttendanceStore } from "./store.js";
 
-const appVersion = "1.4.1";
-const cacheName = "attendance-shell-v8";
+const appVersion = "1.5";
+const cacheName = "attendance-shell-v9";
 
 const get = id => document.getElementById(id);
 const store = createAttendanceStore();
@@ -41,19 +42,17 @@ let clockTimer = null;
 let busy = false;
 let appReady = false;
 let lastInteractionAt = Date.now();
+let themeMode = "auto";
 
-let registration = null;
 let checkingUpdates = false;
 let pendingUpdate = null;
 let applyingUpdate = false;
 let updateTimer = null;
-let themeMode = "auto";
 
 /* interfaccia */
 
 function message(id, value = "", kind = "") {
   const element = get(id);
-
   element.textContent = value;
   element.className = kind
     ? `message ${kind}`
@@ -65,18 +64,13 @@ function screen(id) {
     element.hidden = element.id !== id;
   });
 
-  get("adminOpen").hidden =
-    id !== "clockScreen";
-
-  get("adminBack").hidden =
-    id !== "adminScreen";
-
+  get("adminOpen").hidden = id !== "clockScreen";
+  get("adminBack").hidden = id !== "adminScreen";
   window.scrollTo(0, 0);
 }
 
 function setBusy(value) {
   busy = value;
-
   document.querySelectorAll(".key").forEach(button => {
     button.disabled = value;
   });
@@ -101,16 +95,12 @@ function renderClockPin() {
 }
 
 function cancelClockTimer() {
-  if (clockTimer !== null) {
-    clearTimeout(clockTimer);
-  }
-
+  if (clockTimer !== null) clearTimeout(clockTimer);
   clockTimer = null;
 }
 
 function resetClockPin() {
   cancelClockTimer();
-
   clockPin = "";
   renderClockPin();
 }
@@ -121,25 +111,18 @@ function addClockDigit(digit) {
     get("clockScreen").hidden ||
     clockPin.length >= 4 ||
     !/^[0-9]$/.test(digit)
-  ) {
-    return;
-  }
+  ) return;
 
   lastInteractionAt = Date.now();
 
-  if (!clockPin.length) {
-    message("clockMessage");
-  }
+  if (!clockPin.length) message("clockMessage");
 
   clockPin += digit;
   renderClockPin();
 
-  if (clockPin.length !== 4) {
-    return;
-  }
+  if (clockPin.length !== 4) return;
 
   const enteredPin = clockPin;
-
   cancelClockTimer();
 
   clockTimer = setTimeout(() => {
@@ -156,21 +139,16 @@ function addClockDigit(digit) {
 }
 
 function eraseClockDigit() {
-  if (busy) {
-    return;
-  }
+  if (busy) return;
 
   lastInteractionAt = Date.now();
   cancelClockTimer();
-
   clockPin = clockPin.slice(0, -1);
   renderClockPin();
 }
 
 function refreshClock() {
-  get("deviceName").textContent =
-    state.device.name;
-
+  get("deviceName").textContent = state.device.name;
   resetClockPin();
   message("clockMessage");
 }
@@ -207,19 +185,14 @@ function checkLock(kind) {
     const seconds = Math.ceil(
       (guard.lockedUntil - Date.now()) / 1000
     );
-
-    throw new Error(
-      `Riprova tra ${seconds} secondi`
-    );
+    throw new Error(`Riprova tra ${seconds} secondi`);
   }
 }
 
 async function updateSecurity(kind, success) {
   const next = structuredClone(state);
 
-  if (!next.security) {
-    next.security = {};
-  }
+  if (!next.security) next.security = {};
 
   const guard = next.security[kind] || {
     failures: 0,
@@ -227,12 +200,7 @@ async function updateSecurity(kind, success) {
   };
 
   if (success) {
-    if (
-      !guard.failures &&
-      !guard.lockedUntil
-    ) {
-      return;
-    }
+    if (!guard.failures && !guard.lockedUntil) return;
 
     guard.failures = 0;
     guard.lockedUntil = 0;
@@ -241,13 +209,11 @@ async function updateSecurity(kind, success) {
 
     if (guard.failures >= 5) {
       guard.failures = 0;
-      guard.lockedUntil =
-        Date.now() + 60000;
+      guard.lockedUntil = Date.now() + 60000;
     }
   }
 
   next.security[kind] = guard;
-
   await store.save(next);
   state = next;
 
@@ -263,311 +229,211 @@ async function updateSecurity(kind, success) {
 /* lettura json */
 
 async function readJsonFile(file) {
-  if (
-    !file ||
-    file.size > 5 * 1024 * 1024
-  ) {
+  if (!file || file.size > 5 * 1024 * 1024) {
     throw new Error(
       "Seleziona un JSON valido (massimo 5 MB)"
     );
   }
 
   try {
-    return JSON.parse(
-      await file.text()
-    );
+    return JSON.parse(await file.text());
   } catch {
-    throw new Error(
-      "JSON non leggibile"
-    );
+    throw new Error("JSON non leggibile");
   }
 }
 
 /* configurazione iniziale */
 
-get("setupForm").addEventListener(
-  "submit",
-  async event => {
-    event.preventDefault();
+get("setupForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  if (busy) return;
 
-    if (busy) {
-      return;
+  setBusy(true);
+  const button = get("setupContinue");
+  button.disabled = true;
+  message("setupMessage");
+
+  try {
+    const pin = get("setupPin").value;
+    const json = await readJsonFile(
+      get("setupJson").files[0]
+    );
+    const config = await openProvisioningPackage(
+      json,
+      pin
+    );
+
+    if (!config.employees.length) {
+      throw new Error(
+        "Il JSON non contiene dipendenti attivi"
+      );
     }
 
-    setBusy(true);
+    pendingSetup = { config, pin };
+    get("setupImport").hidden = true;
+    get("setupDevice").hidden = false;
+    get("setupCount").textContent =
+      "Configurazione pronta";
+    get("setupPin").value = "";
+    get("deviceInput").focus();
 
-    const button = get("setupContinue");
-    button.disabled = true;
-
-    message("setupMessage");
-
-    try {
-      const pin = get("setupPin").value;
-
-      const json = await readJsonFile(
-        get("setupJson").files[0]
-      );
-
-      const config =
-        await openProvisioningPackage(
-          json,
-          pin
-        );
-
-      if (!config.employees.length) {
-        throw new Error(
-          "Il JSON non contiene dipendenti attivi"
-        );
-      }
-
-      pendingSetup = {
-        config,
-        pin
-      };
-
-      get("setupImport").hidden = true;
-      get("setupDevice").hidden = false;
-
-      get("setupCount").textContent =
-        "Configurazione pronta";
-
-      get("setupPin").value = "";
-      get("deviceInput").focus();
-
-    } catch (error) {
-      message(
-        "setupMessage",
-        error.message,
-        "error"
-      );
-    } finally {
-      setBusy(false);
-      button.disabled = false;
-    }
+  } catch (error) {
+    message("setupMessage", error.message, "error");
+  } finally {
+    setBusy(false);
+    button.disabled = false;
   }
-);
+});
 
-get("deviceForm").addEventListener(
-  "submit",
-  async event => {
-    event.preventDefault();
+get("deviceForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  if (busy || !pendingSetup) return;
 
-    if (
-      busy ||
-      !pendingSetup
-    ) {
-      return;
+  setBusy(true);
+  const button = get("activateButton");
+  button.disabled = true;
+  message("setupMessage");
+
+  try {
+    const name = get("deviceInput").value.trim();
+
+    if (!name || name.length > 80) {
+      throw new Error("Inserisci il nome dispositivo");
     }
 
-    setBusy(true);
+    const { config, pin } = pendingSetup;
+    const now = new Date().toISOString();
 
-    const button =
-      get("activateButton");
-
-    button.disabled = true;
-
-    message("setupMessage");
-
-    try {
-      const name =
-        get("deviceInput").value.trim();
-
-      if (!name || name.length > 80) {
-        throw new Error(
-          "Inserisci il nome dispositivo"
-        );
-      }
-
-      const { config, pin } = pendingSetup;
-      const now = new Date().toISOString();
-
-      const challenge =
-        await createProvisioningPackage(
-          {
-            schemaVersion: 1,
-            kind: "center-provisioning",
-            sourceCenter: "core",
-            targetCenter: "attendance",
-            originId: config.originId,
-            exportId: crypto.randomUUID(),
-            issuedAt: now,
-            employees: []
-          },
-          pin
-        );
-
-      const newState = {
+    const challenge = await createProvisioningPackage(
+      {
         schemaVersion: 1,
-        center: "attendance",
+        kind: "center-provisioning",
+        sourceCenter: "core",
+        targetCenter: "attendance",
         originId: config.originId,
+        exportId: crypto.randomUUID(),
+        issuedAt: now,
+        employees: []
+      },
+      pin
+    );
 
-        device: {
-          id: crypto.randomUUID(),
-          name,
-          createdAt: now
-        },
-
-        adminChallenge: challenge,
-
-        employees: structuredClone(
-          config.employees
-        ),
-
-        punches: [],
-
-        imports: [
-          {
-            exportId: config.exportId,
-            at: now,
-            added: config.employees.length,
-            skipped: 0,
-            conflicts: 0
-          }
-        ],
-
-        security: {
-          employee: {
-            failures: 0,
-            lockedUntil: 0
-          },
-          admin: {
-            failures: 0,
-            lockedUntil: 0
-          }
+    const newState = {
+      schemaVersion: 1,
+      center: "attendance",
+      originId: config.originId,
+      device: {
+        id: crypto.randomUUID(),
+        name,
+        createdAt: now
+      },
+      adminChallenge: challenge,
+      employees: structuredClone(config.employees),
+      punches: [],
+      imports: [
+        {
+          exportId: config.exportId,
+          at: now,
+          added: config.employees.length,
+          skipped: 0,
+          conflicts: 0
         }
-      };
-
-      await store.initialize(newState);
-
-      state = newState;
-      pendingSetup = null;
-
-      get("deviceForm").reset();
-
-      if (navigator.storage?.persist) {
-        navigator.storage
-          .persist()
-          .catch(() => {});
+      ],
+      security: {
+        employee: { failures: 0, lockedUntil: 0 },
+        admin: { failures: 0, lockedUntil: 0 }
       }
+    };
 
-      screen("clockScreen");
-      refreshClock();
-
-    } catch (error) {
-      message(
-        "setupMessage",
-        error.message,
-        "error"
-      );
-    } finally {
-      setBusy(false);
-      button.disabled = false;
-    }
-  }
-);
-
-get("setupBack").addEventListener(
-  "click",
-  () => {
-    if (busy) {
-      return;
-    }
-
+    await store.initialize(newState);
+    state = newState;
     pendingSetup = null;
+    get("deviceForm").reset();
 
-    get("setupImport").hidden = false;
-    get("setupDevice").hidden = true;
+    if (navigator.storage?.persist) {
+      navigator.storage.persist().catch(() => {});
+    }
 
-    message("setupMessage");
+    screen("clockScreen");
+    refreshClock();
+
+  } catch (error) {
+    message("setupMessage", error.message, "error");
+  } finally {
+    setBusy(false);
+    button.disabled = false;
   }
-);
+});
+
+get("setupBack").addEventListener("click", () => {
+  if (busy) return;
+
+  pendingSetup = null;
+  get("setupImport").hidden = false;
+  get("setupDevice").hidden = true;
+  message("setupMessage");
+});
 
 /* tastierino */
 
-document
-  .querySelectorAll("[data-digit]")
-  .forEach(button => {
-    button.addEventListener(
-      "click",
-      () => addClockDigit(
-        button.dataset.digit
-      )
-    );
+document.querySelectorAll("[data-digit]").forEach(button => {
+  button.addEventListener("click", () => {
+    addClockDigit(button.dataset.digit);
   });
+});
 
 get("erasePin").addEventListener(
   "click",
   eraseClockDigit
 );
 
-get("clearPin").addEventListener(
-  "click",
-  () => {
-    if (busy) {
-      return;
-    }
+get("clearPin").addEventListener("click", () => {
+  if (busy) return;
 
-    lastInteractionAt = Date.now();
-    resetClockPin();
-  }
-);
+  lastInteractionAt = Date.now();
+  resetClockPin();
+});
 
 /* tastiera fisica */
 
-document.addEventListener(
-  "keydown",
-  event => {
-    if (
-      get("clockScreen").hidden ||
-      busy ||
-      event.ctrlKey ||
-      event.metaKey ||
-      event.altKey
-    ) {
-      return;
-    }
+document.addEventListener("keydown", event => {
+  if (
+    get("clockScreen").hidden ||
+    busy ||
+    event.ctrlKey ||
+    event.metaKey ||
+    event.altKey
+  ) return;
 
-    const target = event.target;
+  const target = event.target;
 
-    if (
-      target instanceof HTMLElement &&
-      (
-        target.matches(
-          "input, textarea, select"
-        ) ||
-        target.isContentEditable
-      )
-    ) {
-      return;
-    }
+  if (
+    target instanceof HTMLElement &&
+    (
+      target.matches("input, textarea, select") ||
+      target.isContentEditable
+    )
+  ) return;
 
-    if (/^[0-9]$/.test(event.key)) {
-      event.preventDefault();
-      addClockDigit(event.key);
+  if (/^[0-9]$/.test(event.key)) {
+    event.preventDefault();
+    addClockDigit(event.key);
 
-    } else if (
-      event.key === "Backspace"
-    ) {
-      event.preventDefault();
-      eraseClockDigit();
+  } else if (event.key === "Backspace") {
+    event.preventDefault();
+    eraseClockDigit();
 
-    } else if (
-      event.key === "Escape"
-    ) {
-      event.preventDefault();
-
-      lastInteractionAt = Date.now();
-      resetClockPin();
-    }
+  } else if (event.key === "Escape") {
+    event.preventDefault();
+    lastInteractionAt = Date.now();
+    resetClockPin();
   }
-);
+});
 
 /* timbratura automatica */
 
 async function registerPunch(pin) {
-  if (busy || !state) {
-    return;
-  }
+  if (busy || !state) return;
 
   setBusy(true);
   cancelClockTimer();
@@ -576,9 +442,7 @@ async function registerPunch(pin) {
     checkLock("employee");
 
     if (!/^[0-9]{4}$/.test(pin)) {
-      throw new Error(
-        "Inserisci un PIN di 4 cifre"
-      );
+      throw new Error("Inserisci un PIN di 4 cifre");
     }
 
     let found = null;
@@ -597,31 +461,20 @@ async function registerPunch(pin) {
     }
 
     if (!found) {
-      await updateSecurity(
-        "employee",
-        false
-      );
+      await updateSecurity("employee", false);
     }
 
-    await updateSecurity(
-      "employee",
-      true
-    );
+    await updateSecurity("employee", true);
 
-    const previous = [
-      ...state.punches
-    ].reverse().find(
-      punch =>
-        punch.employeeId === found.id
-    );
+    const previous = [...state.punches]
+      .reverse()
+      .find(punch => punch.employeeId === found.id);
 
-    const type =
-      previous?.type === "in"
-        ? "out"
-        : "in";
+    const type = previous?.type === "in"
+      ? "out"
+      : "in";
 
     const at = new Date().toISOString();
-
     const next = structuredClone(state);
 
     next.punches.push({
@@ -633,7 +486,6 @@ async function registerPunch(pin) {
     });
 
     await store.save(next);
-
     state = next;
 
     message(
@@ -646,15 +498,9 @@ async function registerPunch(pin) {
     );
 
   } catch (error) {
-    message(
-      "clockMessage",
-      error.message,
-      "error"
-    );
-
+    message("clockMessage", error.message, "error");
   } finally {
     resetClockPin();
-
     lastInteractionAt = Date.now();
     setBusy(false);
   }
@@ -663,18 +509,14 @@ async function registerPunch(pin) {
 /* amministrazione */
 
 function closeAdmin() {
-  if (busy) {
-    return;
-  }
+  if (busy) return;
 
   clearTimeout(adminTimer);
-
   adminTimer = null;
   adminPinSession = null;
 
   get("adminLogin").reset();
   get("importForm").reset();
-
   get("adminGate").hidden = false;
   get("adminPanel").hidden = true;
 
@@ -697,7 +539,6 @@ function refreshAdminTimeout() {
       refreshAdminTimeout();
       return;
     }
-
     closeAdmin();
   }, 120000);
 }
@@ -722,25 +563,16 @@ function renderAdmin() {
   const list = get("punchList");
   list.replaceChildren();
 
-  for (
-    const punch of
-    state.punches.slice(-20).reverse()
-  ) {
-    const row =
-      document.createElement("div");
-
+  for (const punch of state.punches.slice(-20).reverse()) {
+    const row = document.createElement("div");
     row.className = "log-row";
 
-    const person =
-      document.createElement("strong");
-
+    const person = document.createElement("strong");
     person.textContent =
       names.get(punch.employeeId) ||
       "Dipendente non trovato";
 
-    const details =
-      document.createElement("span");
-
+    const details = document.createElement("span");
     details.textContent =
       `${punch.type === "in" ? "Entrata" : "Uscita"} · ` +
       dateFormat.format(new Date(punch.at));
@@ -750,38 +582,25 @@ function renderAdmin() {
   }
 
   if (!state.punches.length) {
-    const empty =
-      document.createElement("p");
-
+    const empty = document.createElement("p");
     empty.className = "hint";
-    empty.textContent =
-      "Nessuna timbratura";
-
+    empty.textContent = "Nessuna timbratura";
     list.append(empty);
   }
 }
 
-get("adminOpen").addEventListener(
-  "click",
-  () => {
-    if (busy) {
-      return;
-    }
+get("adminOpen").addEventListener("click", () => {
+  if (busy) return;
 
-    lastInteractionAt = Date.now();
+  lastInteractionAt = Date.now();
+  screen("adminScreen");
 
-    screen("adminScreen");
-
-    get("adminGate").hidden = false;
-    get("adminPanel").hidden = true;
-
-    get("adminLogin").reset();
-
-    message("adminMessage");
-
-    get("adminPin").focus();
-  }
-);
+  get("adminGate").hidden = false;
+  get("adminPanel").hidden = true;
+  get("adminLogin").reset();
+  message("adminMessage");
+  get("adminPin").focus();
+});
 
 get("adminBack").addEventListener(
   "click",
@@ -797,18 +616,12 @@ get("adminLogin").addEventListener(
   "submit",
   async event => {
     event.preventDefault();
-
-    if (busy) {
-      return;
-    }
+    if (busy) return;
 
     setBusy(true);
 
-    const button =
-      get("adminLoginButton");
-
+    const button = get("adminLoginButton");
     button.disabled = true;
-
     message("adminMessage");
 
     try {
@@ -818,33 +631,21 @@ get("adminLogin").addEventListener(
       let valid = false;
 
       try {
-        const proof =
-          await openProvisioningPackage(
-            state.adminChallenge,
-            pin
-          );
-
-        valid =
-          proof.originId === state.originId;
-
+        const proof = await openProvisioningPackage(
+          state.adminChallenge,
+          pin
+        );
+        valid = proof.originId === state.originId;
       } catch {
         valid = false;
       }
 
       if (!valid) {
-        await updateSecurity(
-          "admin",
-          false
-        );
+        await updateSecurity("admin", false);
       }
 
-      await updateSecurity(
-        "admin",
-        true
-      );
-
+      await updateSecurity("admin", true);
       adminPinSession = pin;
-
       get("adminLogin").reset();
 
       get("adminGate").hidden = true;
@@ -854,12 +655,7 @@ get("adminLogin").addEventListener(
       refreshAdminTimeout();
 
     } catch (error) {
-      message(
-        "adminMessage",
-        error.message,
-        "error"
-      );
-
+      message("adminMessage", error.message, "error");
     } finally {
       setBusy(false);
       button.disabled = false;
@@ -874,34 +670,23 @@ get("importForm").addEventListener(
   async event => {
     event.preventDefault();
 
-    if (
-      busy ||
-      !adminPinSession
-    ) {
-      return;
-    }
+    if (busy || !adminPinSession) return;
 
     setBusy(true);
-
     const button = get("importButton");
     button.disabled = true;
-
     message("importMessage");
 
     try {
       const json = await readJsonFile(
         get("importJson").files[0]
       );
+      const incoming = await openProvisioningPackage(
+        json,
+        adminPinSession
+      );
 
-      const incoming =
-        await openProvisioningPackage(
-          json,
-          adminPinSession
-        );
-
-      if (
-        incoming.originId !== state.originId
-      ) {
+      if (incoming.originId !== state.originId) {
         throw new Error(
           "Configurazione di un altro Core Center"
         );
@@ -909,8 +694,7 @@ get("importForm").addEventListener(
 
       if (
         state.imports.some(
-          item =>
-            item.exportId === incoming.exportId
+          item => item.exportId === incoming.exportId
         )
       ) {
         message(
@@ -918,7 +702,6 @@ get("importForm").addEventListener(
           "JSON già importato",
           "success"
         );
-
         return;
       }
 
@@ -941,11 +724,8 @@ get("importForm").addEventListener(
       const conflicts = [];
       let skipped = 0;
 
-      for (
-        const employee of incoming.employees
-      ) {
-        const existing =
-          currentById.get(employee.id);
+      for (const employee of incoming.employees) {
+        const existing = currentById.get(employee.id);
 
         if (existing) {
           if (
@@ -958,7 +738,6 @@ get("importForm").addEventListener(
               `${employee.firstName} ${employee.lastName}`
             );
           }
-
           continue;
         }
 
@@ -971,19 +750,14 @@ get("importForm").addEventListener(
           conflicts.push(
             `${employee.firstName} ${employee.lastName}`
           );
-
           continue;
         }
 
         names.add(name);
-
-        added.push(
-          structuredClone(employee)
-        );
+        added.push(structuredClone(employee));
       }
 
       const next = structuredClone(state);
-
       next.employees.push(...added);
 
       next.imports.push({
@@ -998,7 +772,6 @@ get("importForm").addEventListener(
       state = next;
 
       get("importForm").reset();
-
       renderAdmin();
       refreshAdminTimeout();
 
@@ -1016,12 +789,7 @@ get("importForm").addEventListener(
       );
 
     } catch (error) {
-      message(
-        "importMessage",
-        error.message,
-        "error"
-      );
-
+      message("importMessage", error.message, "error");
     } finally {
       setBusy(false);
       button.disabled = false;
@@ -1036,28 +804,20 @@ const colorPreference = matchMedia(
 );
 
 function applyTheme(mode) {
-  themeMode =
-    themeModes.includes(mode)
-      ? mode
-      : "auto";
+  themeMode = themeModes.includes(mode)
+    ? mode
+    : "auto";
 
   document.documentElement.dataset.theme =
-    themeMode === "auto"
-      ? ""
-      : themeMode;
+    themeMode === "auto" ? "" : themeMode;
 
   const button = get("themeToggle");
-
-  button.textContent =
-    themeSymbols[themeMode];
-
+  button.textContent = themeSymbols[themeMode];
   button.setAttribute(
     "aria-label",
     `Tema ${themeNames[themeMode]}. Tocca per cambiare`
   );
-
-  button.title =
-    `Tema ${themeNames[themeMode]}`;
+  button.title = `Tema ${themeNames[themeMode]}`;
 
   const dark =
     themeMode === "dark" ||
@@ -1067,9 +827,7 @@ function applyTheme(mode) {
     );
 
   document
-    .querySelector(
-      'meta[name="theme-color"]'
-    )
+    .querySelector('meta[name="theme-color"]')
     .setAttribute(
       "content",
       dark ? "#111113" : "#f5f5f7"
@@ -1081,7 +839,7 @@ function applyTheme(mode) {
       themeMode
     );
   } catch {
-    // Preferenza facoltativa.
+    // preferenza facoltativa
   }
 }
 
@@ -1089,75 +847,59 @@ let storedTheme = "auto";
 
 try {
   storedTheme =
-    localStorage.getItem(
-      "attendance-theme"
-    ) || "auto";
+    localStorage.getItem("attendance-theme") ||
+    "auto";
 } catch {
   storedTheme = "auto";
 }
 
 applyTheme(storedTheme);
 
-get("themeToggle").addEventListener(
-  "click",
-  () => {
-    const next =
-      (themeModes.indexOf(themeMode) + 1) %
-      themeModes.length;
+get("themeToggle").addEventListener("click", () => {
+  const next =
+    (themeModes.indexOf(themeMode) + 1) %
+    themeModes.length;
 
-    applyTheme(themeModes[next]);
-  }
-);
+  applyTheme(themeModes[next]);
+});
 
-colorPreference.addEventListener?.(
-  "change",
-  () => {
-    if (themeMode === "auto") {
-      applyTheme("auto");
-    }
-  }
-);
+colorPreference.addEventListener?.("change", () => {
+  if (themeMode === "auto") applyTheme("auto");
+});
 
-/* offline */
+/* supporto offline */
 
 function setOfflineStatus(ready, value) {
   get("offlineStatus").classList.toggle(
     "ready",
     ready
   );
-
   get("offlineText").textContent = value;
 }
 
-function withTimeout(
-  promise,
-  milliseconds,
-  reason = "Operazione troppo lenta"
-) {
+function delay(milliseconds) {
+  return new Promise(resolve => {
+    setTimeout(resolve, milliseconds);
+  });
+}
+
+function withTimeout(promise, milliseconds, reason) {
   let timer;
 
   return Promise.race([
     promise,
-
     new Promise((resolve, reject) => {
-      timer = setTimeout(
-        () => reject(new Error(reason)),
-        milliseconds
-      );
+      timer = setTimeout(() => {
+        reject(new Error(
+          reason || "Tempo di attesa superato"
+        ));
+      }, milliseconds);
     })
   ]).finally(() => clearTimeout(timer));
 }
 
-function delay(milliseconds) {
-  return new Promise(resolve =>
-    setTimeout(resolve, milliseconds)
-  );
-}
-
-function readWorkerInfo(worker) {
-  if (!worker) {
-    return Promise.resolve(null);
-  }
+function workerInfo(worker, type = "app-status") {
+  if (!worker) return Promise.resolve(null);
 
   return new Promise(resolve => {
     const channel = new MessageChannel();
@@ -1165,68 +907,22 @@ function readWorkerInfo(worker) {
 
     const finish = data => {
       if (finished) return;
-
       finished = true;
       clearTimeout(timer);
-
       channel.port1.close();
       channel.port2.close();
-
       resolve(data);
     };
 
-    const timer = setTimeout(
-      () => finish(null),
-      4000
-    );
+    const timer = setTimeout(() => finish(null), 4500);
 
-    channel.port1.onmessage =
-      event => finish(event.data);
-
-    try {
-      worker.postMessage(
-        { type: "app-status" },
-        [channel.port2]
-      );
-    } catch {
-      finish(null);
-    }
-  });
-}
-
-function repairOfflineShell(worker) {
-  return new Promise(resolve => {
-    if (!worker) {
-      resolve(false);
-      return;
-    }
-
-    const channel = new MessageChannel();
-    let done = false;
-
-    const finish = result => {
-      if (done) return;
-
-      done = true;
-      clearTimeout(timer);
-
-      channel.port1.close();
-      channel.port2.close();
-
-      resolve(result?.ready === true);
+    channel.port1.onmessage = event => {
+      finish(event.data);
     };
 
-    const timer = setTimeout(
-      () => finish(null),
-      23000
-    );
-
-    channel.port1.onmessage =
-      event => finish(event.data);
-
     try {
       worker.postMessage(
-        { type: "repair-shell" },
+        { type },
         [channel.port2]
       );
     } catch {
@@ -1236,14 +932,26 @@ function repairOfflineShell(worker) {
 }
 
 async function getRegistration() {
-  if (!registration) {
-    registration = await withTimeout(
-      navigator.serviceWorker.getRegistration("./"),
-      7000
-    );
-  }
+  if (!("serviceWorker" in navigator)) return null;
 
-  return registration;
+  // recupera sempre la registrazione corrente
+  // per evitare riferimenti scaduti
+  return withTimeout(
+    navigator.serviceWorker.getRegistration("./"),
+    7000,
+    "Registrazione offline non disponibile"
+  );
+}
+
+async function registerWorker() {
+  return withTimeout(
+    navigator.serviceWorker.register("./sw.js", {
+      scope: "./",
+      updateViaCache: "none"
+    }),
+    15000,
+    "Registrazione offline troppo lenta"
+  );
 }
 
 async function refreshOfflineStatus() {
@@ -1251,11 +959,7 @@ async function refreshOfflineStatus() {
     !("serviceWorker" in navigator) ||
     !("caches" in window)
   ) {
-    setOfflineStatus(
-      false,
-      "Offline non supportato"
-    );
-
+    setOfflineStatus(false, "Offline non supportato");
     return false;
   }
 
@@ -1269,25 +973,13 @@ async function refreshOfflineStatus() {
           ? "Preparazione offline..."
           : "Offline non pronto"
       );
-
       return false;
     }
 
-    const info = await readWorkerInfo(
-      current.active
-    );
-
-    if (!info) {
-      setOfflineStatus(
-        false,
-        "Verifica offline non riuscita"
-      );
-
-      return false;
-    }
+    const info = await workerInfo(current.active);
 
     const ready =
-      info.ready === true &&
+      info?.ready === true &&
       info.appVersion === appVersion &&
       info.cacheName === cacheName;
 
@@ -1295,55 +987,34 @@ async function refreshOfflineStatus() {
       ready,
       ready
         ? "Disponibile offline"
-        : "Offline non pronto"
+        : info?.ready
+          ? "Versione offline da aggiornare"
+          : "Offline non pronto"
     );
 
     return ready;
 
   } catch (error) {
-    console.warn(
-      "Verifica offline:",
-      error
-    );
-
+    console.warn("stato offline:", error);
     setOfflineStatus(
       false,
       "Verifica offline non riuscita"
     );
-
     return false;
   }
 }
 
 async function prepareOffline() {
   if (!("serviceWorker" in navigator)) {
-    setOfflineStatus(
-      false,
-      "Offline non supportato"
-    );
-
+    setOfflineStatus(false, "Offline non supportato");
     return;
   }
 
   try {
     let current = await getRegistration();
 
-    if (
-      !current &&
-      navigator.onLine
-    ) {
-      current = await withTimeout(
-        navigator.serviceWorker.register(
-          "./sw.js",
-          {
-            scope: "./",
-            updateViaCache: "none"
-          }
-        ),
-        15000
-      );
-
-      registration = current;
+    if (!current && navigator.onLine) {
+      current = await registerWorker();
     }
 
     if (
@@ -1351,50 +1022,47 @@ async function prepareOffline() {
       !current.active &&
       current.installing
     ) {
-      setOfflineStatus(
-        false,
-        "Preparazione offline..."
-      );
+      setOfflineStatus(false, "Preparazione offline...");
 
       await withTimeout(
         navigator.serviceWorker.ready,
-        12000
+        12000,
+        "Preparazione offline troppo lenta"
       );
     }
 
   } catch (error) {
-    console.warn(
-      "Preparazione offline:",
-      error
-    );
+    console.warn("preparazione offline:", error);
   }
 
   await refreshOfflineStatus();
 }
 
-/* aggiornamenti solo manuali */
+/* aggiornamenti manuali */
 
 function canApplyUpdate() {
+  const clockReady =
+    !get("clockScreen").hidden &&
+    clockPin.length === 0 &&
+    clockTimer === null;
+
+  const setupReady =
+    !get("setupScreen").hidden &&
+    !get("setupPin").value &&
+    !get("deviceInput").value &&
+    !get("setupJson").files.length;
+
+  const errorReady = !get("errorScreen").hidden;
+
   return (
     appReady &&
     !busy &&
     !pendingSetup &&
     !adminPinSession &&
     get("adminScreen").hidden &&
-    (
-      !get("clockScreen").hidden ||
-      (
-        !get("setupScreen").hidden &&
-        !get("setupPin").value &&
-        !get("deviceInput").value &&
-        !get("setupJson").files.length
-      ) ||
-      !get("errorScreen").hidden
-    ) &&
-    !clockPin.length &&
-    clockTimer === null &&
+    (clockReady || setupReady || errorReady) &&
     !document.hidden &&
-    Date.now() - lastInteractionAt >= 2000
+    Date.now() - lastInteractionAt >= 1500
   );
 }
 
@@ -1402,12 +1070,14 @@ function clearUpdateTimer() {
   if (updateTimer !== null) {
     clearInterval(updateTimer);
   }
-
   updateTimer = null;
 }
 
-function queueSafeUpdate(worker = null) {
-  pendingUpdate = worker || "reload";
+function queueSafeUpdate(worker, version) {
+  pendingUpdate = {
+    worker: worker || null,
+    version
+  };
 
   message(
     "updateMessage",
@@ -1417,17 +1087,12 @@ function queueSafeUpdate(worker = null) {
   clearUpdateTimer();
 
   updateTimer = setInterval(() => {
-    if (
-      canApplyUpdate() &&
-      !applyingUpdate
-    ) {
+    if (canApplyUpdate() && !applyingUpdate) {
       void applyUpdate();
     }
-  }, 500);
+  }, 400);
 
-  if (canApplyUpdate()) {
-    void applyUpdate();
-  }
+  if (canApplyUpdate()) void applyUpdate();
 }
 
 async function applyUpdate() {
@@ -1435,9 +1100,7 @@ async function applyUpdate() {
     applyingUpdate ||
     !pendingUpdate ||
     !canApplyUpdate()
-  ) {
-    return;
-  }
+  ) return;
 
   applyingUpdate = true;
   clearUpdateTimer();
@@ -1451,44 +1114,47 @@ async function applyUpdate() {
   );
 
   try {
-    if (pendingUpdate !== "reload") {
-      const worker = pendingUpdate;
+    const { worker, version } = pendingUpdate;
 
+    if (worker) {
       worker.postMessage({
         type: "activate-update"
       });
 
       let activated = false;
 
-      for (
-        let attempt = 0;
-        attempt < 75;
-        attempt++
-      ) {
+      for (let attempt = 0; attempt < 65; attempt++) {
+        const current = await getRegistration();
+
         if (
-          registration?.active === worker &&
+          current?.active &&
           worker.state === "activated"
         ) {
-          activated = true;
-          break;
+          const info = await workerInfo(current.active);
+
+          if (info?.ready && info.appVersion === version) {
+            activated = true;
+            break;
+          }
         }
 
-        await delay(300);
+        await delay(350);
       }
 
       if (!activated) {
         throw new Error(
-          "Attivazione non riuscita"
+          "Attivazione aggiornamento non riuscita"
         );
       }
     }
 
+    // il browser ricarica questa stessa finestra
+    // senza cancellare indexeddb o altri dati
     location.reload();
 
   } catch (error) {
     applyingUpdate = false;
     pendingUpdate = null;
-
     button.disabled = false;
 
     message(
@@ -1500,10 +1166,7 @@ async function applyUpdate() {
 }
 
 async function remoteVersion() {
-  const url = new URL(
-    "./index.html",
-    location.href
-  );
+  const url = new URL("./sw.js", location.href);
 
   url.searchParams.set(
     "manual-update",
@@ -1512,19 +1175,15 @@ async function remoteVersion() {
 
   const controller = new AbortController();
 
-  const timer = setTimeout(
-    () => controller.abort(),
-    15000
-  );
+  const timer = setTimeout(() => {
+    controller.abort();
+  }, 18000);
 
   try {
-    const response = await fetch(
-      url.href,
-      {
-        cache: "no-store",
-        signal: controller.signal
-      }
-    );
+    const response = await fetch(url, {
+      cache: "no-store",
+      signal: controller.signal
+    });
 
     if (!response.ok) {
       throw new Error(
@@ -1532,10 +1191,10 @@ async function remoteVersion() {
       );
     }
 
-    const html = await response.text();
+    const source = await response.text();
 
-    const match = html.match(
-      /<meta\s+name="app-version"\s+content="([^"]+)"/
+    const match = source.match(
+      /const appVersion\s*=\s*["']([0-9.]+)["']/
     );
 
     if (!match) {
@@ -1551,22 +1210,18 @@ async function remoteVersion() {
   }
 }
 
-async function waitForNewWorker(
-  current,
-  wantedVersion
-) {
-  const deadline =
-    Date.now() + 28000;
+async function waitForVersion(version) {
+  const deadline = Date.now() + 28000;
 
   while (Date.now() < deadline) {
-    if (current.waiting) {
-      const info = await readWorkerInfo(
-        current.waiting
-      );
+    const current = await getRegistration();
+
+    if (current?.waiting) {
+      const info = await workerInfo(current.waiting);
 
       if (
         info?.ready &&
-        info.appVersion === wantedVersion
+        info.appVersion === version
       ) {
         return {
           worker: current.waiting,
@@ -1575,14 +1230,12 @@ async function waitForNewWorker(
       }
     }
 
-    if (current.active) {
-      const info = await readWorkerInfo(
-        current.active
-      );
+    if (current?.active) {
+      const info = await workerInfo(current.active);
 
       if (
         info?.ready &&
-        info.appVersion === wantedVersion
+        info.appVersion === version
       ) {
         return {
           worker: current.active,
@@ -1591,16 +1244,13 @@ async function waitForNewWorker(
       }
     }
 
-    if (
-      current.installing?.state ===
-      "redundant"
-    ) {
+    if (current?.installing?.state === "redundant") {
       throw new Error(
-        "Installazione aggiornamento non riuscita"
+        "Installazione non riuscita"
       );
     }
 
-    await delay(550);
+    await delay(400);
   }
 
   return null;
@@ -1611,9 +1261,7 @@ async function checkForUpdates() {
     checkingUpdates ||
     applyingUpdate ||
     pendingUpdate
-  ) {
-    return;
-  }
+  ) return;
 
   checkingUpdates = true;
 
@@ -1627,14 +1275,10 @@ async function checkForUpdates() {
 
   try {
     if (!navigator.onLine) {
-      throw new Error(
-        "Connessione non disponibile"
-      );
+      throw new Error("Connessione non disponibile");
     }
 
-    if (
-      !("serviceWorker" in navigator)
-    ) {
+    if (!("serviceWorker" in navigator)) {
       throw new Error(
         "Aggiornamenti non supportati"
       );
@@ -1643,68 +1287,66 @@ async function checkForUpdates() {
     let current = await getRegistration();
 
     if (!current) {
-      current = await withTimeout(
-        navigator.serviceWorker.register(
-          "./sw.js",
-          {
-            scope: "./",
-            updateViaCache: "none"
-          }
-        ),
-        15000
-      );
-
-      registration = current;
+      current = await registerWorker();
     }
 
-    /* worker già scaricato */
+    const version = await remoteVersion();
 
-    const waitingInfo = await readWorkerInfo(
+    // prima verifica se la nuova versione
+    // è già installata ma ancora in attesa
+    const waitingInfo = await workerInfo(
       current.waiting
     );
 
     if (
       waitingInfo?.ready &&
-      waitingInfo.appVersion
+      waitingInfo.appVersion === version
     ) {
-      queueSafeUpdate(current.waiting);
+      queueSafeUpdate(current.waiting, version);
       return;
     }
 
-    /* confronto online */
-
-    const version = await remoteVersion();
-
-    const activeInfo = await readWorkerInfo(
+    const activeInfo = await workerInfo(
       current.active
     );
 
-    const activeReady = Boolean(
-      activeInfo?.ready &&
-      activeInfo.appVersion === appVersion &&
-      activeInfo.cacheName === cacheName
-    );
-
-    /* recupero cache incompleta */
+    if (
+      activeInfo?.appVersion === version &&
+      activeInfo.ready
+    ) {
+      if (
+        version !== appVersion ||
+        !navigator.serviceWorker.controller
+      ) {
+        queueSafeUpdate(null, version);
+      } else {
+        message(
+          "updateMessage",
+          "L'app è aggiornata",
+          "success"
+        );
+      }
+      return;
+    }
 
     if (
       version === appVersion &&
       activeInfo?.appVersion === appVersion &&
-      !activeReady
+      !activeInfo.ready
     ) {
       message(
         "updateMessage",
         "Ripristino file offline..."
       );
 
-      const repaired =
-        await repairOfflineShell(
-          current.active
-        );
+      const repaired = await workerInfo(
+        current.active,
+        "repair-shell"
+      );
 
-      if (!repaired) {
+      if (!repaired?.ready) {
         throw new Error(
-          "Cache offline non ripristinata. Riprova."
+          "File offline non ripristinati"
         );
       }
 
@@ -1715,20 +1357,6 @@ async function checkForUpdates() {
         "L'app è aggiornata",
         "success"
       );
-
-      return;
-    }
-
-    if (
-      version === appVersion &&
-      activeReady
-    ) {
-      message(
-        "updateMessage",
-        "L'app è aggiornata",
-        "success"
-      );
-
       return;
     }
 
@@ -1739,16 +1367,33 @@ async function checkForUpdates() {
         : `Versione ${version} disponibile. Download...`
     );
 
-    await withTimeout(
-      current.update(),
-      20000,
-      "Controllo del service worker troppo lento"
-    );
+    // il worker esistente potrebbe essere
+    // una registrazione ormai non valida
+    try {
+      if (current.active || current.waiting || current.installing) {
+        await withTimeout(
+          current.update(),
+          20000,
+          "Controllo aggiornamenti troppo lento"
+        );
+      } else {
+        await registerWorker();
+      }
 
-    const result = await waitForNewWorker(
-      current,
-      version
-    );
+    } catch (error) {
+      const fresh = await getRegistration();
+
+      if (!fresh) {
+        await registerWorker();
+      } else if (
+        !fresh.installing &&
+        !fresh.waiting
+      ) {
+        throw error;
+      }
+    }
+
+    const result = await waitForVersion(version);
 
     if (!result) {
       throw new Error(
@@ -1758,11 +1403,10 @@ async function checkForUpdates() {
 
     if (result.active) {
       if (
-        result.worker !==
-          navigator.serviceWorker.controller ||
-        version !== appVersion
+        version !== appVersion ||
+        !navigator.serviceWorker.controller
       ) {
-        queueSafeUpdate();
+        queueSafeUpdate(null, version);
       } else {
         message(
           "updateMessage",
@@ -1771,9 +1415,7 @@ async function checkForUpdates() {
         );
       }
     } else {
-      queueSafeUpdate(
-        result.worker
-      );
+      queueSafeUpdate(result.worker, version);
     }
 
   } catch (error) {
@@ -1788,10 +1430,7 @@ async function checkForUpdates() {
   } finally {
     checkingUpdates = false;
 
-    if (
-      !pendingUpdate &&
-      !applyingUpdate
-    ) {
+    if (!pendingUpdate && !applyingUpdate) {
       button.disabled = false;
     }
 
@@ -1811,7 +1450,7 @@ if ("serviceWorker" in navigator) {
   navigator.serviceWorker.addEventListener(
     "controllerchange",
     () => {
-      // Verifica solo lo stato locale.
+      // verifica esclusivamente la cache locale
       void refreshOfflineStatus();
     }
   );
@@ -1825,10 +1464,7 @@ async function start() {
   try {
     state = await store.load();
 
-    if (
-      state &&
-      !validState(state)
-    ) {
+    if (state && !validState(state)) {
       throw new Error(
         "Archivio non compatibile"
       );
@@ -1837,9 +1473,9 @@ async function start() {
     if (state) {
       screen("clockScreen");
       refreshClock();
+
     } else {
       screen("setupScreen");
-
       get("setupImport").hidden = false;
       get("setupDevice").hidden = true;
     }
@@ -1847,7 +1483,6 @@ async function start() {
   } catch (error) {
     get("bootMessage").textContent =
       error.message;
-
     screen("errorScreen");
 
   } finally {
@@ -1856,6 +1491,5 @@ async function start() {
 }
 
 renderClockPin();
-
 void start();
 void prepareOffline();
