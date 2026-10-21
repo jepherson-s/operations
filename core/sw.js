@@ -1,6 +1,6 @@
 
-const appVersion = "1.7";
-const cacheName = "core-shell-v9";
+const appVersion = "1.8";
+const cacheName = "core-shell-v10";
 const scope = new URL("./", self.location.href);
 const shellFiles = [
   "index.html",
