@@ -5,14 +5,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#f5f5f7">
-<meta name="app-version" content="1.6">
+<meta name="app-version" content="1.7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="core">
 
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
 
-<title>core center</title>
+<title>Core Center</title>
 
 <style>
 :root {
@@ -713,15 +713,15 @@ h1 span {
       class="lock-button"
       type="button"
       hidden>
-      blocca
+      Logout
     </button>
 
     <button
       id="themeToggle"
       class="theme-toggle"
       type="button"
-      aria-label="tema automatico"
-      title="tema automatico">◐</button>
+      aria-label="Tema automatico"
+      title="Tema automatico">◐</button>
 
   </header>
 
@@ -729,16 +729,16 @@ h1 span {
 
     <section id="gate" class="gate">
 
-      <span class="eyebrow">accesso locale</span>
+      <span class="eyebrow">Accesso locale</span>
 
-      <h1 id="gateTitle">verifica archivio...</h1>
+      <h1 id="gateTitle">Verifica archivio...</h1>
 
       <p id="gateDescription" class="subtitle"></p>
 
       <form id="setupForm" class="form" hidden>
 
         <div class="field">
-          <label for="newPin">crea pin admin</label>
+          <label for="newPin">Crea PIN Admin</label>
 
           <input
             id="newPin"
@@ -752,7 +752,7 @@ h1 span {
         </div>
 
         <div class="field">
-          <label for="confirmPin">conferma pin</label>
+          <label for="confirmPin">Conferma PIN</label>
 
           <input
             id="confirmPin"
@@ -766,14 +766,14 @@ h1 span {
         </div>
 
         <button class="primary-button" type="submit">
-          configura
+          Configura
         </button>
       </form>
 
       <form id="unlockForm" class="form" hidden>
 
         <div class="field">
-          <label for="adminPin">pin admin</label>
+          <label for="adminPin">PIN Admin</label>
 
           <input
             id="adminPin"
@@ -787,7 +787,7 @@ h1 span {
         </div>
 
         <button class="primary-button" type="submit">
-          sblocca
+          Accedi
         </button>
       </form>
 
@@ -807,8 +807,8 @@ h1 span {
         <div class="hero">
 
           <div class="hero-copy">
-            <span class="eyebrow">operations</span>
-            <h1>core center<span>.</span></h1>
+            <span class="eyebrow">Operations</span>
+            <h1>Core Center<span>.</span></h1>
           </div>
 
           <div class="doodles" aria-hidden="true">
@@ -844,7 +844,7 @@ h1 span {
           </div>
         </div>
 
-        <h2 class="section-title">gestione</h2>
+        <h2 class="section-title">Gestione</h2>
 
         <div class="grid">
 
@@ -861,7 +861,7 @@ h1 span {
             </span>
 
             <span class="tile-bottom">
-              <span class="tile-name">dipendenti</span>
+              <span class="tile-name">Dipendenti</span>
               <span class="tile-arrow">›</span>
             </span>
           </button>
@@ -882,7 +882,7 @@ h1 span {
             </span>
 
             <span class="tile-bottom">
-              <span class="tile-name">dispositivi</span>
+              <span class="tile-name">Dispositivi</span>
               <span class="tile-arrow">›</span>
             </span>
           </button>
@@ -896,14 +896,14 @@ h1 span {
               <svg viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="3"/>
                 <path
-                  d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+                  d="M12 2v3M12 19v3M2 12h3M19 12h-2"/>
                 <path
                   d="M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>
               </svg>
             </span>
 
             <span class="tile-bottom">
-              <span class="tile-name">configurazioni</span>
+              <span class="tile-name">Configurazioni</span>
               <span class="tile-arrow">›</span>
             </span>
           </button>
@@ -923,7 +923,7 @@ h1 span {
             </span>
 
             <span class="tile-bottom">
-              <span class="tile-name">sincronizzazione</span>
+              <span class="tile-name">Sincronizzazione</span>
               <span class="tile-arrow">›</span>
             </span>
           </button>
@@ -936,20 +936,20 @@ h1 span {
       <section id="employees" class="page">
 
         <button class="back" type="button" data-back>
-          ‹ indietro
+          ‹ Indietro
         </button>
 
         <div id="employeeToolbar">
 
           <div class="titlebar">
 
-            <h1 class="detail-title">dipendenti</h1>
+            <h1 class="detail-title">Dipendenti</h1>
 
             <button
               id="addEmployee"
               class="primary-button"
               type="button">
-              + aggiungi
+              + Aggiungi
             </button>
 
           </div>
@@ -958,8 +958,8 @@ h1 span {
             id="employeeSearch"
             class="search"
             type="search"
-            placeholder="cerca dipendente"
-            aria-label="cerca dipendente">
+            placeholder="Cerca dipendente"
+            aria-label="Cerca dipendente">
 
           <div
             id="employeeList"
@@ -972,19 +972,19 @@ h1 span {
           <h1
             id="employeeEditorTitle"
             class="detail-title">
-            nuovo dipendente
+            Nuovo dipendente
           </h1>
 
           <form id="employeeForm" class="form">
 
             <div class="card">
 
-              <h2>anagrafica</h2>
+              <h2>Anagrafica</h2>
 
               <div class="form-grid">
 
                 <div class="field">
-                  <label for="firstName">nome</label>
+                  <label for="firstName">Nome</label>
                   <input
                     id="firstName"
                     type="text"
@@ -993,7 +993,7 @@ h1 span {
                 </div>
 
                 <div class="field">
-                  <label for="lastName">cognome</label>
+                  <label for="lastName">Cognome</label>
                   <input
                     id="lastName"
                     type="text"
@@ -1003,13 +1003,13 @@ h1 span {
 
                 <div class="field">
                   <label for="birthDate">
-                    data di nascita
+                    Data di nascita
                   </label>
                   <input id="birthDate" type="date">
                 </div>
 
                 <div class="field">
-                  <label for="phone">telefono</label>
+                  <label for="phone">Telefono</label>
                   <input
                     id="phone"
                     type="tel"
@@ -1017,7 +1017,7 @@ h1 span {
                 </div>
 
                 <div class="field">
-                  <label for="email">email</label>
+                  <label for="email">Email</label>
                   <input
                     id="email"
                     type="email"
@@ -1026,12 +1026,12 @@ h1 span {
 
                 <div class="field">
                   <label for="employeeStatus">
-                    stato
+                    Stato
                   </label>
 
                   <select id="employeeStatus">
-                    <option value="active">attivo</option>
-                    <option value="inactive">disattivo</option>
+                    <option value="active">Attivo</option>
+                    <option value="inactive">Disattivo</option>
                   </select>
                 </div>
 
@@ -1040,14 +1040,14 @@ h1 span {
 
             <div class="card">
 
-              <h2>accesso</h2>
+              <h2>Accesso</h2>
 
               <div class="field">
 
                 <label
                   id="employeePinLabel"
                   for="employeePin">
-                  pin dipendente
+                  PIN dipendente
                 </label>
 
                 <input
@@ -1069,48 +1069,48 @@ h1 span {
 
             <div class="card">
 
-              <h2>contratto</h2>
+              <h2>Contratto</h2>
 
               <div class="form-grid">
 
                 <div class="field">
 
                   <label for="contractType">
-                    tipo di contratto
+                    Tipo di contratto
                   </label>
 
                   <select id="contractType">
                     <option value="indeterminato">
-                      indeterminato
+                      Indeterminato
                     </option>
                     <option value="determinato">
-                      determinato
+                      Determinato
                     </option>
                     <option value="apprendistato">
-                      apprendistato
+                      Apprendistato
                     </option>
                     <option value="chiamata">
-                      a chiamata
+                      A chiamata
                     </option>
                     <option value="tirocinio">
-                      tirocinio
+                      Tirocinio
                     </option>
                     <option value="altro">
-                      altro
+                      Altro
                     </option>
                   </select>
                 </div>
 
                 <div class="field">
                   <label for="contractStart">
-                    data inizio
+                    Data inizio
                   </label>
                   <input id="contractStart" type="date">
                 </div>
 
                 <div class="field">
                   <label for="contractEnd">
-                    data fine
+                    Data fine
                   </label>
                   <input id="contractEnd" type="date">
                 </div>
@@ -1118,55 +1118,55 @@ h1 span {
               </div>
 
               <h3 class="form-heading">
-                ore distribuite · indicative
+                Ore distribuite · indicative
               </h3>
 
               <div class="schedule-grid">
 
                 <div class="field">
-                  <label for="day-lun">lun</label>
+                  <label for="day-lun">Lun</label>
                   <input id="day-lun" data-day="lun"
                     type="number" min="0" max="24"
                     step="0.25" placeholder="—">
                 </div>
 
                 <div class="field">
-                  <label for="day-mar">mar</label>
+                  <label for="day-mar">Mar</label>
                   <input id="day-mar" data-day="mar"
                     type="number" min="0" max="24"
                     step="0.25" placeholder="—">
                 </div>
 
                 <div class="field">
-                  <label for="day-mer">mer</label>
+                  <label for="day-mer">Mer</label>
                   <input id="day-mer" data-day="mer"
                     type="number" min="0" max="24"
                     step="0.25" placeholder="—">
                 </div>
 
                 <div class="field">
-                  <label for="day-gio">gio</label>
+                  <label for="day-gio">Gio</label>
                   <input id="day-gio" data-day="gio"
                     type="number" min="0" max="24"
                     step="0.25" placeholder="—">
                 </div>
 
                 <div class="field">
-                  <label for="day-ven">ven</label>
+                  <label for="day-ven">Ven</label>
                   <input id="day-ven" data-day="ven"
                     type="number" min="0" max="24"
                     step="0.25" placeholder="—">
                 </div>
 
                 <div class="field">
-                  <label for="day-sab">sab</label>
+                  <label for="day-sab">Sab</label>
                   <input id="day-sab" data-day="sab"
                     type="number" min="0" max="24"
                     step="0.25" placeholder="—">
                 </div>
 
                 <div class="field">
-                  <label for="day-dom">dom</label>
+                  <label for="day-dom">Dom</label>
                   <input id="day-dom" data-day="dom"
                     type="number" min="0" max="24"
                     step="0.25" placeholder="—">
@@ -1177,7 +1177,7 @@ h1 span {
               <div id="scheduleTotal" class="schedule-total">
 
                 <label for="weeklyHours">
-                  totale settimanale
+                  Totale settimanale
                 </label>
 
                 <input
@@ -1198,14 +1198,14 @@ h1 span {
 
             <div class="card">
 
-              <h2>retribuzione</h2>
+              <h2>Retribuzione</h2>
 
               <div class="form-grid">
 
                 <div class="field">
 
                   <label for="salaryAmount">
-                    importo (€)
+                    Importo (€)
                   </label>
 
                   <input
@@ -1219,12 +1219,12 @@ h1 span {
                 <div class="field">
 
                   <label for="salaryPeriod">
-                    periodicità
+                    Periodicità
                   </label>
 
                   <select id="salaryPeriod">
-                    <option value="monthly">mensile</option>
-                    <option value="hourly">oraria</option>
+                    <option value="monthly">Mensile</option>
+                    <option value="hourly">Oraria</option>
                   </select>
 
                 </div>
@@ -1233,7 +1233,7 @@ h1 span {
 
               <div class="field spaced-field">
 
-                <label for="iban">iban</label>
+                <label for="iban">IBAN</label>
 
                 <input
                   id="iban"
@@ -1257,14 +1257,14 @@ h1 span {
                 id="cancelEmployee"
                 class="secondary-button"
                 type="button">
-                annulla
+                Annulla
               </button>
 
               <button
                 id="saveEmployee"
                 class="primary-button"
                 type="submit">
-                salva dipendente
+                Salva dipendente
               </button>
 
             </div>
@@ -1279,14 +1279,14 @@ h1 span {
       <section id="devices" class="page">
 
         <button class="back" type="button" data-back>
-          ‹ indietro
+          ‹ Indietro
         </button>
 
-        <h1 class="detail-title">dispositivi</h1>
+        <h1 class="detail-title">Dispositivi</h1>
 
         <div class="card">
 
-          <h2>attendance center</h2>
+          <h2>Attendance Center</h2>
 
           <p
             id="exportCount"
@@ -1300,7 +1300,7 @@ h1 span {
             <div class="field">
 
               <label for="exportPin">
-                pin admin
+                PIN Admin
               </label>
 
               <input
@@ -1319,7 +1319,7 @@ h1 span {
               id="exportButton"
               class="primary-button"
               type="submit">
-              genera json
+              Genera JSON
             </button>
 
           </form>
@@ -1338,20 +1338,20 @@ h1 span {
       <section id="settings" class="page">
 
         <button class="back" type="button" data-back>
-          ‹ indietro
+          ‹ Indietro
         </button>
 
-        <h1 class="detail-title">configurazioni</h1>
+        <h1 class="detail-title">Configurazioni</h1>
 
         <div class="card">
 
-          <h2>cambia pin admin</h2>
+          <h2>Cambia PIN Admin</h2>
 
           <form id="changePinForm" class="form">
 
             <div class="field">
 
-              <label for="oldPin">pin attuale</label>
+              <label for="oldPin">PIN attuale</label>
 
               <input
                 id="oldPin"
@@ -1368,7 +1368,7 @@ h1 span {
             <div class="field">
 
               <label for="replacementPin">
-                nuovo pin
+                Nuovo PIN
               </label>
 
               <input
@@ -1386,7 +1386,7 @@ h1 span {
             <div class="field">
 
               <label for="replacementConfirm">
-                conferma pin
+                Conferma PIN
               </label>
 
               <input
@@ -1404,7 +1404,7 @@ h1 span {
             <button
               class="primary-button"
               type="submit">
-              aggiorna pin
+              Aggiorna PIN
             </button>
 
           </form>
@@ -1423,15 +1423,15 @@ h1 span {
       <section id="sync" class="page">
 
         <button class="back" type="button" data-back>
-          ‹ indietro
+          ‹ Indietro
         </button>
 
         <h1 class="detail-title">
-          sincronizzazione
+          Sincronizzazione
         </h1>
 
         <div class="card">
-          <h2>non ancora attiva</h2>
+          <h2>Non ancora attiva</h2>
         </div>
 
       </section>
@@ -1450,7 +1450,7 @@ h1 span {
       <span class="status-dot"></span>
 
       <span id="offlineText">
-        verifica disponibilità offline...
+        Verifica disponibilità offline...
       </span>
 
     </div>
@@ -1458,11 +1458,11 @@ h1 span {
     <button
       id="checkUpdateButton"
       class="footer-update"
-      type="button">↻ controlla aggiornamenti</button>
+      type="button">↻ Controlla aggiornamenti</button>
 
     <p id="updateMessage" class="message footer-message" role="status" aria-live="polite"></p>
 
-    <div>core center · versione 1.6</div>
+    <div>Core Center · versione 1.7</div>
 
   </footer>
 
@@ -1494,8 +1494,8 @@ const employeeForm = get("employeeForm");
 const exportForm = get("exportForm");
 
 const pages = document.querySelectorAll(".page");
-const appVersion = "1.6";
-const expectedCache = "core-shell-v8";
+const appVersion = "1.7";
+const expectedCache = "core-shell-v9";
 const themeModes = ["light", "auto", "dark"];
 const themeSymbols = { light: "☀", auto: "◐", dark: "☾" };
 const themeNames = { light: "chiaro", auto: "automatico", dark: "scuro" };
@@ -1557,7 +1557,7 @@ document.querySelectorAll("[data-back]").forEach(button => {
 function showMessage(id, text, kind = "") {
   const element = get(id);
 
-  element.textContent = text;
+  element.textContent = text ? displayLabel(text) : "";
   element.className = "message";
 
   if (kind) {
@@ -1581,23 +1581,23 @@ async function showGate() {
     const configured = await vault.hasData();
 
     if (configured) {
-      get("gateTitle").textContent = "bentornato.";
+      get("gateTitle").textContent = "Bentornato.";
       get("gateDescription").textContent =
-        "inserisci il pin admin.";
+        "Inserisci il PIN Admin.";
 
       unlockForm.hidden = false;
     } else {
       get("gateTitle").textContent =
-        "prima configurazione.";
+        "Prima configurazione.";
 
       get("gateDescription").textContent =
-        "crea il pin admin di 6 cifre.";
+        "Crea il PIN Admin di 6 cifre.";
 
       setupForm.hidden = false;
     }
   } catch (error) {
     get("gateTitle").textContent =
-      "archivio non disponibile.";
+      "Archivio non disponibile.";
 
     get("gateDescription").textContent = "";
 
@@ -1628,7 +1628,7 @@ setupForm.addEventListener("submit", async event => {
   if (pin !== get("confirmPin").value) {
     showMessage(
       "gateError",
-      "i pin non corrispondono",
+      "I PIN non corrispondono",
       "error"
     );
     return;
@@ -1658,9 +1658,29 @@ setupForm.addEventListener("submit", async event => {
   }
 });
 
+let unlockBusy = false;
+let autoLoginTimer = null;
+
+get("adminPin").addEventListener("input", () => {
+  clearTimeout(autoLoginTimer);
+  showMessage("gateError", "");
+  const input = get("adminPin");
+  if (!unlockForm.hidden && !unlockBusy && /^[0-9]{6}$/.test(input.value)) {
+    autoLoginTimer = setTimeout(() => {
+      if (!unlockForm.hidden && !unlockBusy && /^[0-9]{6}$/.test(input.value)) {
+        unlockForm.requestSubmit();
+      }
+    }, 150);
+  }
+});
+
 unlockForm.addEventListener("submit", async event => {
   event.preventDefault();
+  if (unlockBusy) return;
 
+  clearTimeout(autoLoginTimer);
+  unlockBusy = true;
+  const pin = get("adminPin").value;
   const button = unlockForm.querySelector(
     'button[type="submit"]'
   );
@@ -1670,7 +1690,8 @@ unlockForm.addEventListener("submit", async event => {
   showMessage("gateError", "");
 
   try {
-    await vault.unlock(get("adminPin").value);
+    await vault.unlock(pin);
+    unlockForm.reset();
     showWorkspace();
   } catch (error) {
     showMessage(
@@ -1678,14 +1699,16 @@ unlockForm.addEventListener("submit", async event => {
       error.message,
       "error"
     );
+    // non cancellare l'input: serve anche per i pin legacy più lunghi.
   } finally {
-    unlockForm.reset();
     button.disabled = false;
+    unlockBusy = false;
     activeOperations -= 1;
   }
 });
 
 get("lockButton").addEventListener("click", async () => {
+  clearTimeout(autoLoginTimer);
   vault.lock();
 
   employeeForm.reset();
@@ -1714,7 +1737,7 @@ changePinForm.addEventListener("submit", async event => {
   if (newPin !== get("replacementConfirm").value) {
     showMessage(
       "pinMessage",
-      "i pin non corrispondono",
+      "I PIN non corrispondono",
       "error"
     );
     return;
@@ -1730,7 +1753,7 @@ changePinForm.addEventListener("submit", async event => {
 
     showMessage(
       "pinMessage",
-      "pin aggiornato",
+      "PIN aggiornato",
       "success"
     );
   } catch (error) {
@@ -1752,7 +1775,7 @@ function getEmployees() {
 
   if (!Array.isArray(data.employees)) {
     throw new Error(
-      "archivio dipendenti non valido"
+      "Archivio dipendenti non valido"
     );
   }
 
@@ -1790,18 +1813,18 @@ function showEmployeeForm(employeeId = null) {
   showMessage("employeeMessage", "");
 
   get("employeeEditorTitle").textContent = employee
-    ? "modifica dipendente"
-    : "nuovo dipendente";
+    ? "Modifica dipendente"
+    : "Nuovo dipendente";
 
   get("employeePin").required =
     !employee || !employee.pinVerifier;
 
   get("employeePinLabel").textContent = employee
-    ? "nuovo pin"
-    : "pin dipendente";
+    ? "Nuovo PIN"
+    : "PIN dipendente";
 
   get("employeePinHint").textContent = employee
-    ? "vuoto per mantenere il pin attuale"
+    ? "Vuoto per mantenere il PIN attuale"
     : "4 cifre";
 
   if (employee) {
@@ -1881,7 +1904,7 @@ function readSchedule() {
       Math.abs(hours * 4 - Math.round(hours * 4)) > 0.001
     ) {
       throw new Error(
-        `ore non valide per ${day}`
+        `Ore non valide per ${day}`
       );
     }
 
@@ -1891,7 +1914,7 @@ function readSchedule() {
 
   if (total > 80) {
     throw new Error(
-      "il totale non può superare 80 ore"
+      "Il totale non può superare 80 ore"
     );
   }
 
@@ -1923,6 +1946,11 @@ function updateHoursTotal() {
 
     wrapper.classList.add("invalid");
   }
+}
+
+function displayLabel(value) {
+  const text = String(value ?? "");
+  return text ? text[0].toLocaleUpperCase("it") + text.slice(1) : "";
 }
 
 function renderEmployees() {
@@ -1960,8 +1988,8 @@ function renderEmployees() {
 
     empty.className = "empty";
     empty.textContent = query
-      ? "nessun risultato"
-      : "nessun dipendente";
+      ? "Nessun risultato"
+      : "Nessun dipendente";
 
     list.append(empty);
     return;
@@ -1981,7 +2009,7 @@ function renderEmployees() {
       `${employee.firstName} ${employee.lastName}`;
 
     detail.textContent =
-      `${employee.contractType} · ` +
+      `${displayLabel(employee.contractType)} · ` +
       `${formatNumber(employee.weeklyHours || 0)} ore`;
 
     info.append(name, detail);
@@ -1995,7 +2023,7 @@ function renderEmployees() {
       employee.active ? "badge active" : "badge";
 
     badge.textContent =
-      employee.active ? "attivo" : "disattivo";
+      employee.active ? "Attivo" : "Disattivo";
 
     const arrow = document.createElement("span");
 
@@ -2060,7 +2088,7 @@ function readEmployeeFields() {
 
   if (!firstName || !lastName) {
     throw new Error(
-      "nome e cognome obbligatori"
+      "Nome e cognome obbligatori"
     );
   }
 
@@ -2078,7 +2106,7 @@ function readEmployeeFields() {
     contractEnd < contractStart
   ) {
     throw new Error(
-      "la data fine precede la data inizio"
+      "La data fine precede la data inizio"
     );
   }
 
@@ -2097,7 +2125,7 @@ function readEmployeeFields() {
     )
   ) {
     throw new Error(
-      "retribuzione non valida"
+      "Retribuzione non valida"
     );
   }
 
@@ -2106,7 +2134,7 @@ function readEmployeeFields() {
     .toUpperCase();
 
   if (!validateIban(iban)) {
-    throw new Error("iban non valido");
+    throw new Error("IBAN non valido");
   }
 
   return {
@@ -2163,7 +2191,7 @@ employeeForm.addEventListener("submit", async event => {
 
     if (!Array.isArray(employees)) {
       throw new Error(
-        "archivio dipendenti non valido"
+        "Archivio dipendenti non valido"
       );
     }
 
@@ -2175,7 +2203,7 @@ employeeForm.addEventListener("submit", async event => {
 
     if (editingEmployeeId && index === -1) {
       throw new Error(
-        "dipendente non trovato"
+        "Dipendente non trovato"
       );
     }
 
@@ -2185,7 +2213,7 @@ employeeForm.addEventListener("submit", async event => {
 
     if (!previous?.pinVerifier && !pin) {
       throw new Error(
-        "inserisci il pin dipendente"
+        "Inserisci il PIN dipendente"
       );
     }
 
@@ -2195,7 +2223,7 @@ employeeForm.addEventListener("submit", async event => {
     if (pin) {
       if (!/^[0-9]{4}$/.test(pin)) {
         throw new Error(
-          "il pin dipendente deve avere 4 cifre"
+          "Il PIN dipendente deve avere 4 cifre"
         );
       }
 
@@ -2209,7 +2237,7 @@ employeeForm.addEventListener("submit", async event => {
           )
         ) {
           throw new Error(
-            "pin già assegnato"
+            "PIN già assegnato"
           );
         }
       }
@@ -2261,7 +2289,7 @@ function updateExportCount() {
   const count = getActiveEmployees().length;
 
   get("exportCount").textContent =
-    `${count} dipendent${count === 1 ? "e" : "i"} attiv${count === 1 ? "o" : "i"}`;
+    `${count} Dipendent${count === 1 ? "e" : "i"} attiv${count === 1 ? "o" : "i"}`;
 }
 
 function downloadJson(data, filename) {
@@ -2298,7 +2326,7 @@ exportForm.addEventListener("submit", async event => {
   try {
     if (!/^[0-9]{6}$/.test(pin)) {
       throw new Error(
-        "il pin admin deve avere 6 cifre"
+        "Il PIN Admin deve avere 6 cifre"
       );
     }
 
@@ -2361,7 +2389,7 @@ exportForm.addEventListener("submit", async event => {
 
     showMessage(
       "exportMessage",
-      "download avviato",
+      "Download avviato",
       "success"
     );
   } catch (error) {
@@ -2384,8 +2412,8 @@ function setTheme(theme) {
   document.documentElement.dataset.theme = themeMode === "auto" ? "" : themeMode;
   const button = get("themeToggle");
   button.textContent = themeSymbols[themeMode];
-  button.setAttribute("aria-label", `tema ${themeNames[themeMode]}. tocca per cambiare`);
-  button.title = `tema ${themeNames[themeMode]}`;
+  button.setAttribute("aria-label", `Tema ${themeNames[themeMode]}. Tocca per cambiare`);
+  button.title = `Tema ${themeNames[themeMode]}`;
   const dark = themeMode === "dark" || (themeMode === "auto" && colorPreference.matches);
   document.querySelector('meta[name="theme-color"]').setAttribute(
     "content", dark ? "#111113" : "#f5f5f7"
@@ -2436,7 +2464,7 @@ function withTimeout(promise, milliseconds) {
   return Promise.race([
     promise,
     new Promise((resolve, reject) => {
-      timer = setTimeout(() => reject(new Error("tempo di attesa superato")), milliseconds);
+      timer = setTimeout(() => reject(new Error("Tempo di attesa superato")), milliseconds);
     })
   ]).finally(() => clearTimeout(timer));
 }
@@ -2471,13 +2499,13 @@ async function getRegistration() {
 
 async function refreshOfflineStatus() {
   if (!("serviceWorker" in navigator)) {
-    setOfflineStatus(false, "offline non supportato");
+    setOfflineStatus(false, "Offline non supportato");
     return false;
   }
   try {
     const current = await getRegistration();
     if (!current?.active) {
-      setOfflineStatus(false, current?.installing ? "preparazione offline..." : "offline non pronto");
+      setOfflineStatus(false, current?.installing ? "Preparazione offline..." : "Offline non pronto");
       return false;
     }
     const info = await workerInfo(current.active);
@@ -2485,19 +2513,19 @@ async function refreshOfflineStatus() {
       info.appVersion === appVersion &&
       info.cacheName === expectedCache;
     setOfflineStatus(ready, ready
-      ? "disponibile offline"
-      : info?.ready === true ? "versione offline da aggiornare" : "offline non pronto");
+      ? "Disponibile offline"
+      : info?.ready === true ? "Versione offline da aggiornare" : "Offline non pronto");
     return ready;
   } catch (error) {
     console.warn("stato offline:", error);
-    setOfflineStatus(false, "verifica offline non riuscita");
+    setOfflineStatus(false, "Verifica offline non riuscita");
     return false;
   }
 }
 
 async function prepareOffline() {
   if (!("serviceWorker" in navigator)) {
-    setOfflineStatus(false, "offline non supportato");
+    setOfflineStatus(false, "Offline non supportato");
     return;
   }
   try {
@@ -2511,7 +2539,7 @@ async function prepareOffline() {
       registration = current;
     }
     if (current && !current.active && current.installing) {
-      setOfflineStatus(false, "preparazione offline...");
+      setOfflineStatus(false, "Preparazione offline...");
       await withTimeout(navigator.serviceWorker.ready, 12000);
     }
   } catch (error) {
@@ -2532,7 +2560,7 @@ function canApplyUpdate() {
 
 function queueUpdate(worker = null) {
   pendingUpdate = worker || "reload";
-  updateMessage("aggiornamento pronto. attendo la fine delle operazioni.");
+  updateMessage("Aggiornamento pronto. Attendo la fine delle operazioni.");
   if (updateTimer !== null) clearInterval(updateTimer);
   updateTimer = setInterval(() => {
     if (canApplyUpdate()) void applyUpdate();
@@ -2546,7 +2574,7 @@ async function applyUpdate() {
   if (updateTimer !== null) clearInterval(updateTimer);
   updateTimer = null;
   get("checkUpdateButton").disabled = true;
-  updateMessage("installazione aggiornamento...");
+  updateMessage("Installazione aggiornamento...");
   try {
     if (pendingUpdate !== "reload") {
       const worker = pendingUpdate;
@@ -2561,14 +2589,14 @@ async function applyUpdate() {
         }
         await delay(350);
       }
-      if (!activated) throw new Error("attivazione non completata");
+      if (!activated) throw new Error("Attivazione non completata");
     }
     location.reload();
   } catch (error) {
     applyingUpdate = false;
     pendingUpdate = null;
     get("checkUpdateButton").disabled = false;
-    updateMessage(`${error.message}. riprova il controllo.`, "error");
+    updateMessage(`${error.message}. Riprova il controllo.`, "error");
   }
 }
 
@@ -2580,10 +2608,10 @@ async function remoteVersion() {
   const timer = setTimeout(() => controller.abort(), 18000);
   try {
     const response = await fetch(url, { cache: "no-store", signal: controller.signal });
-    if (!response.ok) throw new Error("server aggiornamenti non disponibile");
+    if (!response.ok) throw new Error("Server aggiornamenti non disponibile");
     const source = await response.text();
     const match = source.match(/const appVersion\s*=\s*["']([0-9.]+)["']/);
-    if (!match) throw new Error("versione online non leggibile");
+    if (!match) throw new Error("Versione online non leggibile");
     return match[1];
   } finally {
     clearTimeout(timer);
@@ -2612,7 +2640,7 @@ async function waitForVersion(version) {
       }
     }
     if (current?.installing?.state === "redundant") {
-      throw new Error("installazione non riuscita");
+      throw new Error("Installazione non riuscita");
     }
     await delay(400);
   }
@@ -2624,10 +2652,10 @@ async function checkForUpdates() {
   checkingUpdates = true;
   const button = get("checkUpdateButton");
   button.disabled = true;
-  updateMessage("controllo aggiornamenti...");
+  updateMessage("Controllo aggiornamenti...");
   try {
-    if (!navigator.onLine) throw new Error("connessione non disponibile");
-    if (!("serviceWorker" in navigator)) throw new Error("aggiornamenti non supportati");
+    if (!navigator.onLine) throw new Error("Connessione non disponibile");
+    if (!("serviceWorker" in navigator)) throw new Error("Aggiornamenti non supportati");
     let current = await getRegistration();
     if (!current) {
       current = await withTimeout(navigator.serviceWorker.register("./sw.js", {
@@ -2644,18 +2672,18 @@ async function checkForUpdates() {
     const active = await workerInfo(current.active);
     if (active?.appVersion === version) {
       if (!active.ready) {
-        updateMessage("ripristino file offline...");
+        updateMessage("Ripristino file offline...");
         const repaired = await repairShell(current.active);
-        if (!repaired) throw new Error("file offline non ripristinati");
+        if (!repaired) throw new Error("File offline non ripristinati");
       }
       if (version !== appVersion || !navigator.serviceWorker.controller) {
         queueUpdate();
       } else {
-        updateMessage("l'app è aggiornata", "success");
+        updateMessage("L'app è aggiornata", "success");
       }
       return;
     }
-    updateMessage(`versione ${version} disponibile. download...`);
+    updateMessage(`Versione ${version} disponibile. Download...`);
     try {
       await withTimeout(current.update(), 20000);
     } catch (error) {
@@ -2671,16 +2699,16 @@ async function checkForUpdates() {
       }
     }
     const result = await waitForVersion(version);
-    if (!result) throw new Error("installazione non completata. riprova.");
+    if (!result) throw new Error("Installazione non completata. Riprova.");
     if (result.active) {
       if (version !== appVersion || !navigator.serviceWorker.controller) queueUpdate();
-      else updateMessage("l'app è aggiornata", "success");
+      else updateMessage("L'app è aggiornata", "success");
     } else {
       queueUpdate(result.worker);
     }
   } catch (error) {
     updateMessage(error.name === "AbortError"
-      ? "connessione troppo lenta. riprova."
+      ? "Connessione troppo lenta. Riprova."
       : error.message, "error");
   } finally {
     checkingUpdates = false;
